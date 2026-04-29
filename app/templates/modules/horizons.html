@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block title %}⑤ 3 Horizons 모델 - 사업모델캔버스{% endblock %}
+{% block module_nav %}{% include 'modules/_step_nav.html' %}{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">🚀 ⑤ 3 Horizons 모델</h1>
+        <p class="page-desc">현재·중기·장기 시간축으로 혁신 로드맵을 수립합니다.</p>
+    </div>
+</div>
+
+<div class="module-description">
+    <div class="module-desc-header collapsed" onclick="toggleModuleDesc(this)">
+        <span class="module-desc-icon">📖</span>
+        <span>3 Horizons 프레임워크란?</span>
+        <span class="module-desc-toggle">▾</span>
+    </div>
+    <div class="module-desc-body collapsed">
+        <p>맥킨지가 개발한 혁신 포트폴리오 관리 프레임워크입니다. 단기 수익 유지와 중·장기 혁신을 동시에 추진하기 위해 세 가지 시간 지평으로 사업 활동을 분류합니다.</p>
+        <div class="module-desc-grid" style="grid-template-columns: 1fr;">
+            <div class="desc-item"><strong>🟢 H1 — 핵심 사업 유지·개선 (0~1년)</strong> 현재 매출의 대부분을 만들어내는 사업. 운영 효율화, 비용 절감, 고객 유지에 집중. 투자 대비 확실한 수익이 검증된 영역</div>
+            <div class="desc-item"><strong>🟡 H2 — 신사업 구축 (1~3년)</strong> H1에서 발전하거나 인접 시장에 진출하는 성장 사업. 아직 완전히 수익화되지 않았지만 가능성이 보이는 단계. 파일럿·MVP를 통한 검증 중</div>
+            <div class="desc-item"><strong>🔵 H3 — 미래 혁신 탐색 (3년 이후)</strong> 파괴적 혁신 또는 완전히 새로운 시장을 겨냥한 실험. 성공 가능성은 낮지만 잠재 가치가 큰 아이디어. 소규모 투자로 탐색</div>
+        </div>
+        <p class="desc-tip">💡 <strong>작성 팁:</strong> 각 Horizon에 현재 어떤 사업/프로젝트가 해당하는지 구체적으로 작성하고, 필요한 자원과 성과 지표도 함께 기술하세요.</p>
+    </div>
+</div>
+
+<div class="module-layout">
+    <div class="input-panel">
+        <form method="POST" id="module-form">
+            <div class="form-actions form-actions-top">
+                <button type="button" class="btn btn-ai-all" onclick="openAskAllModal()">✦ AI 자동 데이터 입력</button>
+                <button type="submit" class="btn btn-primary">💾 저장</button>
+            </div>
+            <div class="horizons-stack">
+                {% set h_fields = [
+                    ('horizon1', 'H1 — 핵심 사업 유지·개선', '0~1년', '현재 매출을 이끄는 핵심 사업의 효율화 및 수익성 개선 계획'),
+                    ('horizon2', 'H2 — 신사업 구축',         '1~3년', '성장 가능성이 있는 신규 사업 영역 발굴 및 투자 계획'),
+                    ('horizon3', 'H3 — 미래 혁신 탐색',       '3년 이후', '미래 핵심 사업이 될 파괴적 혁신 아이디어 및 실험')
+                ] %}
+                {% for fname, label, period, hint in h_fields %}
+                <div class="horizon-item {{ fname }}">
+                    <div class="horizon-label-row">
+                        <div class="horizon-label">{{ label }} <span>({{ period }})</span></div>
+                        <button type="button" class="btn-ask-ai" onclick="openAskModal('{{ fname }}', '{{ label }} ({{ period }})')">✦ AI에게 물어보기</button>
+                    </div>
+                    <textarea name="{{ fname }}" id="field-{{ fname }}" rows="4" placeholder="{{ hint }}">{{ input_data.get(fname, '') }}</textarea>
+                </div>
+                {% endfor %}
+            </div>
+        </form>
+    </div>
+    <div class="module-resizer" title="드래그하여 크기 조정 / 더블클릭하여 50:50 초기화"></div>
+    <div class="result-panel">
+        <div class="result-header">
+            <h2>AI 분석 리포트</h2>
+            <div class="result-header-actions">
+                <button type="button" class="btn btn-ai" onclick="runAnalysis()">🤖 AI 분석 실행</button>
+                <a href="{{ url_for('modules.export_module_docx', project_id=project.id, module_type=module_type) }}" class="btn btn-ghost">📄 DOCX 저장</a>
+            </div>
+        </div>
+        <div id="ai-result" class="ai-result">
+            <div class="result-placeholder"><p>데이터를 입력하고 저장한 후 <strong>AI 분석</strong> 버튼을 클릭하세요.</p></div>
+        </div>
+    </div>
+</div>
+
+{% include 'modules/_ask_modal.html' %}
+
+<script>
+const projectId = {{ project.id }}; const moduleType = '{{ module_type }}';
+const moduleFields = ['horizon1','horizon2','horizon3'];
+const storedResult = {{ ai_result | tojson if ai_result else 'null' }};
+document.addEventListener('DOMContentLoaded', () => {
+    if (storedResult) document.getElementById('ai-result').innerHTML = renderAIResult(storedResult, moduleType);
+});
+</script>
+{% endblock %}

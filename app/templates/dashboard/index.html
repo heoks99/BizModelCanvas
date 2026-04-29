@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block title %}대시보드 - 사업모델캔버스{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">대시보드</h1>
+    <a href="{{ url_for('dashboard.new_project') }}" class="btn btn-primary">＋ 새 프로젝트</a>
+</div>
+
+<!-- 내 프로젝트 -->
+<div class="dashboard-section-label">내 프로젝트</div>
+{% if projects %}
+<div class="projects-grid">
+    {% for project in projects %}
+    <a href="{{ url_for('dashboard.project_detail', project_id=project.id) }}" class="project-card">
+        <div class="project-card-header">
+            <h3>{{ project.name }}</h3>
+            {% if project.is_public %}
+            <span class="badge badge-public">🌐 공개</span>
+            {% else %}
+            <span class="badge badge-private">🔒 비공개</span>
+            {% endif %}
+        </div>
+        {% if project.description %}
+        <p class="project-desc">{{ project.description }}</p>
+        {% endif %}
+        <div class="project-modules">
+            {% set module_keys = ['pestel','five_forces','swot','ansoff','horizons','ogsm','result_report'] %}
+            {% set analysis_types = project.analyses | map(attribute='module_type') | list %}
+            {% for key in module_keys %}
+            <span class="module-dot {% if key in analysis_types %}done{% endif %}" title="{{ key }}"></span>
+            {% endfor %}
+        </div>
+        <div class="project-footer">
+            <span class="project-date">{{ project.updated_at.strftime('%Y.%m.%d') }}</span>
+            {% if project.organization %}<span class="project-org">{{ project.organization }}</span>{% endif %}
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-icon">📋</div>
+    <h2>아직 프로젝트가 없습니다</h2>
+    <p>새 프로젝트를 만들어 사업 전략 분석을 시작하세요.</p>
+    <a href="{{ url_for('dashboard.new_project') }}" class="btn btn-primary">첫 번째 프로젝트 만들기</a>
+</div>
+{% endif %}
+
+<!-- 공개 프로젝트 -->
+{% if public_projects %}
+<div class="dashboard-section-label" style="margin-top:36px;">공개 프로젝트 <span class="dashboard-section-count">{{ public_projects | length }}</span></div>
+<div class="projects-grid">
+    {% for project in public_projects %}
+    <a href="{{ url_for('dashboard.project_detail', project_id=project.id) }}" class="project-card project-card-public">
+        <div class="project-card-header">
+            <h3>{{ project.name }}</h3>
+            <span class="badge badge-public">🌐 공개</span>
+        </div>
+        {% if project.description %}
+        <p class="project-desc">{{ project.description }}</p>
+        {% endif %}
+        <div class="project-modules">
+            {% set module_keys = ['pestel','five_forces','swot','ansoff','horizons','ogsm','result_report'] %}
+            {% set analysis_types = project.analyses | map(attribute='module_type') | list %}
+            {% for key in module_keys %}
+            <span class="module-dot {% if key in analysis_types %}done{% endif %}" title="{{ key }}"></span>
+            {% endfor %}
+        </div>
+        <div class="project-footer">
+            <span class="project-date">{{ project.updated_at.strftime('%Y.%m.%d') }}</span>
+            {% if project.organization %}<span class="project-org">{{ project.organization }}</span>{% endif %}
+            <span class="project-owner-badge">👤 {{ project.owner.username }}</span>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}

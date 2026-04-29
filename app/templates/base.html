@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}사업모델캔버스{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+{% if current_user.is_authenticated %}
+<div class="layout">
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <span class="logo-icon">◈</span>
+            <span class="logo-text">사업모델캔버스</span>
+        </div>
+        <!-- 사이드바 검색 -->
+        <div class="sidebar-search">
+            <form method="GET" action="{{ url_for('search.search') }}">
+                <div class="sidebar-search-wrap">
+                    <span class="sidebar-search-icon">🔎</span>
+                    <input type="text" name="q" class="sidebar-search-input"
+                           placeholder="검색..."
+                           value="{{ request.args.get('q', '') if request.endpoint == 'search.search' else '' }}">
+                </div>
+            </form>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('dashboard.index') }}" class="nav-item {% if request.endpoint == 'dashboard.index' %}active{% endif %}">
+                <span class="nav-icon">⊞</span> 대시보드
+            </a>
+            <a href="{{ url_for('qna.index') }}" class="nav-item {% if request.blueprint == 'qna' %}active{% endif %}">
+                <span class="nav-icon">💬</span> 질의응답
+            </a>
+            {% if current_user.role == 'admin' %}
+            <a href="{{ url_for('admin.index') }}" class="nav-item {% if request.blueprint == 'admin' %}active{% endif %}">
+                <span class="nav-icon">⚙️</span> 관리자
+            </a>
+            {% endif %}
+            {% if sidebar_orgs %}
+            <div class="sidebar-section-label">프로젝트</div>
+            {% for org_name, org_projects in sidebar_orgs.items() %}
+            {% for p in org_projects %}
+            {% set is_active = (request.view_args and request.view_args.get('project_id') == p.id) %}
+            <div class="sidebar-project-group">
+                <div class="sidebar-project-row {% if is_active %}active detail-open{% endif %}"
+                     onclick="toggleProjectDetail(this)">
+                    <span class="sidebar-project-dot">◆</span>
+                    <span class="sidebar-project-name">{{ p.name }}</span>
+                    <span class="sidebar-project-chevron">›</span>
+                </div>
+                <div class="sidebar-project-detail {% if is_active %}open{% endif %}">
+                    {% if p.organization %}
+                    <div class="spd-row">
+                        <span class="spd-key">수행조직</span>
+                        <span class="spd-val">{{ p.organization }}</span>
+                    </div>
+                    {% endif %}
+                    {% if p.business_manager %}
+                    <div class="spd-row">
+                        <span class="spd-key">사업담당</span>
+                        <span class="spd-val">{{ p.business_manager }}</span>
+                    </div>
+                    {% endif %}
+                    {% if p.project_manager %}
+                    <div class="spd-row">
+                        <span class="spd-key">수행담당</span>
+                        <span class="spd-val">{{ p.project_manager }}</span>
+                    </div>
+                    {% endif %}
+                    {% if p.description %}
+                    <div class="spd-row spd-desc">
+                        <span class="spd-key">사업내용</span>
+                        <span class="spd-val">{{ p.description }}</span>
+                    </div>
+                    {% endif %}
+                    <a href="{{ url_for('dashboard.project_detail', project_id=p.id) }}"
+                       class="spd-open-btn">열기 →</a>
+                </div>
+            </div>
+            {% endfor %}
+            {% endfor %}
+            {% endif %}
+            <a href="{{ url_for('dashboard.new_project') }}" class="nav-item {% if request.endpoint == 'dashboard.new_project' %}active{% endif %}">
+                <span class="nav-icon">＋</span> 새 프로젝트
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="{{ url_for('auth.profile') }}" class="user-info {% if request.endpoint == 'auth.profile' %}active{% endif %}">
+                <span>👤</span>
+                <div class="user-info-text">
+                    <span class="user-info-name">{{ current_user.full_name or current_user.username }}</span>
+                    <span class="user-info-org">
+                        {% if current_user.job_title %}{{ current_user.job_title }}{% endif %}
+                        {% if current_user.job_title and current_user.organization %} · {% endif %}
+                        {% if current_user.organization %}{{ current_user.organization }}{% endif %}
+                    </span>
+                </div>
+            </a>
+            <a href="{{ url_for('auth.logout') }}" class="logout-btn">로그아웃</a>
+        </div>
+    </aside>
+    <div class="sidebar-resizer" id="sidebar-resizer" title="드래그하여 사이드바 너비 조정 / 더블클릭으로 초기화"></div>
+    <main class="main-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-messages">
+            {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+        {% block module_nav %}{% endblock %}
+        {% block content %}{% endblock %}
+    </main>
+</div>
+{% else %}
+<div class="auth-layout">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-messages">
+        {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    {% block auth_content %}{% endblock %}
+</div>
+{% endif %}
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

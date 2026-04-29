@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}질문 등록 — 사업모델캔버스{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <a href="{{ url_for('qna.index') }}" class="back-link">← 질의응답 목록</a>
+        <h1 class="page-title">💬 질문 등록</h1>
+        <p class="page-desc">전략 관련 질문을 등록하세요. 저장 후 AI 답변을 요청할 수 있습니다.</p>
+    </div>
+</div>
+
+<div class="form-card">
+    <form method="POST" id="qna-new-form">
+        <input type="hidden" name="want_ai" id="want_ai_input" value="0">
+        <div class="form-group">
+            <label>관련 프로젝트 <span class="form-optional">(선택)</span></label>
+            <select name="project_id" class="form-select">
+                <option value="">— 프로젝트 선택 안 함 —</option>
+                {% for project in projects %}
+                <option value="{{ project.id }}">{{ project.name }}{% if project.organization %} ({{ project.organization }}){% endif %}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>질문 제목 <span class="form-required">*</span></label>
+            <input type="text" name="title" class="form-input"
+                   placeholder="예) PESTEL 분석에서 기술 요인을 어떻게 평가해야 하나요?" required>
+        </div>
+        <div class="form-group">
+            <label>질문 내용 <span class="form-required">*</span></label>
+            <textarea name="content" class="form-textarea" rows="8"
+                placeholder="질문 내용을 상세하게 작성해주세요.&#10;배경 상황, 현재 고민, 원하는 방향 등을 포함하면 더 정확한 답변을 받을 수 있습니다." required></textarea>
+        </div>
+        <div class="qna-new-actions">
+            <a href="{{ url_for('qna.index') }}" class="btn btn-ghost">취소</a>
+            <div style="display:flex; gap:8px;">
+                <button type="button" class="btn btn-secondary" onclick="submitQna(0)">💾 저장만 하기</button>
+                <button type="button" class="btn btn-ai" onclick="submitQna(1)">🤖 저장 + AI 답변 받기</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+function submitQna(wantAi) {
+    document.getElementById('want_ai_input').value = wantAi;
+    document.getElementById('qna-new-form').submit();
+}
+</script>
+{% endblock %}

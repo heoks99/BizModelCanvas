@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% block title %}관리자 — 사업모델캔버스{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">⚙️ 관리자</h1>
+        <p class="page-desc">회원 승인 및 계정 관리</p>
+    </div>
+</div>
+
+<!-- 통계 카드 -->
+<div class="admin-stats">
+    <div class="admin-stat-card">
+        <div class="admin-stat-num">{{ stats.total }}</div>
+        <div class="admin-stat-label">전체 회원</div>
+    </div>
+    <div class="admin-stat-card admin-stat-pending">
+        <div class="admin-stat-num">{{ stats.pending }}</div>
+        <div class="admin-stat-label">승인 대기</div>
+    </div>
+    <div class="admin-stat-card admin-stat-active">
+        <div class="admin-stat-num">{{ stats.active }}</div>
+        <div class="admin-stat-label">활성 회원</div>
+    </div>
+    <div class="admin-stat-card admin-stat-inactive">
+        <div class="admin-stat-num">{{ stats.inactive }}</div>
+        <div class="admin-stat-label">비활성</div>
+    </div>
+    <div class="admin-stat-card">
+        <div class="admin-stat-num">{{ stats.projects }}</div>
+        <div class="admin-stat-label">전체 프로젝트</div>
+    </div>
+</div>
+
+<!-- 승인 대기 -->
+{% set pending_users = users | selectattr('status', 'eq', 'pending') | list %}
+{% if pending_users %}
+<div class="admin-section-label" style="color:var(--warning);">⏳ 승인 대기 ({{ pending_users|length }})</div>
+<div class="admin-table-wrap" style="margin-bottom:28px;">
+    <table class="admin-table">
+        <thead>
+            <tr><th>이름</th><th>아이디</th><th>이메일</th><th>조직</th><th>직책</th><th>가입일</th><th>승인</th></tr>
+        </thead>
+        <tbody>
+        {% for u in pending_users %}
+        <tr id="row-{{ u.id }}">
+            <td>{{ u.full_name or '—' }}</td>
+            <td><span class="admin-username">{{ u.username }}</span></td>
+            <td>{{ u.email }}</td>
+            <td>{{ u.organization or '—' }}</td>
+            <td>{{ u.job_title or '—' }}</td>
+            <td>{{ u.created_at.strftime('%Y.%m.%d') }}</td>
+            <td>
+                <button class="btn btn-ai btn-sm"
+                        onclick="approveUser({{ u.id }})">✓ 승인</button>
+                <button class="btn btn-ghost btn-sm"
+                        onclick="setStatus({{ u.id }}, 'inactive')">✕ 거절</button>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<!-- 전체 회원 목록 -->
+<div class="admin-section-label">전체 회원</div>
+<div class="admin-table-wrap">
+    <table class="admin-table">
+        <thead>
+            <tr><th>이름</th><th>아이디</th><th>이메일</th><th>조직</th><th>직책</th><th>역할</th><th>상태</th><th>가입일</th><th>관리</th></tr>
+        </thead>
+        <tbody>
+        {% for u in users %}
+        <tr id="row-all-{{ u.id }}">
+            <td>{{ u.full_name or '—' }}</td>
+            <td><a href="{{ url_for('admin.user_detail', user_id=u.id) }}" class="admin-link">{{ u.username }}</a></td>
+            <td>{{ u.email }}</td>
+            <td>{{ u.organization or '—' }}</td>
+            <td>{{ u.job_title or '—' }}</td>
+            <td>
+                {% if u.id != current_user.id %}
+                <button class="admin-role-badge {% if u.role == 'admin' %}role-admin{% else %}role-member{% endif %}"
+                        id="role-badge-{{ u.id }}"
+                        onclick="toggleRole({{ u.id }}, '{{ u.role }}')">
+                    {{ '관리자' if u.role == 'admin' else '일반' }}
+                </button>
+                {% else %}
+                <span class="admin-role-badge role-admin">관리자 (나)</span>
+                {% endif %}
+            </td>
+            <td>
+                <span class="admin-status-badge status-{{ u.status }}" id="status-badge-{{ u.id }}">
+                    {{ {'pending':'대기','active':'활성','inactive':'비활성'}.get(u.status, u.status) }}
+                </span>
+            </td>
+            <td>{{ u.created_at.strftime('%Y.%m.%d') }}</td>
+            <td class="admin-actions">
+                <a href="{{ url_for('admin.edit_user', user_id=u.id) }}" class="btn btn-ghost btn-sm">수정</a>
+                {% if u.id != current_user.id %}
+                {% if u.status == 'active' %}
+                <button class="btn btn-ghost btn-sm" onclick="setStatus({{ u.id }}, 'inactive')">비활성</button>
+                {% else %}
+                <button class="btn btn-ghost btn-sm" onclick="setStatus({{ u.id }}, 'active')">활성화</button>
+                {% endif %}
+                <form method="POST" action="{{ url_for('admin.delete_user', user_id=u.id) }}"
+                      onsubmit="return confirm('{{ u.username }} 계정을 삭제하시겠습니까?\n해당 사용자의 모든 프로젝트도 삭제됩니다.')"
+                      style="display:inline">
+                    <button type="submit" class="btn btn-sm" style="color:var(--danger); border-color:rgba(239,68,68,0.3);">삭제</button>
+                </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+async function approveUser(userId) {
+    const r = await fetch(`/admin/users/${userId}/approve`, { method: 'POST' });
+    const data = await r.json();
+    if (data.ok) {
+        document.getElementById(`row-${userId}`)?.remove();
+        const badge = document.getElementById(`status-badge-${userId}`);
+        if (badge) { badge.textContent = '활성'; badge.className = 'admin-status-badge status-active'; }
+    }
+}
+
+async function toggleRole(userId, currentRole) {
+    const newRole = currentRole === 'admin' ? 'member' : 'admin';
+    const label = newRole === 'admin' ? '관리자' : '일반';
+    if (!confirm(`이 사용자를 "${label}"(으)로 변경하시겠습니까?`)) return;
+    const r = await fetch(`/admin/users/${userId}/set_role`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: newRole })
+    });
+    const data = await r.json();
+    if (data.ok) {
+        const btn = document.getElementById(`role-badge-${userId}`);
+        btn.textContent = label;
+        btn.className = `admin-role-badge ${newRole === 'admin' ? 'role-admin' : 'role-member'}`;
+        btn.onclick = () => toggleRole(userId, newRole);
+    } else {
+        alert(data.msg);
+    }
+}
+
+async function setStatus(userId, status) {
+    const labels = { active: '활성화', inactive: '비활성', pending: '대기' };
+    if (!confirm(`이 사용자를 ${labels[status]}(으)로 변경하시겠습니까?`)) return;
+    const r = await fetch(`/admin/users/${userId}/set_status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+    });
+    const data = await r.json();
+    if (data.ok) {
+        const badge = document.getElementById(`status-badge-${userId}`);
+        const statusLabels = { pending: '대기', active: '활성', inactive: '비활성' };
+        if (badge) { badge.textContent = statusLabels[data.status]; badge.className = `admin-status-badge status-${data.status}`; }
+        // 대기 목록 행도 제거
+        document.getElementById(`row-${userId}`)?.remove();
+    } else {
+        alert(data.msg);
+    }
+}
+</script>
+{% endblock %}

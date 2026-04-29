@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block title %}⑤ 실행 체계 - 사업모델캔버스{% endblock %}
+{% block module_nav %}{% include 'modules/_step_nav.html' %}{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">🚀 ⑤ 실행 체계</h1>
+        <p class="page-desc">비즈니스 모델을 현실로 만드는 로드맵·KPI·리스크 관리 체계를 수립합니다.</p>
+    </div>
+</div>
+
+<div class="module-description">
+    <div class="module-desc-header collapsed" onclick="toggleModuleDesc(this)">
+        <span class="module-desc-icon">📖</span>
+        <span>실행 체계란?</span>
+        <span class="module-desc-toggle">▾</span>
+    </div>
+    <div class="module-desc-body collapsed">
+        <p>전략을 실행으로 전환하는 단계입니다. 구체적인 로드맵, 측정 가능한 KPI, 조직 체계, 필요 자원, 리스크 대응 방안을 수립합니다.</p>
+        <div class="module-desc-grid">
+            <div class="desc-item"><strong>🗓️ 실행 로드맵</strong> 단계별 일정, 마일스톤, 출시 계획</div>
+            <div class="desc-item"><strong>📊 KPI</strong> 사업 성공을 측정하는 핵심 지표와 목표값</div>
+            <div class="desc-item"><strong>👨‍💼 조직 및 역할</strong> 팀 구성, 핵심 인력, 역할과 책임</div>
+            <div class="desc-item"><strong>💼 자원 및 예산</strong> 인력·기술·자금 등 필요 자원과 예산 계획</div>
+            <div class="desc-item"><strong>⚠️ 리스크 관리</strong> 주요 리스크 식별과 완화 전략</div>
+        </div>
+        <p class="desc-tip">💡 <strong>작성 팁:</strong> 로드맵은 "Phase 1 (1~3개월): MVP 출시, Phase 2 (4~6개월): 초기 고객 확보" 형식으로 단계를 나눠 작성하면 효과적입니다.</p>
+    </div>
+</div>
+
+<div class="module-layout">
+    <div class="input-panel">
+        <form method="POST" id="module-form">
+            <div class="form-actions form-actions-top">
+                <button type="button" class="btn btn-ai-all" onclick="openAskAllModal()">✦ AI 자동 데이터 입력</button>
+                <button type="submit" class="btn btn-primary">💾 저장</button>
+            </div>
+            {% set fields = [
+                ('roadmap',                '🗓️ 실행 로드맵',          '단계별 일정과 마일스톤 (예: Phase 1 MVP 출시, Phase 2 확산)'),
+                ('kpi',                    '📊 핵심 성과지표 (KPI)',  '측정 가능한 성과 지표와 목표값 (예: MAU 1만명, 월 매출 5000만원)'),
+                ('organization_structure', '👨‍💼 조직 및 역할',         '팀 구성, 핵심 인력 계획, 역할 분담'),
+                ('resources_budget',       '💼 필요 자원 및 예산',    '인력·기술·자금 등 필요 자원과 예산 계획'),
+                ('risk_management',        '⚠️ 리스크 및 대응 방안', '주요 리스크 항목과 각각의 완화 전략')
+            ] %}
+            {% for fname, label, hint in fields %}
+            <div class="form-group">
+                <div class="field-label-row">
+                    <label>{{ label }}</label>
+                    <button type="button" class="btn-ask-ai" onclick="openAskModal('{{ fname }}', '{{ label }}')">✦ AI에게 물어보기</button>
+                </div>
+                <textarea name="{{ fname }}" id="field-{{ fname }}" rows="3" placeholder="{{ hint }}">{{ input_data.get(fname, '') }}</textarea>
+            </div>
+            {% endfor %}
+        </form>
+    </div>
+
+    <div class="module-resizer" title="드래그하여 크기 조정 / 더블클릭하여 50:50 초기화"></div>
+    <div class="result-panel">
+        <div class="result-header">
+            <h2>AI 분석 리포트</h2>
+            <div class="result-header-actions">
+                <button type="button" class="btn btn-ai" onclick="runAnalysis()">🤖 AI 분석 실행</button>
+                <a href="{{ url_for('modules.export_module_docx', project_id=project.id, module_type=module_type) }}" class="btn btn-ghost">📄 DOCX 저장</a>
+            </div>
+        </div>
+        <div id="ai-result" class="ai-result">
+            <div class="result-placeholder">
+                <p>데이터를 입력하고 저장한 후 <strong>AI 분석</strong> 버튼을 클릭하세요.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'modules/_ask_modal.html' %}
+
+<script>
+const projectId = {{ project.id }};
+const moduleType = '{{ module_type }}';
+const moduleFields = ['roadmap','kpi','organization_structure','resources_budget','risk_management'];
+const storedResult = {{ ai_result | tojson if ai_result else 'null' }};
+document.addEventListener('DOMContentLoaded', () => {
+    if (storedResult) document.getElementById('ai-result').innerHTML = renderAIResult(storedResult, moduleType);
+});
+</script>
+{% endblock %}

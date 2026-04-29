@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block title %}① PESTEL 분석 - 사업모델캔버스{% endblock %}
+{% block module_nav %}{% include 'modules/_step_nav.html' %}{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">🌐 ① PESTEL 분석</h1>
+        <p class="page-desc">거시 환경 분석 — 정치·경제·사회·기술·환경·법규 요인을 파악합니다.</p>
+    </div>
+</div>
+
+<!-- 모듈 설명 -->
+<div class="module-description">
+    <div class="module-desc-header collapsed" onclick="toggleModuleDesc(this)">
+        <span class="module-desc-icon">📖</span>
+        <span>PESTEL 프레임워크란?</span>
+        <span class="module-desc-toggle">▾</span>
+    </div>
+    <div class="module-desc-body collapsed">
+        <p>PESTEL은 기업 외부의 거시 환경을 6가지 범주로 분석하는 전략 도구입니다. 시장 진입, 신사업 기획, 중장기 전략 수립 시 외부 리스크와 기회를 체계적으로 파악하는 데 사용됩니다.</p>
+        <div class="module-desc-grid">
+            <div class="desc-item"><strong>🏛️ Political</strong> 정부 정책, 정치 안정성, 무역 규제, 세금 정책</div>
+            <div class="desc-item"><strong>💰 Economic</strong> 경제성장률, 금리, 환율, 인플레이션, 소비 트렌드</div>
+            <div class="desc-item"><strong>👥 Social</strong> 인구구조, 라이프스타일, 문화, 소비자 인식 변화</div>
+            <div class="desc-item"><strong>⚙️ Technological</strong> 기술 혁신, 자동화, 디지털 전환, R&D 트렌드</div>
+            <div class="desc-item"><strong>🌱 Environmental</strong> 기후변화, 탄소중립, 자원 고갈, 환경 규제</div>
+            <div class="desc-item"><strong>⚖️ Legal</strong> 노동법, 소비자 보호법, 지식재산권, 산업 규제</div>
+        </div>
+        <p class="desc-tip">💡 <strong>작성 팁:</strong> 각 항목에 현재 상황(팩트)과 그것이 우리 사업에 미치는 영향(해석)을 함께 기술하면 AI 분석의 품질이 높아집니다.</p>
+    </div>
+</div>
+
+<div class="module-layout">
+    <div class="input-panel">
+        <form method="POST" id="module-form">
+            <div class="form-actions form-actions-top">
+                <button type="button" class="btn btn-ai-all" onclick="openAskAllModal()">✦ AI 자동 데이터 입력</button>
+                <button type="submit" class="btn btn-primary">💾 저장</button>
+            </div>
+            {% set fields = [
+                ('political',    '🏛️ 정치 (Political)',      '정부 정책, 규제, 정치적 안정성 등'),
+                ('economic',     '💰 경제 (Economic)',       'GDP 성장률, 금리, 환율, 소비 트렌드 등'),
+                ('social',       '👥 사회 (Social)',         '인구구조, 생활방식, 문화적 트렌드 등'),
+                ('technology',   '⚙️ 기술 (Technology)',     '기술 혁신, R&D 투자, 자동화 트렌드 등'),
+                ('environmental','🌱 환경 (Environmental)',  '기후변화, 탄소중립, 자원 규제 등'),
+                ('legal',        '⚖️ 법규 (Legal)',          '노동법, 환경법, 소비자 보호법 등')
+            ] %}
+            {% for fname, label, hint in fields %}
+            <div class="form-group">
+                <div class="field-label-row">
+                    <label>{{ label }}</label>
+                    <button type="button" class="btn-ask-ai" onclick="openAskModal('{{ fname }}', '{{ label }}')">✦ AI에게 물어보기</button>
+                </div>
+                <textarea name="{{ fname }}" id="field-{{ fname }}" rows="3" placeholder="{{ hint }}">{{ input_data.get(fname, '') }}</textarea>
+            </div>
+            {% endfor %}
+        </form>
+    </div>
+
+    <div class="module-resizer" title="드래그하여 크기 조정 / 더블클릭하여 50:50 초기화"></div>
+    <div class="result-panel">
+        <div class="result-header">
+            <h2>AI 분석 리포트</h2>
+            <div class="result-header-actions">
+                <button type="button" class="btn btn-ai" onclick="runAnalysis()">🤖 AI 분석 실행</button>
+                <a href="{{ url_for('modules.export_module_docx', project_id=project.id, module_type=module_type) }}" class="btn btn-ghost">📄 DOCX 저장</a>
+            </div>
+        </div>
+        <div id="ai-result" class="ai-result">
+            <div class="result-placeholder">
+                <p>데이터를 입력하고 저장한 후 <strong>AI 분석</strong> 버튼을 클릭하세요.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'modules/_ask_modal.html' %}
+
+<script>
+const projectId = {{ project.id }};
+const moduleType = '{{ module_type }}';
+const moduleFields = ['political','economic','social','technology','environmental','legal'];
+const storedResult = {{ ai_result | tojson if ai_result else 'null' }};
+document.addEventListener('DOMContentLoaded', () => {
+    if (storedResult) document.getElementById('ai-result').innerHTML = renderAIResult(storedResult, moduleType);
+});
+</script>
+{% endblock %}

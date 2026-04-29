@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block title %}내 정보 — 사업모델캔버스{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">👤 내 정보</h1>
+        <p class="page-desc">계정 정보를 확인하고 수정할 수 있습니다.</p>
+    </div>
+</div>
+
+<div class="profile-layout">
+
+    <!-- 기본 정보 수정 -->
+    <div class="form-card">
+        <div class="profile-card-title">기본 정보</div>
+        <form method="POST">
+            <input type="hidden" name="action" value="update_info">
+            <div class="profile-fields">
+                <div class="form-group">
+                    <label>아이디</label>
+                    <input type="text" class="form-input" value="{{ current_user.username }}" disabled>
+                    <div class="form-hint">아이디는 변경할 수 없습니다.</div>
+                </div>
+                <div class="form-group">
+                    <label>이름 <span class="form-required">*</span></label>
+                    <input type="text" name="full_name" class="form-input"
+                           value="{{ current_user.full_name or '' }}"
+                           placeholder="실명을 입력하세요" required>
+                </div>
+                <div class="form-group">
+                    <label>이메일 <span class="form-required">*</span></label>
+                    <input type="email" name="email" class="form-input"
+                           value="{{ current_user.email }}" required>
+                </div>
+                <div class="form-group">
+                    <label>조직명 <span class="form-required">*</span></label>
+                    <input type="text" name="organization" class="form-input"
+                           value="{{ current_user.organization or '' }}"
+                           placeholder="소속 조직명을 입력하세요" required>
+                </div>
+                <div class="form-group">
+                    <label>직책 <span class="form-required">*</span></label>
+                    <input type="text" name="job_title" class="form-input"
+                           value="{{ current_user.job_title or '' }}"
+                           placeholder="예) 팀장, 과장, Senior Consultant" required>
+                </div>
+                <div class="form-group">
+                    <label>가입일</label>
+                    <input type="text" class="form-input"
+                           value="{{ current_user.created_at.strftime('%Y년 %m월 %d일') }}" disabled>
+                </div>
+            </div>
+            <div style="display:flex; justify-content:flex-end; margin-top:8px;">
+                <button type="submit" class="btn btn-primary">정보 저장</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- 비밀번호 변경 -->
+    <div class="form-card">
+        <div class="profile-card-title">비밀번호 변경</div>
+        <form method="POST">
+            <input type="hidden" name="action" value="change_password">
+            <div class="form-group">
+                <label>현재 비밀번호 <span class="form-required">*</span></label>
+                <input type="password" name="current_password" class="form-input"
+                       placeholder="현재 비밀번호를 입력하세요" required>
+            </div>
+            <div class="form-group">
+                <label>새 비밀번호 <span class="form-required">*</span></label>
+                <input type="password" name="new_password" class="form-input"
+                       placeholder="새 비밀번호를 입력하세요" required>
+            </div>
+            <div class="form-group">
+                <label>새 비밀번호 확인 <span class="form-required">*</span></label>
+                <input type="password" name="confirm_password" class="form-input"
+                       placeholder="새 비밀번호를 다시 입력하세요" required>
+            </div>
+            <div style="display:flex; justify-content:flex-end; margin-top:8px;">
+                <button type="submit" class="btn btn-primary">비밀번호 변경</button>
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

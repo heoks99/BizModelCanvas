@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}회원가입 - 사업모델캔버스{% endblock %}
+{% block auth_content %}
+<div class="auth-card">
+    <div class="auth-header">
+        <div class="auth-logo">◈</div>
+        <h1>회원가입</h1>
+        <p>사업모델캔버스에 오신 것을 환영합니다</p>
+    </div>
+    <form method="POST" class="auth-form">
+        <div class="form-group">
+            <label>아이디 <span class="auth-required">*</span></label>
+            <input type="text" name="username" placeholder="아이디를 입력하세요" required autofocus>
+        </div>
+        <div class="form-group">
+            <label>이름 <span class="auth-required">*</span></label>
+            <input type="text" name="full_name" placeholder="실명을 입력하세요" required>
+        </div>
+        <div class="form-group">
+            <label>이메일 <span class="auth-required">*</span></label>
+            <input type="email" name="email" placeholder="이메일을 입력하세요" required>
+        </div>
+        <div class="form-group">
+            <label>조직명 <span class="auth-required">*</span></label>
+            <input type="text" name="organization" placeholder="소속 조직명을 입력하세요" required>
+        </div>
+        <div class="form-group">
+            <label>직책 <span class="auth-required">*</span></label>
+            <input type="text" name="job_title" placeholder="예) 팀장, 과장, Senior Consultant" required>
+        </div>
+        <div class="form-group">
+            <label>비밀번호 <span class="auth-required">*</span></label>
+            <input type="password" name="password" placeholder="비밀번호를 입력하세요" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">회원가입</button>
+    </form>
+    <p class="auth-link">이미 계정이 있으신가요? <a href="{{ url_for('auth.login') }}">로그인</a></p>
+</div>
+{% endblock auth_content %}

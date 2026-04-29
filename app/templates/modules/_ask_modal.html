@@ -1,0 +1,147 @@
+<!-- AI 개별 필드 질문 모달 -->
+<div id="ask-modal" class="ask-modal-overlay" onclick="closeAskModal(event)">
+    <div class="ask-modal">
+        <div class="ask-modal-header">
+            <div class="ask-modal-title">
+                <span class="ask-modal-icon">✦</span>
+                <div>
+                    <div id="ask-modal-field-name">AI에게 물어보기</div>
+                    <div class="ask-modal-subtitle">Claude AI가 입력 내용을 도와드립니다</div>
+                </div>
+            </div>
+            <button class="ask-modal-close" onclick="closeAskModalDirect()">&times;</button>
+        </div>
+
+        <div class="ask-modal-body">
+            <!-- 질문 입력 -->
+            <div class="ask-question-area">
+                <textarea id="ask-question-input" rows="3"
+                    placeholder="이 항목에 대해 무엇이든 질문하세요.&#10;예) 우리 회사가 IT 스타트업인 경우 어떤 내용을 작성하면 좋을까요?"></textarea>
+                <button class="btn btn-ai ask-submit-btn" onclick="submitAskQuestion()">
+                    <span id="ask-btn-text">✦ 질문하기</span>
+                </button>
+            </div>
+
+            <!-- AI 답변 -->
+            <div id="ask-answer-area" class="ask-answer-area" style="display:none">
+                <div class="ask-answer-header">
+                    <span class="ask-answer-label">AI 답변</span>
+                    <span class="ask-answer-hint">원하는 내용을 드래그하여 선택 후 복사하거나, 아래 버튼을 사용하세요</span>
+                </div>
+                <div id="ask-answer-content" class="ask-answer-content selectable"></div>
+                <div id="ask-action-row" class="ask-action-row" style="display:none">
+                    <button class="btn btn-ghost" onclick="copyAnswerText()">
+                        <span id="copy-btn-text">📋 전체 복사</span>
+                    </button>
+                    <button class="btn btn-primary" onclick="applyAnswerText()">
+                        ↩ 필드에 적용
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- AI 분석 실행 모달 -->
+<div id="analyze-modal" class="ask-modal-overlay" onclick="closeAnalyzeModal(event)">
+    <div class="ask-modal analyze-modal-inner">
+        <div class="ask-modal-header">
+            <div class="ask-modal-title">
+                <span class="ask-modal-icon">🤖</span>
+                <div>
+                    <div>AI 분석 실행</div>
+                    <div class="ask-modal-subtitle">추가 지시사항을 입력하면 분석에 반영됩니다 (선택사항)</div>
+                </div>
+            </div>
+            <button class="ask-modal-close" onclick="closeAnalyzeModalDirect()">&times;</button>
+        </div>
+        <div class="ask-modal-body">
+            <div class="analyze-style-presets">
+                <span class="analyze-preset-label">빠른 선택</span>
+                <button class="analyze-preset-btn" onclick="setAnalyzePreset(this)" data-text="">기본</button>
+                <button class="analyze-preset-btn" onclick="setAnalyzePreset(this)" data-text="핵심 인사이트와 전략적 시사점 위주로 간결하게 작성해줘.">간결하게</button>
+                <button class="analyze-preset-btn" onclick="setAnalyzePreset(this)" data-text="각 항목을 최대한 상세하고 깊이 있게 분석해줘. 근거와 수치 예시도 포함해줘.">상세하게</button>
+                <button class="analyze-preset-btn" onclick="setAnalyzePreset(this)" data-text="경영진 보고용으로 Executive Summary 형식으로 작성해줘.">경영진 보고용</button>
+                <button class="analyze-preset-btn" onclick="setAnalyzePreset(this)" data-text="실행 가능한 액션 아이템과 우선순위 중심으로 작성해줘.">실행 중심</button>
+            </div>
+            <div class="ask-question-area">
+                <textarea id="analyze-extra-input" rows="4"
+                    placeholder="추가 지시사항을 입력하세요. (선택사항)&#10;예) 스타트업 관점에서 분석해줘 / 리스크 요인을 더 강조해줘 / 표 위주로 작성해줘"></textarea>
+            </div>
+            <div class="analyze-modal-actions">
+                <button class="btn btn-ghost" onclick="closeAnalyzeModalDirect()">취소</button>
+                <button class="btn btn-ai" id="analyze-run-btn" onclick="submitAnalysis()">
+                    <span id="analyze-btn-text">🤖 AI 분석 시작</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- AI 전체 자동 입력 모달 -->
+<div id="ask-all-modal" class="ask-modal-overlay" onclick="closeAskAllModal(event)">
+    <div class="ask-modal ask-all-modal-inner">
+        <div class="ask-modal-header">
+            <div class="ask-modal-title">
+                <span class="ask-modal-icon">✦</span>
+                <div>
+                    <div id="ask-all-modal-title">AI 자동 데이터 입력</div>
+                    <div class="ask-modal-subtitle">프로젝트 정보를 기반으로 AI가 모든 항목을 자동으로 채워드립니다</div>
+                </div>
+            </div>
+            <button class="ask-modal-close" onclick="closeAskAllModalDirect()">&times;</button>
+        </div>
+
+        <div class="ask-modal-body">
+            <!-- 프로젝트 정보 요약 -->
+            <div class="ask-all-project-info">
+                <div class="ask-all-project-info-label">프로젝트 정보</div>
+                <div class="ask-all-project-info-grid">
+                    <div class="ask-all-project-info-item">
+                        <span class="ask-all-info-key">프로젝트명</span>
+                        <span class="ask-all-info-val">{{ project.name }}</span>
+                    </div>
+                    {% if project.organization %}
+                    <div class="ask-all-project-info-item">
+                        <span class="ask-all-info-key">수행 조직</span>
+                        <span class="ask-all-info-val">{{ project.organization }}</span>
+                    </div>
+                    {% endif %}
+                    {% if project.description %}
+                    <div class="ask-all-project-info-item ask-all-info-full">
+                        <span class="ask-all-info-key">프로젝트 설명</span>
+                        <span class="ask-all-info-val">{{ project.description }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="ask-question-area">
+                <label class="ask-all-input-label">추가 상황 설명 <span class="ask-all-optional">(선택사항)</span></label>
+                <textarea id="ask-all-question-input" rows="4"
+                    placeholder="프로젝트 정보만으로도 자동 입력이 가능합니다.&#10;추가로 설명할 내용이 있으면 입력하세요.&#10;예) 최근 경쟁사가 급증하고 있으며 해외 진출을 검토 중입니다."></textarea>
+                <button class="btn btn-ai ask-submit-btn" onclick="submitAskAllFields()">
+                    <span id="ask-all-btn-text">✦ AI 자동 입력 시작</span>
+                </button>
+            </div>
+
+            <div id="ask-all-status" class="ask-all-status" style="display:none">
+                <div class="ask-loading">
+                    <div class="ai-loading-orb" style="width:18px;height:18px"></div>
+                    <span>Claude AI가 모든 항목을 작성 중입니다...</span>
+                </div>
+            </div>
+
+            <div id="ask-all-result" class="ask-all-result" style="display:none">
+                <div class="ask-all-result-header">
+                    <span class="ask-answer-label">✓ 작성 완료</span>
+                    <span class="ask-answer-hint">아래 내용이 각 입력 필드에 자동으로 채워졌습니다. 필요시 수정 후 저장하세요.</span>
+                </div>
+                <div id="ask-all-result-list" class="ask-all-result-list"></div>
+                <div class="ask-action-row" style="margin-top:12px">
+                    <button class="btn btn-primary" onclick="closeAskAllModalDirect()">✓ 확인 및 닫기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

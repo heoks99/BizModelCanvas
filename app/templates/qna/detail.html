@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+{% block title %}{{ qna.title }} — 질의응답{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <a href="{{ url_for('qna.index') }}" class="back-link">← 질의응답 목록</a>
+        <h1 class="page-title">💬 질의응답</h1>
+    </div>
+    <div class="page-actions">
+        <form method="POST" action="{{ url_for('qna.delete', qna_id=qna.id) }}"
+              onsubmit="return confirm('이 질문을 삭제하시겠습니까?')">
+            <button type="submit" class="btn btn-ghost" style="color:var(--danger)">🗑 삭제</button>
+        </form>
+    </div>
+</div>
+
+<div class="qna-feed">
+
+    <!-- ① 원본 질문 -->
+    <div class="feed-entry feed-question" id="entry-question">
+        <div class="feed-avatar feed-avatar-user">👤</div>
+        <div class="feed-bubble">
+            <div class="feed-bubble-header">
+                <div class="feed-meta">
+                    {% if qna.project %}
+                    <span class="qna-project-tag">{{ qna.project.name }}</span>
+                    {% endif %}
+                    <span class="feed-author">{{ qna.owner.username }}</span>
+                    <span class="qna-date">{{ qna.created_at.strftime('%Y.%m.%d %H:%M') }}</span>
+                </div>
+                <h2 class="feed-title">{{ qna.title }}</h2>
+            </div>
+            <div class="feed-content">{{ qna.content | nl2br }}</div>
+        </div>
+    </div>
+
+    <!-- ② 원본 질문 AI 답변 -->
+    <div class="feed-entry feed-ai" id="entry-ai-main">
+        <div class="feed-avatar feed-avatar-ai">✦</div>
+        <div class="feed-bubble feed-bubble-ai">
+            <div class="feed-bubble-header">
+                <span class="model-badge-v2">✦ Claude AI</span>
+                <div class="feed-ai-actions">
+                    {% if not qna.ai_pending and qna.ai_answer %}
+                    <button class="btn btn-ghost btn-sm"
+                            onclick="requestAI({{ qna.id }}, 'main')">↺ 재답변</button>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="feed-ai-content bcg-report" id="ai-content-main">
+                {% if qna.ai_pending %}
+                <div class="ai-loading" id="ai-loading-main">
+                    <div class="ai-loading-orb"></div>
+                    <div class="ai-loading-text"><span>Claude AI 답변 생성 중...</span></div>
+                </div>
+                {% elif qna.ai_answer %}
+                    {{ qna.ai_answer | safe }}
+                {% else %}
+                <div class="feed-no-answer">
+                    <p>아직 AI 답변이 없습니다.</p>
+                    <button class="btn btn-ai btn-sm" onclick="requestAI({{ qna.id }}, 'main')">
+                        🤖 AI 답변 받기
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- ③ 답글 + 각 AI 답변 피드 -->
+    {% for comment in qna.comments %}
+    <div class="feed-entry feed-question" id="entry-comment-{{ comment.id }}">
+        <div class="feed-avatar feed-avatar-user">👤</div>
+        <div class="feed-bubble">
+            <div class="feed-bubble-header">
+                <div class="feed-meta">
+                    <span class="feed-author">{{ comment.owner.username }}</span>
+                    <span class="qna-date">{{ comment.created_at.strftime('%Y.%m.%d %H:%M') }}</span>
+                    <form method="POST"
+                          action="{{ url_for('qna.delete_comment', qna_id=qna.id, comment_id=comment.id) }}"
+                          onsubmit="return confirm('이 답글을 삭제하시겠습니까?')"
+                          style="margin-left:auto">
+                        <button type="submit" class="btn-icon-sm" title="삭제">✕</button>
+                    </form>
+                </div>
+            </div>
+            <div class="feed-content">{{ comment.content | nl2br }}</div>
+        </div>
+    </div>
+
+    <div class="feed-entry feed-ai" id="entry-ai-comment-{{ comment.id }}">
+        <div class="feed-avatar feed-avatar-ai">✦</div>
+        <div class="feed-bubble feed-bubble-ai">
+            <div class="feed-bubble-header">
+                <span class="model-badge-v2">✦ Claude AI</span>
+                <div class="feed-ai-actions">
+                    {% if not comment.ai_pending and comment.ai_answer %}
+                    <button class="btn btn-ghost btn-sm"
+                            onclick="requestCommentAI({{ qna.id }}, {{ comment.id }})">↺ 재답변</button>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="feed-ai-content bcg-report" id="ai-content-comment-{{ comment.id }}">
+                {% if comment.ai_pending %}
+                <div class="ai-loading">
+                    <div class="ai-loading-orb"></div>
+                    <div class="ai-loading-text"><span>Claude AI 답변 생성 중...</span></div>
+                </div>
+                {% elif comment.ai_answer %}
+                    {{ comment.ai_answer | safe }}
+                {% else %}
+                <div class="feed-no-answer">
+                    <p>아직 AI 답변이 없습니다.</p>
+                    <button class="btn btn-ai btn-sm"
+                            onclick="requestCommentAI({{ qna.id }}, {{ comment.id }})">
+                        🤖 AI 답변 받기
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- ④ 답글 입력 -->
+    <div class="feed-reply-box" id="reply-box">
+        <div class="feed-avatar feed-avatar-user">👤</div>
+        <div class="feed-reply-form">
+            <form method="POST" action="{{ url_for('qna.add_comment', qna_id=qna.id) }}" id="reply-form">
+                <input type="hidden" name="want_ai" id="reply_want_ai" value="0">
+                <textarea name="content" id="reply-textarea" class="feed-reply-textarea"
+                          rows="3" placeholder="답글을 입력하세요..."></textarea>
+                <div class="feed-reply-actions">
+                    <div style="display:flex; gap:8px;">
+                        <button type="button" class="btn btn-secondary btn-sm"
+                                onclick="submitReply(0)">💾 답글 저장</button>
+                        <button type="button" class="btn btn-ai btn-sm"
+                                onclick="submitReply(1)">🤖 저장 + AI 답변</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div><!-- /qna-feed -->
+
+<script>
+const QNA_ID = {{ qna.id }};
+
+// ── AI 답변 폴링 ──────────────────────────────────────────────
+function pollAI(url, contentEl, onDone) {
+    const timer = setInterval(async () => {
+        try {
+            const r = await fetch(url);
+            const data = await r.json();
+            if (!data.pending) {
+                clearInterval(timer);
+                if (data.answer) {
+                    contentEl.innerHTML = data.answer;
+                } else {
+                    contentEl.innerHTML = '<div class="feed-no-answer"><p>AI 답변을 생성하지 못했습니다.</p></div>';
+                }
+                if (onDone) onDone(contentEl);
+            }
+        } catch (e) {
+            clearInterval(timer);
+            contentEl.innerHTML = '<div class="flash flash-error">오류가 발생했습니다.</div>';
+        }
+    }, 2000);
+}
+
+function showLoading(el) {
+    el.innerHTML = '<div class="ai-loading"><div class="ai-loading-orb"></div><div class="ai-loading-text"><span>Claude AI 답변 생성 중...</span></div></div>';
+}
+
+function addReAnswerBtn(el, onclick) {
+    // 헤더에 재답변 버튼 추가
+    const header = el.closest('.feed-bubble').querySelector('.feed-ai-actions');
+    if (header && !header.querySelector('button')) {
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-ghost btn-sm';
+        btn.textContent = '↺ 재답변';
+        btn.onclick = onclick;
+        header.appendChild(btn);
+    }
+}
+
+// ── 메인 AI 답변 요청 ─────────────────────────────────────────
+async function requestAI(qnaId, type) {
+    const contentEl = document.getElementById('ai-content-main');
+    showLoading(contentEl);
+    try {
+        const r = await fetch(`/qna/${qnaId}/request_ai`, { method: 'POST' });
+        const data = await r.json();
+        if (data.ok) {
+            pollAI(`/qna/${qnaId}/status`, contentEl,
+                   (el) => addReAnswerBtn(el, () => requestAI(qnaId, 'main')));
+        } else {
+            contentEl.innerHTML = `<div class="flash flash-error">${data.msg}</div>`;
+        }
+    } catch (e) {
+        contentEl.innerHTML = '<div class="flash flash-error">요청 중 오류가 발생했습니다.</div>';
+    }
+}
+
+// ── 댓글 AI 답변 요청 ─────────────────────────────────────────
+async function requestCommentAI(qnaId, commentId) {
+    const contentEl = document.getElementById(`ai-content-comment-${commentId}`);
+    showLoading(contentEl);
+    try {
+        const r = await fetch(`/qna/${qnaId}/comment/${commentId}/request_ai`, { method: 'POST' });
+        const data = await r.json();
+        if (data.ok) {
+            pollAI(`/qna/${qnaId}/comment/${commentId}/status`, contentEl,
+                   (el) => addReAnswerBtn(el, () => requestCommentAI(qnaId, commentId)));
+        } else {
+            contentEl.innerHTML = `<div class="flash flash-error">${data.msg}</div>`;
+        }
+    } catch (e) {
+        contentEl.innerHTML = '<div class="flash flash-error">요청 중 오류가 발생했습니다.</div>';
+    }
+}
+
+// ── 답글 제출 ─────────────────────────────────────────────────
+function submitReply(wantAi) {
+    const textarea = document.getElementById('reply-textarea');
+    if (!textarea.value.trim()) {
+        textarea.focus();
+        return;
+    }
+    document.getElementById('reply_want_ai').value = wantAi;
+    document.getElementById('reply-form').submit();
+}
+
+// ── 페이지 로드 시 pending 항목 자동 폴링 시작 ────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    {% if qna.ai_pending %}
+    pollAI(`/qna/${QNA_ID}/status`,
+           document.getElementById('ai-content-main'),
+           (el) => addReAnswerBtn(el, () => requestAI(QNA_ID, 'main')));
+    {% endif %}
+
+    {% for comment in qna.comments %}
+    {% if comment.ai_pending %}
+    pollAI(`/qna/${QNA_ID}/comment/{{ comment.id }}/status`,
+           document.getElementById('ai-content-comment-{{ comment.id }}'),
+           (el) => addReAnswerBtn(el, () => requestCommentAI(QNA_ID, {{ comment.id }})));
+    {% endif %}
+    {% endfor %}
+});
+</script>
+{% endblock %}

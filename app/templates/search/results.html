@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}검색 — 사업모델캔버스{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">🔎 검색</h1>
+        {% if query %}
+        <p class="page-desc">"{{ query }}" 검색 결과 — {{ results|length }}건</p>
+        {% endif %}
+    </div>
+</div>
+
+<form method="GET" action="{{ url_for('search.search') }}" class="search-page-form">
+    <div class="search-page-input-wrap">
+        <input type="text" name="q" value="{{ query }}" placeholder="프로젝트, 분석 내용을 검색하세요..." class="search-page-input" autofocus>
+        <button type="submit" class="btn btn-primary">검색</button>
+    </div>
+</form>
+
+{% if query %}
+    {% if results %}
+    <div class="search-results">
+        {% for r in results %}
+        <a href="{{ r.url }}" class="search-result-item">
+            <div class="search-result-meta">
+                {% if r.type == 'project' %}
+                <span class="search-result-badge badge">프로젝트</span>
+                {% else %}
+                <span class="search-result-badge badge badge-module">{{ r.module_name }}</span>
+                <span class="search-result-project">{{ r.project.name }}</span>
+                {% endif %}
+            </div>
+            <div class="search-result-title">{{ r.title }}</div>
+            {% if r.type == 'analysis' and r.snippets %}
+            <div class="search-result-snippets">
+                {% for s in r.snippets %}
+                <p class="search-result-snippet">{{ s }}</p>
+                {% endfor %}
+            </div>
+            {% elif r.type == 'project' and r.snippet %}
+            <p class="search-result-snippet">{{ r.snippet }}</p>
+            {% endif %}
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <h2>검색 결과가 없습니다</h2>
+        <p>"{{ query }}"에 해당하는 프로젝트나 분석 내용을 찾지 못했습니다.</p>
+    </div>
+    {% endif %}
+{% endif %}
+{% endblock %}

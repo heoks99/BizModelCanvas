@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block title %}③ SWOT 분석 - 사업모델캔버스{% endblock %}
+{% block module_nav %}{% include 'modules/_step_nav.html' %}{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">🔍 ③ SWOT 분석</h1>
+        <p class="page-desc">기업 내부 역량과 외부 환경을 교차 분석합니다.</p>
+    </div>
+</div>
+
+<div class="module-description">
+    <div class="module-desc-header collapsed" onclick="toggleModuleDesc(this)">
+        <span class="module-desc-icon">📖</span>
+        <span>SWOT 분석 프레임워크란?</span>
+        <span class="module-desc-toggle">▾</span>
+    </div>
+    <div class="module-desc-body collapsed">
+        <p>내부 요인(강점·약점)과 외부 요인(기회·위협)을 교차 분석하여 4가지 전략 방향(SO·ST·WO·WT)을 도출하는 대표적인 전략 기획 도구입니다.</p>
+        <div class="module-desc-grid">
+            <div class="desc-item"><strong>💪 Strengths (강점)</strong> 경쟁사 대비 우위 요소 — 브랜드, 기술력, 인재, 특허, 원가 경쟁력</div>
+            <div class="desc-item"><strong>⚠️ Weaknesses (약점)</strong> 내부 취약점 — 자금 부족, 인지도, 기술 격차, 조직 역량</div>
+            <div class="desc-item"><strong>🚀 Opportunities (기회)</strong> 외부 긍정 요인 — 시장 성장, 규제 완화, 기술 등장, 경쟁사 약화</div>
+            <div class="desc-item"><strong>🔥 Threats (위협)</strong> 외부 부정 요인 — 경쟁 심화, 경기 침체, 규제 강화, 대체재 등장</div>
+        </div>
+        <div class="module-desc-grid" style="margin-top:8px">
+            <div class="desc-item"><strong>SO 전략</strong> 강점으로 기회를 활용 (공격적 성장)</div>
+            <div class="desc-item"><strong>ST 전략</strong> 강점으로 위협을 극복 (다각화)</div>
+            <div class="desc-item"><strong>WO 전략</strong> 약점을 보완해 기회 포착 (방어적 성장)</div>
+            <div class="desc-item"><strong>WT 전략</strong> 약점·위협 최소화 (철수/유지)</div>
+        </div>
+        <p class="desc-tip">💡 <strong>작성 팁:</strong> 항목마다 3~5개의 구체적인 사실을 나열하세요. 추상적 표현보다 수치·사례를 포함하면 교차분석 전략의 질이 높아집니다.</p>
+    </div>
+</div>
+
+<div class="module-layout">
+    <div class="input-panel">
+        <form method="POST" id="module-form">
+            <div class="form-actions form-actions-top">
+                <button type="button" class="btn btn-ai-all" onclick="openAskAllModal()">✦ AI 자동 데이터 입력</button>
+                <button type="submit" class="btn btn-primary">💾 저장</button>
+            </div>
+            <div class="swot-grid">
+                {% set swot_fields = [
+                    ('strengths',    '💪 강점 (Strengths)',    '내부의 긍정적 요인\n예: 강한 브랜드, 특허 기술, 우수 인력'),
+                    ('weaknesses',   '⚠️ 약점 (Weaknesses)',  '내부의 부정적 요인\n예: 자금 부족, 낮은 인지도, 기술 격차'),
+                    ('opportunities','🚀 기회 (Opportunities)','외부의 긍정적 요인\n예: 시장 성장, 규제 완화, 신기술 등장'),
+                    ('threats',      '🔥 위협 (Threats)',      '외부의 부정적 요인\n예: 경쟁 심화, 경기 침체, 원자재 상승')
+                ] %}
+                {% for fname, label, hint in swot_fields %}
+                <div class="swot-cell {{ fname }}">
+                    <div class="field-label-row">
+                        <label>{{ label }}</label>
+                        <button type="button" class="btn-ask-ai btn-ask-ai-sm" onclick="openAskModal('{{ fname }}', '{{ label }}')">✦ AI</button>
+                    </div>
+                    <textarea name="{{ fname }}" id="field-{{ fname }}" rows="5" placeholder="{{ hint }}">{{ input_data.get(fname, '') }}</textarea>
+                </div>
+                {% endfor %}
+            </div>
+        </form>
+    </div>
+
+    <div class="module-resizer" title="드래그하여 크기 조정 / 더블클릭하여 50:50 초기화"></div>
+    <div class="result-panel">
+        <div class="result-header">
+            <h2>AI 분석 리포트</h2>
+            <div class="result-header-actions">
+                <button type="button" class="btn btn-ai" onclick="runAnalysis()">🤖 AI 분석 실행</button>
+                <a href="{{ url_for('modules.export_module_docx', project_id=project.id, module_type=module_type) }}" class="btn btn-ghost">📄 DOCX 저장</a>
+            </div>
+        </div>
+        <div id="ai-result" class="ai-result">
+            <div class="result-placeholder">
+                <p>데이터를 입력하고 저장한 후 <strong>AI 분석</strong> 버튼을 클릭하세요.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'modules/_ask_modal.html' %}
+
+<script>
+const projectId = {{ project.id }};
+const moduleType = '{{ module_type }}';
+const moduleFields = ['strengths','weaknesses','opportunities','threats'];
+const storedResult = {{ ai_result | tojson if ai_result else 'null' }};
+document.addEventListener('DOMContentLoaded', () => {
+    if (storedResult) document.getElementById('ai-result').innerHTML = renderAIResult(storedResult, moduleType);
+});
+</script>
+{% endblock %}

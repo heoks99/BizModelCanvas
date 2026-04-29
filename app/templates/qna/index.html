@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}질의응답 — 사업모델캔버스{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">💬 질의응답</h1>
+        <p class="page-desc">전략 관련 질문을 등록하면 Claude AI가 전문적으로 답변해드립니다.</p>
+    </div>
+    <div class="page-actions">
+        <a href="{{ url_for('qna.new') }}" class="btn btn-primary">＋ 질문 등록</a>
+    </div>
+</div>
+
+{% if qnas %}
+<div class="qna-list">
+    {% for qna in qnas %}
+    <a href="{{ url_for('qna.detail', qna_id=qna.id) }}" class="qna-list-item">
+        <div class="qna-list-main">
+            <div class="qna-list-title">{{ qna.title }}</div>
+            <div class="qna-list-meta">
+                {% if qna.project %}
+                <span class="qna-project-tag">{{ qna.project.name }}</span>
+                {% endif %}
+                <span class="qna-date">{{ qna.created_at.strftime('%Y.%m.%d %H:%M') }}</span>
+            </div>
+            <p class="qna-list-snippet">{{ qna.content[:120] }}{% if qna.content|length > 120 %}…{% endif %}</p>
+        </div>
+        <div class="qna-list-status">
+            {% if qna.ai_answer %}
+            <span class="qna-answered-badge">✓ AI 답변 완료</span>
+            {% else %}
+            <span class="qna-pending-badge">답변 대기</span>
+            {% endif %}
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-icon">💬</div>
+    <h2>등록된 질문이 없습니다</h2>
+    <p>전략 관련 궁금한 내용을 질문해보세요. AI가 전문적으로 답변해드립니다.</p>
+    <a href="{{ url_for('qna.new') }}" class="btn btn-primary">첫 번째 질문 등록하기</a>
+</div>
+{% endif %}
+{% endblock %}

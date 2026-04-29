@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block title %}⑦ 성과 분석 리포트 - 사업모델캔버스{% endblock %}
+{% block module_nav %}{% include 'modules/_step_nav.html' %}{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">📊 ⑦ 성과 분석 리포트</h1>
+        <p class="page-desc">OGSM 대비 실제 달성 수치를 입력하여 성과를 분석하고 개선 방향을 도출합니다.</p>
+    </div>
+</div>
+
+<div class="module-description">
+    <div class="module-desc-header collapsed" onclick="toggleModuleDesc(this)">
+        <span class="module-desc-icon">📖</span>
+        <span>성과 분석 리포트란?</span>
+        <span class="module-desc-toggle">▾</span>
+    </div>
+    <div class="module-desc-body collapsed">
+        <p>OGSM에서 수립한 목표 대비 실제 성과를 체계적으로 평가하고, 원인을 진단하여 다음 전략 사이클에 반영하는 피드백 도구입니다. 전략의 학습과 적응을 위한 핵심 단계입니다.</p>
+        <div class="module-desc-grid" style="grid-template-columns: 1fr;">
+            <div class="desc-item"><strong>📈 목표 대비 실적</strong> Goals에서 설정한 수치 목표 각각에 대해 실제 달성값을 기재. 달성률(%)과 차이(Gap)를 함께 표시</div>
+            <div class="desc-item"><strong>✅ 주요 성과</strong> 목표를 초과 달성한 항목, 예상치 못한 긍정적 결과, 팀의 역량이 돋보인 사례</div>
+            <div class="desc-item"><strong>❌ 미달 항목</strong> 목표에 미치지 못한 항목과 그 원인 분석. 내부 요인(실행 미흡)과 외부 요인(환경 변화)을 구분</div>
+            <div class="desc-item"><strong>🌐 외부 변수</strong> 계획 수립 당시 예상하지 못했던 환경 변화 — 시장, 경쟁, 규제, 경제 상황 등</div>
+        </div>
+        <p class="desc-tip">💡 <strong>작성 팁:</strong> 단순히 숫자만 기재하지 말고 "왜 그런 결과가 나왔는가"에 대한 해석을 함께 작성하세요. AI가 보다 심층적인 개선 방향을 제시할 수 있습니다.</p>
+    </div>
+</div>
+
+<div class="module-layout">
+    <div class="input-panel">
+        <form method="POST" id="module-form">
+            <div class="form-actions form-actions-top">
+                <button type="button" class="btn btn-ai-all" onclick="openAskAllModal()">✦ AI 자동 데이터 입력</button>
+                <button type="submit" class="btn btn-primary">💾 저장</button>
+            </div>
+            {% set fields = [
+                ('target_vs_actual', '📈 목표 대비 실적',  '설정한 Goals 대비 실제 달성 수치 (예: 매출 목표 100억 → 실적 82억)'),
+                ('key_achievements', '✅ 주요 성과',        '목표 초과 달성 항목, 예상치 못한 성과 등'),
+                ('shortfalls',       '❌ 미달 항목',        '목표 미달성 항목과 그 원인 분석'),
+                ('external_factors', '🌐 외부 변수',        '계획 수립 당시 예상하지 못한 외부 환경 변화 (시장, 경쟁, 규제 등)')
+            ] %}
+            {% for fname, label, hint in fields %}
+            <div class="form-group">
+                <div class="field-label-row">
+                    <label>{{ label }}</label>
+                    <button type="button" class="btn-ask-ai" onclick="openAskModal('{{ fname }}', '{{ label }}')">✦ AI에게 물어보기</button>
+                </div>
+                <textarea name="{{ fname }}" id="field-{{ fname }}" rows="4" placeholder="{{ hint }}">{{ input_data.get(fname, '') }}</textarea>
+            </div>
+            {% endfor %}
+        </form>
+    </div>
+    <div class="module-resizer" title="드래그하여 크기 조정 / 더블클릭하여 50:50 초기화"></div>
+    <div class="result-panel">
+        <div class="result-header">
+            <h2>AI 분석 리포트</h2>
+            <div class="result-header-actions">
+                <button type="button" class="btn btn-ai" onclick="runAnalysis()">🤖 AI 분석 실행</button>
+                <a href="{{ url_for('modules.export_module_docx', project_id=project.id, module_type=module_type) }}" class="btn btn-ghost">📄 DOCX 저장</a>
+            </div>
+        </div>
+        <div id="ai-result" class="ai-result">
+            <div class="result-placeholder"><p>데이터를 입력하고 저장한 후 <strong>AI 분석</strong> 버튼을 클릭하세요.</p></div>
+        </div>
+    </div>
+</div>
+
+{% include 'modules/_ask_modal.html' %}
+
+<script>
+const projectId = {{ project.id }}; const moduleType = '{{ module_type }}';
+const moduleFields = ['target_vs_actual','key_achievements','shortfalls','external_factors'];
+const storedResult = {{ ai_result | tojson if ai_result else 'null' }};
+document.addEventListener('DOMContentLoaded', () => {
+    if (storedResult) document.getElementById('ai-result').innerHTML = renderAIResult(storedResult, moduleType);
+});
+</script>
+{% endblock %}

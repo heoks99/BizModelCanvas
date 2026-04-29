@@ -1,0 +1,48 @@
+{% set MODULE_LIST = [
+    ('biz_definition', '①', '사업 정의'),
+    ('env_analysis',   '②', '환경 분석'),
+    ('value_design',   '③', '가치 설계'),
+    ('revenue_model',  '④', '수익 구조'),
+    ('execution',      '⑤', '실행 체계'),
+    ('validation',     '⑥', '검증·정제'),
+] %}
+
+{% set current_idx = namespace(val=0) %}
+{% for key, num, label in MODULE_LIST %}
+  {% if key == module_type %}{% set current_idx.val = loop.index0 %}{% endif %}
+{% endfor %}
+
+{% set prev_key = namespace(val=None) %}
+{% set next_key = namespace(val=None) %}
+{% for key, num, label in MODULE_LIST %}
+  {% if loop.index0 == current_idx.val - 1 %}{% set prev_key.val = key %}{% endif %}
+  {% if loop.index0 == current_idx.val + 1 %}{% set next_key.val = key %}{% endif %}
+{% endfor %}
+
+<nav class="module-step-nav">
+    {% for key, num, label in MODULE_LIST %}
+    {% set is_active = (key == module_type) %}
+    {% set is_done = (key in analyses and analyses[key].ai_result) %}
+    <div class="step-nav-item">
+        <a href="{{ url_for('modules.module_view', project_id=project.id, module_type=key) }}"
+           class="step-nav-link{% if is_active %} active{% elif is_done %} done{% endif %}">
+            <span class="step-num">{% if is_done and not is_active %}✓{% else %}{{ num }}{% endif %}</span>
+            {{ label }}
+        </a>
+        {% if not loop.last %}<span class="step-arrow">›</span>{% endif %}
+    </div>
+    {% endfor %}
+
+    <div class="step-nav-prev-next">
+        {% if prev_key.val %}
+        <a href="{{ url_for('modules.module_view', project_id=project.id, module_type=prev_key.val) }}" class="step-nav-btn">‹ 이전</a>
+        {% else %}
+        <a href="{{ url_for('dashboard.project_detail', project_id=project.id) }}" class="step-nav-btn">⊞ 개요</a>
+        {% endif %}
+        {% if next_key.val %}
+        <a href="{{ url_for('modules.module_view', project_id=project.id, module_type=next_key.val) }}" class="step-nav-btn">다음 ›</a>
+        {% else %}
+        <span class="step-nav-btn disabled">완료</span>
+        {% endif %}
+    </div>
+</nav>

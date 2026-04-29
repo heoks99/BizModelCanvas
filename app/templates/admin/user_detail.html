@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}{{ user.username }} — 관리자{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <a href="{{ url_for('admin.index') }}" class="back-link">← 관리자</a>
+        <h1 class="page-title">👤 {{ user.full_name or user.username }}</h1>
+    </div>
+    <div class="page-actions">
+        <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" class="btn btn-ghost">수정</a>
+        {% if user.id != current_user.id %}
+        <form method="POST" action="{{ url_for('admin.delete_user', user_id=user.id) }}"
+              onsubmit="return confirm('정말 삭제하시겠습니까?')">
+            <button type="submit" class="btn btn-ghost" style="color:var(--danger)">🗑 삭제</button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+<div class="profile-layout">
+    <div class="form-card">
+        <div class="profile-card-title">계정 정보</div>
+        <div class="admin-info-grid">
+            <div class="admin-info-row"><span class="admin-info-key">아이디</span><span>{{ user.username }}</span></div>
+            <div class="admin-info-row"><span class="admin-info-key">이름</span><span>{{ user.full_name or '—' }}</span></div>
+            <div class="admin-info-row"><span class="admin-info-key">이메일</span><span>{{ user.email }}</span></div>
+            <div class="admin-info-row"><span class="admin-info-key">조직</span><span>{{ user.organization or '—' }}</span></div>
+            <div class="admin-info-row"><span class="admin-info-key">직책</span><span>{{ user.job_title or '—' }}</span></div>
+            <div class="admin-info-row"><span class="admin-info-key">역할</span>
+                <span class="admin-role-badge {% if user.role == 'admin' %}role-admin{% else %}role-member{% endif %}">
+                    {{ '관리자' if user.role == 'admin' else '일반' }}
+                </span>
+            </div>
+            <div class="admin-info-row"><span class="admin-info-key">상태</span>
+                <span class="admin-status-badge status-{{ user.status }}">
+                    {{ {'pending':'승인 대기','active':'활성','inactive':'비활성'}.get(user.status) }}
+                </span>
+            </div>
+            <div class="admin-info-row"><span class="admin-info-key">가입일</span><span>{{ user.created_at.strftime('%Y년 %m월 %d일 %H:%M') }}</span></div>
+        </div>
+    </div>
+
+    <div class="form-card">
+        <div class="profile-card-title">프로젝트 ({{ projects|length }}개)</div>
+        {% if projects %}
+        <div class="admin-project-list">
+            {% for p in projects %}
+            <a href="{{ url_for('dashboard.project_detail', project_id=p.id) }}" class="admin-project-item">
+                <span class="admin-project-name">{{ p.name }}</span>
+                <span class="admin-project-meta">{{ p.organization or '' }} · {{ p.updated_at.strftime('%Y.%m.%d') }}</span>
+                {% if p.is_public %}<span class="badge-public">🌐 공개</span>{% endif %}
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="color:var(--text-muted); font-size:13px;">프로젝트 없음</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

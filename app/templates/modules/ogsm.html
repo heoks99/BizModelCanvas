@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block title %}⑥ OGSM 실행 계획서 - 사업모델캔버스{% endblock %}
+{% block module_nav %}{% include 'modules/_step_nav.html' %}{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">🎯 ⑥ OGSM 실행 계획서</h1>
+        <p class="page-desc">목표(O) → 수치 목표(G) → 전략(S) → 측정 지표(M) 논리 구조로 구체화합니다.</p>
+    </div>
+</div>
+
+<div class="module-description">
+    <div class="module-desc-header collapsed" onclick="toggleModuleDesc(this)">
+        <span class="module-desc-icon">📖</span>
+        <span>OGSM 프레임워크란?</span>
+        <span class="module-desc-toggle">▾</span>
+    </div>
+    <div class="module-desc-body collapsed">
+        <p>P&G가 전략 실행 도구로 발전시킨 프레임워크입니다. 추상적인 비전을 측정 가능한 실행 계획으로 연결하는 단일 페이지 전략 문서로, 팀 전체의 정렬(Alignment)을 돕습니다.</p>
+        <div class="module-desc-grid" style="grid-template-columns: 1fr;">
+            <div class="desc-item"><strong>🏆 O — Objectives (정성적 목표)</strong> "우리는 무엇을 달성하려 하는가?" 방향성과 비전을 서술하는 문장. 측정보다는 동기부여가 목적</div>
+            <div class="desc-item"><strong>📊 G — Goals (정량적 목표)</strong> "얼마나 달성할 것인가?" 기간과 수치가 명시된 SMART 목표. 예: 2025년 말 MAU 50만, 매출 200억</div>
+            <div class="desc-item"><strong>🗺️ S — Strategies (전략)</strong> "어떻게 달성할 것인가?" 자원 배분 방향과 핵심 이니셔티브. 보통 3~5개의 전략 방향으로 구성</div>
+            <div class="desc-item"><strong>📏 M — Measures (측정 지표)</strong> "잘 되고 있는지 어떻게 알 수 있는가?" 전략별 KPI와 모니터링 주기. 선행지표(Leading)와 후행지표(Lagging) 포함</div>
+        </div>
+        <p class="desc-tip">💡 <strong>작성 팁:</strong> O→G→S→M 순서로 논리적 흐름이 연결되는지 확인하세요. Goals는 Objectives를 수치화한 것이고, Strategies는 Goals를 달성하는 방법, Measures는 Strategies의 실행 여부를 확인합니다.</p>
+    </div>
+</div>
+
+<div class="module-layout">
+    <div class="input-panel">
+        <form method="POST" id="module-form">
+            <div class="form-actions form-actions-top">
+                <button type="button" class="btn btn-ai-all" onclick="openAskAllModal()">✦ AI 자동 데이터 입력</button>
+                <button type="submit" class="btn btn-primary">💾 저장</button>
+            </div>
+            {% set fields = [
+                ('objectives', '🏆 Objectives — 정성적 목표', '달성하고자 하는 방향성, 비전 (예: 아시아 최고의 SaaS 플랫폼이 된다)'),
+                ('goals',      '📊 Goals — 정량적 목표',      '측정 가능한 수치 목표 (예: 매출 100억, 고객 수 10만, 성장률 30%)'),
+                ('strategies', '🗺️ Strategies — 전략',       '목표 달성을 위한 핵심 전략 방향 (예: 파트너십 확대, 제품 고도화)'),
+                ('measures',   '📏 Measures — 측정 지표',     'KPI 및 모니터링 지표 (예: 월 MAU, NPS 점수, 이탈률)')
+            ] %}
+            {% for fname, label, hint in fields %}
+            <div class="form-group">
+                <div class="field-label-row">
+                    <label>{{ label }}</label>
+                    <button type="button" class="btn-ask-ai" onclick="openAskModal('{{ fname }}', '{{ label }}')">✦ AI에게 물어보기</button>
+                </div>
+                <textarea name="{{ fname }}" id="field-{{ fname }}" rows="4" placeholder="{{ hint }}">{{ input_data.get(fname, '') }}</textarea>
+            </div>
+            {% endfor %}
+        </form>
+    </div>
+    <div class="module-resizer" title="드래그하여 크기 조정 / 더블클릭하여 50:50 초기화"></div>
+    <div class="result-panel">
+        <div class="result-header">
+            <h2>AI 분석 리포트</h2>
+            <div class="result-header-actions">
+                <button type="button" class="btn btn-ai" onclick="runAnalysis()">🤖 AI 분석 실행</button>
+                <a href="{{ url_for('modules.export_module_docx', project_id=project.id, module_type=module_type) }}" class="btn btn-ghost">📄 DOCX 저장</a>
+            </div>
+        </div>
+        <div id="ai-result" class="ai-result">
+            <div class="result-placeholder"><p>데이터를 입력하고 저장한 후 <strong>AI 분석</strong> 버튼을 클릭하세요.</p></div>
+        </div>
+    </div>
+</div>
+
+{% include 'modules/_ask_modal.html' %}
+
+<script>
+const projectId = {{ project.id }}; const moduleType = '{{ module_type }}';
+const moduleFields = ['objectives','goals','strategies','measures'];
+const storedResult = {{ ai_result | tojson if ai_result else 'null' }};
+document.addEventListener('DOMContentLoaded', () => {
+    if (storedResult) document.getElementById('ai-result').innerHTML = renderAIResult(storedResult, moduleType);
+});
+</script>
+{% endblock %}

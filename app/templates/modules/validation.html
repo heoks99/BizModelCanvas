@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block title %}⑥ 검증·정제 - 사업모델캔버스{% endblock %}
+{% block module_nav %}{% include 'modules/_step_nav.html' %}{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">🔬 ⑥ 검증·정제</h1>
+        <p class="page-desc">가설을 검증하고 학습을 통해 비즈니스 모델을 지속 개선합니다.</p>
+    </div>
+</div>
+
+<div class="module-description">
+    <div class="module-desc-header collapsed" onclick="toggleModuleDesc(this)">
+        <span class="module-desc-icon">📖</span>
+        <span>검증·정제란?</span>
+        <span class="module-desc-toggle">▾</span>
+    </div>
+    <div class="module-desc-body collapsed">
+        <p>린 스타트업 방법론의 Build-Measure-Learn 사이클입니다. 비즈니스 모델의 핵심 가정을 빠르게 검증하고, 실제 데이터와 피드백을 기반으로 모델을 정제합니다.</p>
+        <div class="module-desc-grid">
+            <div class="desc-item"><strong>🔮 검증 가설</strong> 사업 성공을 위해 반드시 참이어야 할 핵심 가정</div>
+            <div class="desc-item"><strong>🧪 검증 방법</strong> MVP, 파일럿, A/B테스트, 인터뷰 등</div>
+            <div class="desc-item"><strong>📋 수집 데이터</strong> 실제 고객 반응, 실험 결과, 정량 데이터</div>
+            <div class="desc-item"><strong>🧠 학습 인사이트</strong> 검증 과정에서 얻은 핵심 배움과 발견</div>
+            <div class="desc-item"><strong>🔄 피벗·개선</strong> 모델 수정 방향, 방향 전환 결정, 개선 계획</div>
+        </div>
+        <p class="desc-tip">💡 <strong>작성 팁:</strong> 아직 검증 전 단계라면 "검증하고자 하는 가설"과 "계획 중인 검증 방법"을 작성해도 됩니다. AI가 검증 설계를 도와드립니다.</p>
+    </div>
+</div>
+
+<div class="module-layout">
+    <div class="input-panel">
+        <form method="POST" id="module-form">
+            <div class="form-actions form-actions-top">
+                <button type="button" class="btn btn-ai-all" onclick="openAskAllModal()">✦ AI 자동 데이터 입력</button>
+                <button type="submit" class="btn btn-primary">💾 저장</button>
+            </div>
+            {% set fields = [
+                ('hypotheses',         '🔮 검증 가설 (핵심 가정)', '사업 성공을 위해 반드시 참이어야 할 핵심 가정들'),
+                ('validation_method',  '🧪 검증 방법 (MVP/실험)',  'MVP, 파일럿, A/B테스트, 고객 인터뷰 등 검증 방식'),
+                ('feedback_data',      '📋 수집된 데이터/피드백',  '실제 고객 반응, 실험 결과, 수집한 데이터 (없으면 계획 작성)'),
+                ('learnings',          '🧠 학습 및 인사이트',      '검증 과정에서 얻은 핵심 배움과 예상과 다른 발견'),
+                ('pivot_improvements', '🔄 피벗 또는 개선 사항',   '비즈니스 모델 수정 사항, 방향 전환 결정, 다음 개선 계획')
+            ] %}
+            {% for fname, label, hint in fields %}
+            <div class="form-group">
+                <div class="field-label-row">
+                    <label>{{ label }}</label>
+                    <button type="button" class="btn-ask-ai" onclick="openAskModal('{{ fname }}', '{{ label }}')">✦ AI에게 물어보기</button>
+                </div>
+                <textarea name="{{ fname }}" id="field-{{ fname }}" rows="3" placeholder="{{ hint }}">{{ input_data.get(fname, '') }}</textarea>
+            </div>
+            {% endfor %}
+        </form>
+    </div>
+
+    <div class="module-resizer" title="드래그하여 크기 조정 / 더블클릭하여 50:50 초기화"></div>
+    <div class="result-panel">
+        <div class="result-header">
+            <h2>AI 분석 리포트</h2>
+            <div class="result-header-actions">
+                <button type="button" class="btn btn-ai" onclick="runAnalysis()">🤖 AI 분석 실행</button>
+                <a href="{{ url_for('modules.export_module_docx', project_id=project.id, module_type=module_type) }}" class="btn btn-ghost">📄 DOCX 저장</a>
+            </div>
+        </div>
+        <div id="ai-result" class="ai-result">
+            <div class="result-placeholder">
+                <p>데이터를 입력하고 저장한 후 <strong>AI 분석</strong> 버튼을 클릭하세요.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'modules/_ask_modal.html' %}
+
+<script>
+const projectId = {{ project.id }};
+const moduleType = '{{ module_type }}';
+const moduleFields = ['hypotheses','validation_method','feedback_data','learnings','pivot_improvements'];
+const storedResult = {{ ai_result | tojson if ai_result else 'null' }};
+document.addEventListener('DOMContentLoaded', () => {
+    if (storedResult) document.getElementById('ai-result').innerHTML = renderAIResult(storedResult, moduleType);
+});
+</script>
+{% endblock %}

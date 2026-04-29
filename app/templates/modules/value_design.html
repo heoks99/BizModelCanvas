@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}③ 가치 설계 - 사업모델캔버스{% endblock %}
+{% block module_nav %}{% include 'modules/_step_nav.html' %}{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">💡 ③ 가치 설계</h1>
+        <p class="page-desc">고객에게 전달할 핵심 가치를 설계합니다 — 제품·차별화·파트너십·자원.</p>
+    </div>
+</div>
+
+<div class="module-description">
+    <div class="module-desc-header collapsed" onclick="toggleModuleDesc(this)">
+        <span class="module-desc-icon">📖</span>
+        <span>가치 설계란?</span>
+        <span class="module-desc-toggle">▾</span>
+    </div>
+    <div class="module-desc-body collapsed">
+        <p>비즈니스 모델 캔버스(BMC)의 핵심 블록입니다. 어떤 제품/서비스로 어떤 가치를 전달하고, 이를 위해 어떤 자원·활동·파트너십이 필요한지 구조화합니다.</p>
+        <div class="module-desc-grid">
+            <div class="desc-item"><strong>📦 핵심 제품/서비스</strong> 고객에게 제공하는 핵심 솔루션</div>
+            <div class="desc-item"><strong>⭐ 차별화 포인트</strong> 경쟁사가 쉽게 따라하기 어려운 독점적 우위</div>
+            <div class="desc-item"><strong>🗺️ 고객 경험 여정</strong> 인지→탐색→구매→사용→재구매 전체 여정</div>
+            <div class="desc-item"><strong>🔧 핵심 자원</strong> 사업 운영에 필수적인 자산, 기술, 인력</div>
+            <div class="desc-item"><strong>⚡ 핵심 활동</strong> 가치 제공을 위해 반드시 수행해야 할 활동</div>
+            <div class="desc-item"><strong>🤝 핵심 파트너십</strong> 사업 성공을 위한 외부 파트너 및 협력 관계</div>
+        </div>
+        <p class="desc-tip">💡 <strong>작성 팁:</strong> 차별화 포인트는 "경쟁사는 X를 하지만, 우리는 Y를 한다"는 형식으로 작성하면 명확해집니다.</p>
+    </div>
+</div>
+
+<div class="module-layout">
+    <div class="input-panel">
+        <form method="POST" id="module-form">
+            <div class="form-actions form-actions-top">
+                <button type="button" class="btn btn-ai-all" onclick="openAskAllModal()">✦ AI 자동 데이터 입력</button>
+                <button type="submit" class="btn btn-primary">💾 저장</button>
+            </div>
+            {% set fields = [
+                ('core_product',     '📦 핵심 제품/서비스',  '제공하는 제품 또는 서비스의 핵심 기능과 특징'),
+                ('differentiation',  '⭐ 차별화 포인트',     '경쟁사 대비 독보적인 차별점 (기술, UX, 가격, 속도 등)'),
+                ('customer_journey', '🗺️ 고객 경험 여정',    '고객이 처음 인지하여 재구매까지의 전체 여정'),
+                ('key_resources',    '🔧 핵심 자원',         '사업 운영에 필수적인 자산, 기술, 인력, IP'),
+                ('key_activities',   '⚡ 핵심 활동',         '가치 제공을 위한 핵심 프로세스와 활동'),
+                ('key_partnerships', '🤝 핵심 파트너십',     '사업 성공을 위한 외부 파트너 및 협력 관계')
+            ] %}
+            {% for fname, label, hint in fields %}
+            <div class="form-group">
+                <div class="field-label-row">
+                    <label>{{ label }}</label>
+                    <button type="button" class="btn-ask-ai" onclick="openAskModal('{{ fname }}', '{{ label }}')">✦ AI에게 물어보기</button>
+                </div>
+                <textarea name="{{ fname }}" id="field-{{ fname }}" rows="3" placeholder="{{ hint }}">{{ input_data.get(fname, '') }}</textarea>
+            </div>
+            {% endfor %}
+        </form>
+    </div>
+
+    <div class="module-resizer" title="드래그하여 크기 조정 / 더블클릭하여 50:50 초기화"></div>
+    <div class="result-panel">
+        <div class="result-header">
+            <h2>AI 분석 리포트</h2>
+            <div class="result-header-actions">
+                <button type="button" class="btn btn-ai" onclick="runAnalysis()">🤖 AI 분석 실행</button>
+                <a href="{{ url_for('modules.export_module_docx', project_id=project.id, module_type=module_type) }}" class="btn btn-ghost">📄 DOCX 저장</a>
+            </div>
+        </div>
+        <div id="ai-result" class="ai-result">
+            <div class="result-placeholder">
+                <p>데이터를 입력하고 저장한 후 <strong>AI 분석</strong> 버튼을 클릭하세요.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'modules/_ask_modal.html' %}
+
+<script>
+const projectId = {{ project.id }};
+const moduleType = '{{ module_type }}';
+const moduleFields = ['core_product','differentiation','customer_journey','key_resources','key_activities','key_partnerships'];
+const storedResult = {{ ai_result | tojson if ai_result else 'null' }};
+document.addEventListener('DOMContentLoaded', () => {
+    if (storedResult) document.getElementById('ai-result').innerHTML = renderAIResult(storedResult, moduleType);
+});
+</script>
+{% endblock %}

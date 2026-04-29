@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block title %}① 사업 정의 - 사업모델캔버스{% endblock %}
+{% block module_nav %}{% include 'modules/_step_nav.html' %}{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">🎯 ① 사업 정의</h1>
+        <p class="page-desc">사업의 본질을 명확히 정의합니다 — 어떤 고객의 어떤 문제를, 어떤 가치로 해결하는가.</p>
+    </div>
+</div>
+
+<div class="module-description">
+    <div class="module-desc-header collapsed" onclick="toggleModuleDesc(this)">
+        <span class="module-desc-icon">📖</span>
+        <span>핵심사업이 무엇인지 명확히 정의하기</span>
+        <span class="module-desc-toggle">▾</span>
+    </div>
+    <div class="module-desc-body collapsed">
+        <p>비즈니스 모델 수립의 출발점은 '우리가 어떤 사업을 하는가'를 명확히 하는 것입니다. AI 도구에 충분한 컨텍스트를 제공해야 정확한 분석이 가능합니다.</p>
+
+        <div class="module-desc-section">
+            <div class="module-desc-section-title">📋 정의해야 할 항목</div>
+            <div class="module-desc-grid">
+                <div class="desc-item"><strong>🏢 사업 도메인</strong> SaaS, SI, 플랫폼, 데이터 등 사업 유형</div>
+                <div class="desc-item"><strong>📦 제품·서비스 범위</strong> 핵심 제품·서비스의 범위와 기능</div>
+                <div class="desc-item"><strong>💳 매출 구조</strong> 현재 매출 구조와 주요 고객군</div>
+                <div class="desc-item"><strong>🔧 역량·자산</strong> 기업 규모 및 보유 역량·자산</div>
+                <div class="desc-item"><strong>😣 고객 문제</strong> 해결하려는 고객의 핵심 문제</div>
+            </div>
+        </div>
+
+        <div class="module-desc-section">
+            <div class="module-desc-section-title">🤖 AI 도구 활용 포인트</div>
+            <ul class="module-desc-list">
+                <li>사업 정의서 초안 생성 요청</li>
+                <li>용어 정리 및 범위 경계 명확화</li>
+                <li>유사 기업 사업 정의 사례 조사</li>
+                <li>이해관계자 인터뷰 질문지 작성</li>
+            </ul>
+        </div>
+
+        <div class="module-desc-section">
+            <div class="module-desc-section-title">💬 AI 프롬프트 예시</div>
+            <div class="module-desc-prompt">"우리는 B2B SaaS 기업으로 제조사 대상 ERP를 공급한다. 핵심사업을 정의하고 비즈니스 모델 수립에 필요한 정보 목록을 만들어줘"</div>
+            <div class="module-desc-prompt">"[사업 설명]을 기반으로 비즈니스 모델 캔버스(BMC) 항목을 초안으로 채워줘"</div>
+        </div>
+
+        <div class="module-desc-output">
+            <span class="module-desc-output-label">📌 주요 산출물</span>
+            <span class="module-desc-output-item">사업 정의서</span>
+            <span class="module-desc-output-item">BMC 초안 정보</span>
+            <span class="module-desc-output-item">수집 체크리스트</span>
+        </div>
+    </div>
+</div>
+
+<div class="module-layout">
+    <div class="input-panel">
+        <form method="POST" id="module-form">
+            <div class="form-actions form-actions-top">
+                <button type="button" class="btn btn-ai-all" onclick="openAskAllModal()">✦ AI 자동 데이터 입력</button>
+                <button type="submit" class="btn btn-primary">💾 저장</button>
+            </div>
+            {% set fields = [
+                ('biz_domain',        '🏢 사업 도메인',             '예: B2B SaaS, SI, 플랫폼, 데이터, 커머스, 제조 등'),
+                ('product_scope',     '📦 핵심 제품·서비스 범위',   '핵심 제품·서비스의 기능 범위와 제공 방식'),
+                ('revenue_customer',  '💳 매출 구조 및 주요 고객군','현재 매출 구조(구독/거래/프로젝트 등)와 주요 고객군'),
+                ('capabilities',      '🔧 기업 규모 및 보유 역량',  '기업 규모, 핵심 기술·인력·특허 등 보유 자산'),
+                ('customer_problem',  '😣 해결하려는 고객 문제',    '고객이 실제로 겪고 있는 핵심 불편함과 미충족 니즈')
+            ] %}
+            {% for fname, label, hint in fields %}
+            <div class="form-group">
+                <div class="field-label-row">
+                    <label>{{ label }}</label>
+                    <button type="button" class="btn-ask-ai" onclick="openAskModal('{{ fname }}', '{{ label }}')">✦ AI에게 물어보기</button>
+                </div>
+                <textarea name="{{ fname }}" id="field-{{ fname }}" rows="3" placeholder="{{ hint }}">{{ input_data.get(fname, '') }}</textarea>
+            </div>
+            {% endfor %}
+        </form>
+    </div>
+
+    <div class="module-resizer" title="드래그하여 크기 조정 / 더블클릭하여 50:50 초기화"></div>
+    <div class="result-panel">
+        <div class="result-header">
+            <h2>AI 분석 리포트</h2>
+            <div class="result-header-actions">
+                <button type="button" class="btn btn-ai" onclick="runAnalysis()">🤖 AI 분석 실행</button>
+                <a href="{{ url_for('modules.export_module_docx', project_id=project.id, module_type=module_type) }}" class="btn btn-ghost">📄 DOCX 저장</a>
+            </div>
+        </div>
+        <div id="ai-result" class="ai-result">
+            <div class="result-placeholder">
+                <p>데이터를 입력하고 저장한 후 <strong>AI 분석</strong> 버튼을 클릭하세요.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'modules/_ask_modal.html' %}
+
+<script>
+const projectId = {{ project.id }};
+const moduleType = '{{ module_type }}';
+const moduleFields = ['biz_domain','product_scope','revenue_customer','capabilities','customer_problem'];
+const storedResult = {{ ai_result | tojson if ai_result else 'null' }};
+document.addEventListener('DOMContentLoaded', () => {
+    if (storedResult) document.getElementById('ai-result').innerHTML = renderAIResult(storedResult, moduleType);
+});
+</script>
+{% endblock %}
