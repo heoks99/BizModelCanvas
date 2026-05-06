@@ -178,3 +178,32 @@ def delete_project(project_id):
     db.session.commit()
     flash('프로젝트가 삭제되었습니다.', 'success')
     return redirect(url_for('dashboard.index'))
+
+
+@dashboard_bp.route('/api/health')
+@login_required
+def api_health():
+    """Railway 환경 진단 — API 키·모델 연결 확인"""
+    import os
+    from flask import current_app
+    api_key = current_app.config.get('ANTHROPIC_API_KEY', '')
+    key_preview = (api_key[:12] + '...') if len(api_key) > 12 else ('(없음)' if not api_key else api_key)
+    try:
+        import anthropic
+        client = anthropic.Anthropic(api_key=api_key)
+        msg = client.messages.create(
+            model='claude-opus-4-6',
+            max_tokens=16,
+            messages=[{'role': 'user', 'content': 'ping'}]
+        )
+        return jsonify({
+            'status': 'ok',
+            'api_key': key_preview,
+            'model_response': msg.content[0].text[:50],
+        })
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'api_key': key_preview,
+            'error': str(e),
+        }), 500

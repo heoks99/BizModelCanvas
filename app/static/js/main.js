@@ -348,18 +348,23 @@ function submitAnalysis() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ extra_prompt: extraPrompt }),
     })
-    .then(res => res.json())
-    .then(data => {
+    .then(res => res.text().then(text => {
+        try { return { ok: res.ok, status: res.status, data: JSON.parse(text) }; }
+        catch { return { ok: res.ok, status: res.status, data: { error: `서버 응답 파싱 실패 (HTTP ${res.status}): ${text.slice(0, 200)}` } }; }
+    }))
+    .then(({ ok, status, data }) => {
+        document.getElementById('analyze-run-btn').disabled = false;
         document.getElementById('analyze-btn-text').textContent = '🤖 AI 분석 시작';
         if (data.error) {
-            resultDiv.innerHTML = `<div class="flash flash-error">${data.error}</div>`;
+            resultDiv.innerHTML = `<div class="flash flash-error"><strong>오류 (HTTP ${status}):</strong> ${data.error}</div>`;
         } else {
             resultDiv.innerHTML = renderAIResult(data.result, moduleType);
         }
     })
-    .catch(() => {
+    .catch(err => {
+        document.getElementById('analyze-run-btn').disabled = false;
         document.getElementById('analyze-btn-text').textContent = '🤖 AI 분석 시작';
-        resultDiv.innerHTML = '<div class="flash flash-error">분석 요청 중 오류가 발생했습니다.</div>';
+        resultDiv.innerHTML = `<div class="flash flash-error">네트워크 오류: ${err.message || err}</div>`;
     });
 }
 
