@@ -475,7 +475,7 @@ def analyze_with_claude(module_type: str, input_data: dict, project_name: str, i
                 result = re.sub(r'\n?```$', '', result)
             return result
         except Exception as e:
-            return f'<div class="bcg-insight-warn"><strong>AI 분석 오류:</strong> {str(e)}</div>'
+            raise RuntimeError(str(e)) from e
 
     prompt_template = PROMPTS.get(module_type)
     if not prompt_template:
@@ -529,4 +529,4 @@ def analyze_with_claude(module_type: str, input_data: dict, project_name: str, i
 
         return result
     except Exception as e:
-        return f'<div class="bcg-insight-warn"><strong>AI 분석 오류:</strong> {str(e)}</div>'
+        raise RuntimeError(str(e)) from e

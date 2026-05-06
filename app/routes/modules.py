@@ -62,7 +62,17 @@ def analyze(project_id, module_type):
     data = request.get_json(silent=True) or {}
     extra_prompt = data.get('extra_prompt', '').strip()
     sub_type = data.get('sub_type', '').strip()
-    result = analyze_with_claude(module_type, input_data, project.name, project.organization, extra_prompt, sub_type)
+
+    try:
+        result = analyze_with_claude(module_type, input_data, project.name, project.organization, extra_prompt, sub_type)
+    except Exception as e:
+        return jsonify({'error': f'AI 분석 중 오류가 발생했습니다: {str(e)}'}), 500
+
+    # AI 서비스가 에러 HTML을 반환한 경우 JSON error로 전환
+    if result.startswith('<div class="bcg-insight-warn"><strong>AI 분석 오류'):
+        import re as _re
+        msg = _re.sub(r'<[^>]+>', '', result).strip()
+        return jsonify({'error': msg}), 500
 
     # env_analysis: sub_type별 결과를 JSON 딕셔너리에 부분 저장
     if module_type == 'env_analysis' and sub_type:
