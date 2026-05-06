@@ -1,0 +1,17 @@
+[phases.setup]
+nixPkgs = [
+    "python312",
+    "libxml2",
+    "libxslt",
+    "libjpeg",
+    "zlib",
+    "freetype",
+    "gcc",
+    "libffi",
+]
+
+[phases.install]
+cmds = ["pip install -r requirements.txt"]
+
+[start]
+cmd = "gunicorn run:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120"
