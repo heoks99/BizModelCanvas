@@ -11,7 +11,11 @@ nixPkgs = [
 ]
 
 [phases.install]
-cmds = ["pip install -r requirements.txt"]
+cmds = [
+    "pip install --upgrade pip setuptools wheel",
+    "pip install -r requirements-deploy.txt",
+    "pip install xhtml2pdf==0.2.17 --no-deps",
+]
 
 [start]
 cmd = "gunicorn run:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120"
