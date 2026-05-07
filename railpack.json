@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.railpack.com",
-  "buildAptPackages": ["libcairo2-dev", "pkg-config"],
+  "buildAptPackages": ["libcairo2-dev", "pkg-config", "fonts-noto-cjk"],
   "deploy": {
-    "aptPackages": ["libcairo2"]
+    "aptPackages": ["libcairo2", "fonts-noto-cjk"]
   }
 }
