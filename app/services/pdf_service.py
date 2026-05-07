@@ -8,17 +8,37 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase.pdfmetrics import registerFontFamily
 
 # reportlab에 폰트 등록 후 xhtml2pdf DEFAULT_FONT 딕셔너리에 매핑 추가
-try:
-    pdfmetrics.registerFont(TTFont('malgun',   'C:/Windows/Fonts/malgun.ttf'))
-    pdfmetrics.registerFont(TTFont('malgunbd', 'C:/Windows/Fonts/malgunbd.ttf'))
-    registerFontFamily('malgun',
-                       normal='malgun', bold='malgunbd',
-                       italic='malgun', boldItalic='malgunbd')
-    xpdf_default.DEFAULT_FONT['malgun']   = 'malgun'
-    xpdf_default.DEFAULT_FONT['malgunbd'] = 'malgunbd'
-    KOREAN_FONT = 'malgun'
-except Exception:
-    KOREAN_FONT = 'Helvetica'
+# Linux(배포 환경) → Noto Sans CJK, Windows(로컬 개발) → Malgun Gothic 순으로 시도
+_FONT_CANDIDATES = [
+    # Linux: fonts-noto-cjk apt 패키지 설치 경로
+    ('/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc', None),
+    ('/usr/share/fonts/opentype/noto/NotoSansCJKkr-Regular.otf', None),
+    ('/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc', None),
+    # Windows: 로컬 개발 환경
+    ('C:/Windows/Fonts/malgun.ttf', 'C:/Windows/Fonts/malgunbd.ttf'),
+]
+
+KOREAN_FONT = 'Helvetica'
+for _regular, _bold in _FONT_CANDIDATES:
+    try:
+        import os as _os
+        if not _os.path.exists(_regular):
+            continue
+        pdfmetrics.registerFont(TTFont('NotoKR', _regular))
+        if _bold and _os.path.exists(_bold):
+            pdfmetrics.registerFont(TTFont('NotoKR-Bold', _bold))
+            registerFontFamily('NotoKR',
+                               normal='NotoKR', bold='NotoKR-Bold',
+                               italic='NotoKR', boldItalic='NotoKR-Bold')
+        else:
+            registerFontFamily('NotoKR',
+                               normal='NotoKR', bold='NotoKR',
+                               italic='NotoKR', boldItalic='NotoKR')
+        xpdf_default.DEFAULT_FONT['NotoKR'] = 'NotoKR'
+        KOREAN_FONT = 'NotoKR'
+        break
+    except Exception:
+        continue
 
 # 모듈 메타 정보
 MODULE_META = {
