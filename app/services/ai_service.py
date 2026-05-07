@@ -322,7 +322,7 @@ def ask_all_fields_with_claude(module_type: str, question: str, project_name: st
     try:
         from flask import current_app
         api_key = current_app.config.get('ANTHROPIC_API_KEY', '')
-        client = anthropic.Anthropic(api_key=api_key)
+        client = anthropic.Anthropic(api_key=api_key, timeout=60.0)
         message = client.messages.create(
             model='claude-opus-4-6',
             max_tokens=ASK_ALL_MAX_TOKENS,
@@ -359,7 +359,7 @@ def ask_field_with_claude(_module_type: str, field_label: str, question: str, pr
     try:
         from flask import current_app
         api_key = current_app.config.get('ANTHROPIC_API_KEY', '')
-        client = anthropic.Anthropic(api_key=api_key)
+        client = anthropic.Anthropic(api_key=api_key, timeout=60.0)
         message = client.messages.create(
             model='claude-opus-4-6',
             max_tokens=ASK_MAX_TOKENS,
@@ -463,7 +463,7 @@ def analyze_with_claude(module_type: str, input_data: dict, project_name: str, i
         try:
             from flask import current_app
             api_key = current_app.config.get('ANTHROPIC_API_KEY', '')
-            client = anthropic.Anthropic(api_key=api_key)
+            client = anthropic.Anthropic(api_key=api_key, timeout=60.0)
             message = client.messages.create(
                 model='claude-opus-4-6',
                 max_tokens=ANALYZE_MAX_TOKENS,
@@ -499,7 +499,7 @@ def analyze_with_claude(module_type: str, input_data: dict, project_name: str, i
     try:
         from flask import current_app
         api_key = current_app.config.get('ANTHROPIC_API_KEY', '')
-        client = anthropic.Anthropic(api_key=api_key)
+        client = anthropic.Anthropic(api_key=api_key, timeout=60.0)
         message = client.messages.create(
             model='claude-opus-4-6',
             max_tokens=ANALYZE_MAX_TOKENS,
