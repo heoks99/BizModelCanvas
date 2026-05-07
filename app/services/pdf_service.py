@@ -1,5 +1,6 @@
 import io
 import json
+import os
 import re
 from datetime import datetime
 from xhtml2pdf import pisa, default as xpdf_default
@@ -7,17 +8,37 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase.pdfmetrics import registerFontFamily
 
-# reportlab에 폰트 등록 후 xhtml2pdf DEFAULT_FONT 딕셔너리에 매핑 추가
+# 폰트 경로: 프로젝트 내장 → Windows 시스템 순으로 탐색
+_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_FONT_CANDIDATES = [
+    # 프로젝트 내장 (Railway/Linux 포함 모든 환경)
+    os.path.join(_BASE_DIR, 'static', 'fonts', 'malgun.ttf'),
+    os.path.join(_BASE_DIR, 'static', 'fonts', 'malgunbd.ttf'),
+    # Windows 시스템
+    'C:/Windows/Fonts/malgun.ttf',
+    'C:/Windows/Fonts/malgunbd.ttf',
+]
+
+def _find_font(name):
+    for path in _FONT_CANDIDATES:
+        if name in os.path.basename(path) and os.path.exists(path):
+            return path
+    return None
+
 try:
-    pdfmetrics.registerFont(TTFont('malgun',   'C:/Windows/Fonts/malgun.ttf'))
-    pdfmetrics.registerFont(TTFont('malgunbd', 'C:/Windows/Fonts/malgunbd.ttf'))
+    normal_path = _find_font('malgun.ttf')
+    bold_path   = _find_font('malgunbd.ttf')
+    if not normal_path or not bold_path:
+        raise FileNotFoundError('malgun font not found')
+    pdfmetrics.registerFont(TTFont('malgun',   normal_path))
+    pdfmetrics.registerFont(TTFont('malgunbd', bold_path))
     registerFontFamily('malgun',
                        normal='malgun', bold='malgunbd',
                        italic='malgun', boldItalic='malgunbd')
     xpdf_default.DEFAULT_FONT['malgun']   = 'malgun'
     xpdf_default.DEFAULT_FONT['malgunbd'] = 'malgunbd'
     KOREAN_FONT = 'malgun'
-except Exception:
+except Exception as _e:
     KOREAN_FONT = 'Helvetica'
 
 # 모듈 메타 정보
