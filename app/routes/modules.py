@@ -156,3 +156,34 @@ def export_module_docx(project_id, module_type):
     filename = f"{project.name}_Step{step}_{module_name}.pdf"
     return send_file(buf, mimetype='application/pdf',
                      as_attachment=True, download_name=filename)
+
+
+@modules_bp.route('/<module_type>/pdf/<sub_type>')
+@login_required
+def export_sub_pdf(project_id, module_type, sub_type):
+    """env_analysis 서브모듈 개별 PDF 저장"""
+    project = get_project_or_404(project_id)
+    analysis = Analysis.query.filter_by(project_id=project_id, module_type=module_type).first()
+
+    SUB_LABELS = {
+        'pestel':      'PESTEL분석',
+        'five_forces': '5Forces분석',
+        'swot':        'SWOT분석',
+        'vrio':        'VRIO분석',
+        'segment':     '고객세그먼트맵',
+    }
+
+    ai_result = None
+    if analysis and analysis.ai_result:
+        try:
+            d = json.loads(analysis.ai_result)
+            ai_result = d.get(sub_type, '')
+        except Exception:
+            ai_result = analysis.ai_result
+
+    from app.services.pdf_service import generate_module_pdf
+    buf = generate_module_pdf(project, module_type, ai_result)
+    sub_label = SUB_LABELS.get(sub_type, sub_type)
+    filename = f"{project.name}_Step02_{sub_label}.pdf"
+    return send_file(buf, mimetype='application/pdf',
+                     as_attachment=True, download_name=filename)

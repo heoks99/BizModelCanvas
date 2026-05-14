@@ -406,21 +406,14 @@
             {% if ai_result and ai_result.get(key) %}<span class="env-tab-done">✓</span>{% endif %}
         </button>
         {% endfor %}
-        <div class="env-top-actions">
-            <a href="{{ url_for('modules.export_module_docx', project_id=project.id, module_type=active_tab) }}"
-               class="btn btn-ghost btn-sm">📄 단계 파일 저장</a>
-            {% if is_owner %}
-            <button type="button" class="btn btn-ai btn-sm" onclick="runAllSubAnalysis()">🤖 전체 순차 분석</button>
-            {% endif %}
-        </div>
     </div>
 
-    {# 각 프레임워크 패널: 입력(좌) + 결과(우) #}
+    {# 각 프레임워크 패널: 상단(입력) + 하단(결과) 세로 분할 #}
     {% for key, icon, label, fname, hint in env_tabs %}
     <div id="env-panel-{{ key }}" class="env-full-panel {% if loop.first %}active{% endif %}">
 
-        {# 입력 영역 #}
-        <div class="env-input-col">
+        {# 입력 영역 (상단) #}
+        <div class="env-input-row">
             <div class="env-col-header">
                 <span class="env-col-title">{{ icon }} {{ label }} 입력 데이터</span>
                 {% if is_owner %}
@@ -438,7 +431,7 @@
                 <input type="hidden" name="{{ fname2 }}" value="{{ input_data.get(fname2, '') }}">
                 {% endif %}
                 {% endfor %}
-                <textarea name="{{ fname }}" id="field-{{ fname }}" class="env-textarea"
+                <textarea name="{{ fname }}" id="field-{{ fname }}" class="env-textarea-tall"
                           placeholder="{{ hint }}">{{ input_data.get(fname, '') }}</textarea>
                 <div class="env-input-footer">
                     <button type="submit" class="btn btn-primary btn-sm">💾 저장</button>
@@ -446,24 +439,24 @@
             </form>
             {% else %}
             <div class="readonly-notice">🌐 읽기 전용</div>
-            <div class="readonly-field env-textarea">{{ input_data.get(fname, '(미입력)') }}</div>
+            <div class="readonly-field env-textarea-tall">{{ input_data.get(fname, '(미입력)') }}</div>
             {% endif %}
         </div>
 
-        <div class="env-col-resizer" data-key="{{ key }}"></div>
-
-        {# 결과 영역 #}
-        <div class="env-result-col">
+        {# 결과 영역 (하단) #}
+        <div class="env-result-row">
             <div class="env-col-header">
                 <span class="env-col-title">AI 분석 리포트</span>
                 {% if is_owner %}
                 <div class="env-col-actions">
                     <button type="button" class="btn btn-ai btn-sm"
                             onclick="runSubAnalysis('{{ key }}')">🤖 AI 분석</button>
+                    <a href="{{ url_for('modules.export_sub_pdf', project_id=project.id, module_type=active_tab, sub_type=key) }}"
+                       class="btn btn-ghost btn-sm">📄 파일 저장</a>
                 </div>
                 {% endif %}
             </div>
-            <div id="ai-result-{{ key }}" class="ai-result env-ai-result">
+            <div id="ai-result-{{ key }}" class="ai-result env-ai-result-row">
                 {% if ai_result and ai_result.get(key) %}
                 <script>document.addEventListener('DOMContentLoaded',()=>{
                     document.getElementById('ai-result-{{ key }}').innerHTML = renderAIResult({{ ai_result.get(key) | tojson }}, '{{ active_tab }}');
