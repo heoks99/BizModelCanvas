@@ -1,3 +1,20 @@
+// ===== 글자 수 카운터 =====
+const CHAR_MAX = 2000;
+
+function updateCharCount(textarea) {
+    const len = textarea.value.length;
+    const counter = document.getElementById('counter-' + textarea.id.replace('field-', ''));
+    if (!counter) return;
+    counter.textContent = `${len.toLocaleString()} / ${CHAR_MAX.toLocaleString()}자`;
+    counter.classList.toggle('char-counter-warn',  len >= CHAR_MAX * 0.9);
+    counter.classList.toggle('char-counter-limit', len >= CHAR_MAX);
+}
+
+// 페이지 로드 시 모든 textarea 초기 카운트 갱신
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('textarea[maxlength]').forEach(ta => updateCharCount(ta));
+});
+
 // ===== 모듈 설명 토글 =====
 function toggleModuleDesc(header) {
     header.classList.toggle('collapsed');

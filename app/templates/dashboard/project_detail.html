@@ -432,8 +432,13 @@
                 {% endif %}
                 {% endfor %}
                 <textarea name="{{ fname }}" id="field-{{ fname }}" class="env-textarea-tall"
-                          placeholder="{{ hint }}">{{ input_data.get(fname, '') }}</textarea>
+                          maxlength="2000"
+                          placeholder="{{ hint }}"
+                          oninput="updateCharCount(this)">{{ input_data.get(fname, '') }}</textarea>
                 <div class="env-input-footer">
+                    <span class="char-counter" id="counter-{{ fname }}">
+                        {{- input_data.get(fname, '') | length -}}&nbsp;/&nbsp;2,000자
+                    </span>
                     <button type="submit" class="btn btn-primary btn-sm">💾 저장</button>
                 </div>
             </form>
@@ -486,9 +491,16 @@
             </div>
             {% for fname, label, _desc in tab_fields %}
             <div class="form-group">
-                <label>{{ label }}</label>
+                <div class="form-group-header">
+                    <label>{{ label }}</label>
+                    <span class="char-counter" id="counter-{{ fname }}">
+                        {{- input_data.get(fname, '') | length -}}&nbsp;/&nbsp;2,000자
+                    </span>
+                </div>
                 <textarea name="{{ fname }}" id="field-{{ fname }}" rows="3"
-                          placeholder="{{ meta.fields_hint.get(fname, '') }}">{{ input_data.get(fname, '') }}</textarea>
+                          maxlength="2000"
+                          placeholder="{{ meta.fields_hint.get(fname, '') }}"
+                          oninput="updateCharCount(this)">{{ input_data.get(fname, '') }}</textarea>
             </div>
             {% endfor %}
         </form>

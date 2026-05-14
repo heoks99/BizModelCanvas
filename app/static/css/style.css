@@ -391,6 +391,25 @@ input:focus, textarea:focus { outline: none; border-color: var(--accent); }
 input::placeholder, textarea::placeholder { color: var(--text-muted); }
 
 .form-group { margin-bottom: 18px; }
+
+/* 글자 수 카운터 */
+.char-counter {
+    font-size: 11px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    transition: color 0.2s;
+}
+.char-counter-warn  { color: var(--warning); }
+.char-counter-limit { color: var(--danger); font-weight: 700; }
+
+/* 일반 탭 form-group 헤더 (label + 카운터 가로 배치) */
+.form-group-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+.form-group-header label { margin-bottom: 0; }
 .form-card {
     background: var(--bg-card);
     border: 1px solid var(--border);
@@ -974,7 +993,8 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); }
 
 .env-input-footer {
     display: flex;
-    justify-content: flex-end;
+    align-items: center;
+    justify-content: space-between;
     padding: 6px 10px;
     background: var(--bg-card);
     border-top: 1px solid var(--border);
