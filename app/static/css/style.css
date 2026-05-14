@@ -967,7 +967,8 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); }
 /* 3배 높이 textarea (env 상하 분할 레이아웃) */
 .env-textarea-tall {
     width: 100%;
-    height: 420px;
+    height: calc(8 * 1.7 * 13px + 24px); /* 8행 × line-height × font-size + padding */
+    min-height: 160px;
     resize: vertical;
     background: transparent;
     border: none;

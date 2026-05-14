@@ -426,6 +426,7 @@
             {% if is_owner %}
             <form method="POST" id="form-{{ key }}"
                   action="{{ url_for('dashboard.project_detail', project_id=project.id, tab_key=active_tab) }}">
+                <input type="hidden" name="_env_sub_key" value="{{ key }}">
                 {% for k2, icon2, label2, fname2, hint2 in env_tabs %}
                 {% if fname2 != fname %}
                 <input type="hidden" name="{{ fname2 }}" value="{{ input_data.get(fname2, '') }}">
@@ -497,7 +498,7 @@
                         {{- input_data.get(fname, '') | length -}}&nbsp;/&nbsp;2,000자
                     </span>
                 </div>
-                <textarea name="{{ fname }}" id="field-{{ fname }}" rows="3"
+                <textarea name="{{ fname }}" id="field-{{ fname }}" rows="8"
                           maxlength="2000"
                           placeholder="{{ meta.fields_hint.get(fname, '') }}"
                           oninput="updateCharCount(this)">{{ input_data.get(fname, '') }}</textarea>
@@ -554,6 +555,17 @@ const storedResult = {{ ai_result | tojson if ai_result else 'null' }};
 document.addEventListener('DOMContentLoaded', () => {
     if (moduleType !== 'env_analysis' && storedResult) {
         document.getElementById('ai-result').innerHTML = renderAIResult(storedResult, moduleType);
+    }
+
+    // 저장 후 URL hash로 env 서브모듈 탭 복원
+    if (moduleType === 'env_analysis') {
+        const hash = location.hash; // e.g. #env-sub-five_forces
+        if (hash.startsWith('#env-sub-')) {
+            const subKey = hash.replace('#env-sub-', '');
+            const tabBtn = document.querySelector(`.env-top-tab[data-key="${subKey}"]`);
+            if (tabBtn) switchEnvFull(tabBtn);
+            history.replaceState(null, '', location.pathname + location.search);
+        }
     }
 });
 

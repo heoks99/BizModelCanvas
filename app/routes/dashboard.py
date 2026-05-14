@@ -85,6 +85,7 @@ def project_detail(project_id, tab_key=None):
     if request.method == 'POST' and is_owner:
         from app import db
         form_data = request.form.to_dict()
+        env_sub_key = form_data.pop('_env_sub_key', '')  # 내부 제어용, DB 저장 제외
         analysis = Analysis.query.filter_by(project_id=project_id, module_type=active_tab).first()
         if not analysis:
             analysis = Analysis(project_id=project_id, module_type=active_tab)
@@ -92,7 +93,10 @@ def project_detail(project_id, tab_key=None):
         analysis.input_data = json.dumps(form_data, ensure_ascii=False)
         db.session.commit()
         flash('데이터가 저장되었습니다.', 'success')
-        return redirect(url_for('dashboard.project_detail', project_id=project_id, tab_key=active_tab))
+        redirect_url = url_for('dashboard.project_detail', project_id=project_id, tab_key=active_tab)
+        if env_sub_key:
+            redirect_url += f'#env-sub-{env_sub_key}'
+        return redirect(redirect_url)
 
     active_analysis = analyses.get(active_tab)
     input_data = json.loads(active_analysis.input_data) if active_analysis and active_analysis.input_data else {}
