@@ -297,12 +297,26 @@ MODULE_FIELDS = {
 ASK_MAX_TOKENS = 1500
 ANALYZE_MAX_TOKENS = 15000
 ASK_ALL_MAX_TOKENS = 3000
+ASK_SINGLE_MAX_TOKENS = 2000
 
 
-def ask_all_fields_with_claude(module_type: str, question: str, project_name: str, organization: str) -> dict:
-    fields = MODULE_FIELDS.get(module_type, [])
-    if not fields:
+def ask_all_fields_with_claude(module_type: str, question: str, project_name: str,
+                                organization: str, single_field: str = '') -> dict:
+    """single_field가 지정되면 해당 필드 1개만 요청 (env 서브모듈 AI 자동 입력용)."""
+    import json as _json
+
+    all_fields = MODULE_FIELDS.get(module_type, [])
+    if not all_fields:
         return {'error': '지원하지 않는 모듈 유형입니다.'}
+
+    # env 서브모듈: 단일 필드만 요청
+    if single_field:
+        matched = [(fn, lb, dc) for fn, lb, dc in all_fields if fn == single_field]
+        fields = matched if matched else all_fields
+        max_tokens = ASK_SINGLE_MAX_TOKENS
+    else:
+        fields = all_fields
+        max_tokens = ASK_ALL_MAX_TOKENS
 
     field_list = '\n'.join(
         f'- {fname}: {label} ({desc})' for fname, label, desc in fields
@@ -325,7 +339,7 @@ def ask_all_fields_with_claude(module_type: str, question: str, project_name: st
         client = anthropic.Anthropic(api_key=api_key)
         message = client.messages.create(
             model='claude-opus-4-6',
-            max_tokens=ASK_ALL_MAX_TOKENS,
+            max_tokens=max_tokens,
             system=system,
             messages=[{
                 'role': 'user',
@@ -340,10 +354,37 @@ def ask_all_fields_with_claude(module_type: str, question: str, project_name: st
         raw = message.content[0].text.strip()
         raw = re.sub(r'^```[a-z]*\n?', '', raw)
         raw = re.sub(r'\n?```$', '', raw)
-        import json
-        return json.loads(raw)
+        # JSON이 잘린 경우 복구 시도
+        raw = _fix_truncated_json(raw)
+        return _json.loads(raw)
     except Exception as e:
         return {'error': f'오류가 발생했습니다: {str(e)}'}
+
+
+def _fix_truncated_json(raw: str) -> str:
+    """잘린 JSON 문자열을 최대한 복구."""
+    raw = raw.strip()
+    if not raw.startswith('{'):
+        return raw
+    # 열린 따옴표/괄호 개수로 닫힘 여부 판단
+    try:
+        import json as _json
+        _json.loads(raw)
+        return raw  # 이미 유효
+    except Exception:
+        pass
+    # 마지막 완전한 key:value 쌍까지만 잘라서 닫기
+    # 마지막 쉼표 뒤 불완전 항목 제거 후 } 추가
+    cut = raw.rstrip()
+    if cut.endswith(','):
+        cut = cut[:-1]
+    # 열린 문자열(따옴표 홀수) 닫기
+    quote_count = cut.count('"') - cut.count('\\"')
+    if quote_count % 2 == 1:
+        cut += '"'
+    if not cut.endswith('}'):
+        cut += '}'
+    return cut
 
 
 def ask_field_with_claude(_module_type: str, field_label: str, question: str, project_name: str, organization: str) -> str:

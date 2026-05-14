@@ -216,10 +216,14 @@ function submitAskAllFields() {
     document.getElementById('ask-all-status').style.display = 'block';
     document.getElementById('ask-all-result').style.display = 'none';
 
+    // env 서브모듈 단일 필드 자동 입력 시 single_field 전송
+    const body = { question };
+    if (_envAutoFname) body.single_field = _envAutoFname;
+
     fetch(`/projects/${projectId}/modules/${moduleType}/ask-all`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question })
+        body: JSON.stringify(body)
     })
     .then(r => r.json())
     .then(data => {

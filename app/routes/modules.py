@@ -121,6 +121,8 @@ def ask_all_fields(project_id, module_type):
     project = get_project_or_404(project_id)
     data = request.get_json()
     question = (data or {}).get('question', '').strip()
+    # env 서브모듈 단일 필드 자동 입력용
+    single_field = (data or {}).get('single_field', '').strip()
     if not question:
         return jsonify({'error': '질문을 입력해주세요.'}), 400
 
@@ -129,7 +131,8 @@ def ask_all_fields(project_id, module_type):
         module_type=module_type,
         question=question,
         project_name=project.name,
-        organization=project.organization or ''
+        organization=project.organization or '',
+        single_field=single_field,
     )
     return jsonify(result)
 
