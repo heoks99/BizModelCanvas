@@ -365,6 +365,12 @@ def build_module_html(module_type, ai_result, input_data=None):
     return html
 
 
+def _meta_row(label, value):
+    """값이 있을 때만 메타 행 HTML 반환."""
+    v = (value or '').strip()
+    return f'<strong>{label}</strong>: {v}<br/>' if v else ''
+
+
 def generate_module_pdf(project, module_type, ai_result, input_data=None):
     meta = MODULE_META.get(module_type, {'name': module_type, 'icon': ''})
     now = datetime.now().strftime('%Y년 %m월 %d일')
@@ -372,12 +378,12 @@ def generate_module_pdf(project, module_type, ai_result, input_data=None):
     cover_html = f'''
     <div class="cover">
         <div class="cover-badge">사업모델캔버스</div>
-        <h1 class="cover-title">{project.name}</h1>
+        <h1 class="cover-title">{project.name or ""}</h1>
         <p class="cover-subtitle">{meta["name"]}</p>
         <div class="cover-meta">
-            {'<strong>수행 조직</strong>: ' + project.organization + '<br/>' if project.organization else ''}
-            {'<strong>사업 담당</strong>: ' + project.business_manager + '<br/>' if project.business_manager else ''}
-            {'<strong>수행 담당</strong>: ' + project.project_manager + '<br/>' if project.project_manager else ''}
+            {_meta_row("수행 조직", project.organization)}
+            {_meta_row("사업 담당", project.business_manager)}
+            {_meta_row("수행 담당", project.project_manager)}
             <strong>출력일</strong>: {now}
         </div>
     </div>
@@ -410,13 +416,13 @@ def generate_full_report_pdf(project, modules, analyses):
     cover_html = f'''
     <div class="cover">
         <div class="cover-badge">사업모델캔버스 — 전체 분석 리포트</div>
-        <h1 class="cover-title">{project.name}</h1>
+        <h1 class="cover-title">{project.name or ""}</h1>
         <p class="cover-subtitle">전략 분석 통합 보고서</p>
         <div class="cover-meta">
-            {'<strong>수행 조직</strong>: ' + project.organization + '<br/>' if project.organization else ''}
-            {'<strong>사업 담당</strong>: ' + project.business_manager + '<br/>' if project.business_manager else ''}
-            {'<strong>수행 담당</strong>: ' + project.project_manager + '<br/>' if project.project_manager else ''}
-            {'<strong>프로젝트 설명</strong>: ' + project.description + '<br/>' if project.description else ''}
+            {_meta_row("수행 조직", project.organization)}
+            {_meta_row("사업 담당", project.business_manager)}
+            {_meta_row("수행 담당", project.project_manager)}
+            {_meta_row("프로젝트 설명", project.description)}
             <strong>출력일</strong>: {now}
         </div>
     </div>
