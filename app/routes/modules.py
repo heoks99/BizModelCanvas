@@ -3,6 +3,7 @@ from flask_login import login_required, current_user
 from app import db
 from app.models.project import Project, Analysis
 from app.services.ai_service import analyze_with_claude
+from datetime import datetime
 import json
 
 modules_bp = Blueprint('modules', __name__, url_prefix='/projects/<int:project_id>/modules')
@@ -157,7 +158,8 @@ def export_module_docx(project_id, module_type):
     buf = generate_module_pdf(project, module_type, ai_result, input_data=input_data)
     module_name = MODULE_META.get(module_type, {}).get('name', module_type)
     step = MODULE_STEP.get(module_type, '00')
-    filename = f"{project.name}_Step{step}_{module_name}.pdf"
+    ts = datetime.now().strftime('%m%d%H')
+    filename = f"{project.name}_Step{step}_{module_name}_{ts}.pdf"
     return send_file(buf, mimetype='application/pdf',
                      as_attachment=True, download_name=filename)
 
@@ -190,6 +192,7 @@ def export_sub_pdf(project_id, module_type, sub_type):
     from app.services.pdf_service import generate_module_pdf
     buf = generate_module_pdf(project, module_type, ai_result, input_data=input_data)
     sub_label = SUB_LABELS.get(sub_type, sub_type)
-    filename = f"{project.name}_Step02_{sub_label}.pdf"
+    ts = datetime.now().strftime('%m%d%H')
+    filename = f"{project.name}_Step02_{sub_label}_{ts}.pdf"
     return send_file(buf, mimetype='application/pdf',
                      as_attachment=True, download_name=filename)
