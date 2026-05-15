@@ -51,6 +51,55 @@ MODULE_META = {
     'validation':     {'name': '검증·정제', 'icon': '🔬'},
 }
 
+# 각 모듈 입력 필드 라벨 (PDF 입력 데이터 섹션 출력용)
+MODULE_FIELD_LABELS = {
+    'biz_definition': [
+        ('biz_domain',        '사업 도메인'),
+        ('product_scope',     '핵심 제품·서비스 범위'),
+        ('revenue_customer',  '매출 구조 및 주요 고객군'),
+        ('capabilities',      '기업 규모 및 보유 역량'),
+        ('customer_problem',  '해결하려는 고객 문제'),
+    ],
+    'env_analysis': [
+        ('market_size',      '시장 규모 및 성장성'),
+        ('competition',      '경쟁 환경'),
+        ('customer_trend',   '고객 트렌드'),
+        ('tech_regulation',  '기술·규제 환경'),
+        ('opportunities',    '기회 요인'),
+        ('threats',          '위협 요인'),
+    ],
+    'value_design': [
+        ('core_product',      '핵심 제품/서비스'),
+        ('differentiation',   '차별화 포인트'),
+        ('customer_journey',  '고객 경험 여정'),
+        ('key_resources',     '핵심 자원'),
+        ('key_activities',    '핵심 활동'),
+        ('key_partnerships',  '핵심 파트너십'),
+    ],
+    'revenue_model': [
+        ('revenue_type',          '수익 모델 유형'),
+        ('pricing',               '가격 전략'),
+        ('channels',              '고객 획득 채널'),
+        ('cost_structure',        '비용 구조'),
+        ('unit_economics',        '단위 경제성'),
+        ('profitability_target',  '수익성 목표'),
+    ],
+    'execution': [
+        ('roadmap',               '실행 로드맵'),
+        ('kpi',                   '핵심 성과지표 (KPI)'),
+        ('organization_structure','조직 및 역할'),
+        ('resources_budget',      '필요 자원 및 예산'),
+        ('risk_management',       '리스크 및 대응 방안'),
+    ],
+    'validation': [
+        ('hypotheses',         '검증 가설 (핵심 가정)'),
+        ('validation_method',  '검증 방법 (MVP/실험)'),
+        ('feedback_data',      '수집된 데이터/피드백'),
+        ('learnings',          '학습 및 인사이트'),
+        ('pivot_improvements', '피벗 또는 개선 사항'),
+    ],
+}
+
 
 # BCG CSS 클래스 → xhtml2pdf 호환 인라인 스타일 매핑
 _BCG_CLASS_STYLES = {
@@ -203,6 +252,14 @@ PDF_CSS = (
     ".ai-result-content strong { color: #1a1a2e; }\n"
     ".ai-result-content p { margin: 0 0 8px; }\n"
     ".no-result { color: #aaa; font-style: italic; font-size: 9pt; }\n"
+    ".input-section { margin-bottom: 20px; }\n"
+    ".input-section-title { font-size: 11pt; font-weight: bold; color: #1a1a2e; background: #f0f3ff; border-left: 4px solid #4f6ef7; padding: 6px 12px; margin-bottom: 10px; }\n"
+    ".input-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 9pt; }\n"
+    ".input-table th { background: #4f6ef7; color: white; padding: 6px 10px; text-align: left; width: 28%; font-size: 9pt; vertical-align: top; }\n"
+    ".input-table td { border: 1px solid #dde3ff; padding: 6px 10px; vertical-align: top; color: #333; line-height: 1.6; white-space: pre-wrap; }\n"
+    ".input-empty { color: #bbb; font-style: italic; }\n"
+    ".ai-section-title { font-size: 11pt; font-weight: bold; color: #4f6ef7; border-bottom: 2px solid #4f6ef7; padding-bottom: 4px; margin: 18px 0 10px; }\n"
+    ".status-saved { color: #f5a623; font-weight: bold; }\n"
     ".toc { margin: 20px 0 30px; }\n"
     ".toc-item { padding: 5px 0; border-bottom: 1px dotted #ddd; font-size: 10pt; }\n"
     ".toc-num { color: #4f6ef7; font-weight: bold; margin-right: 8px; }\n"
@@ -253,7 +310,36 @@ def _extract_html(module_type: str, ai_result: str) -> str:
     return _unescape_attr_quotes(ai_result)
 
 
-def build_module_html(module_type, ai_result):
+def build_input_data_html(module_type, input_data: dict) -> str:
+    """입력 데이터를 라벨-값 테이블 HTML로 변환."""
+    fields = MODULE_FIELD_LABELS.get(module_type, [])
+    if not fields or not input_data:
+        return ''
+
+    rows = ''
+    has_any = False
+    for key, label in fields:
+        val = (input_data.get(key) or '').strip()
+        if val:
+            has_any = True
+            # 줄바꿈을 <br/>로 변환
+            val_html = val.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('\n', '<br/>')
+            rows += f'<tr><th>{label}</th><td>{val_html}</td></tr>'
+        else:
+            rows += f'<tr><th>{label}</th><td class="input-empty">미입력</td></tr>'
+
+    if not has_any:
+        return ''
+
+    return (
+        '<div class="input-section">'
+        '<div class="input-section-title">입력 데이터</div>'
+        f'<table class="input-table">{rows}</table>'
+        '</div>'
+    )
+
+
+def build_module_html(module_type, ai_result, input_data=None):
     meta = MODULE_META.get(module_type, {'name': module_type, 'icon': ''})
 
     html = f'<div class="module-section">'
@@ -261,17 +347,25 @@ def build_module_html(module_type, ai_result):
         <h2>{meta["name"]}</h2>
     </div>'''
 
+    # 입력 데이터 섹션
+    if input_data:
+        input_html = build_input_data_html(module_type, input_data)
+        if input_html:
+            html += input_html
+
+    # AI 분석 결과 섹션
     clean_html = _extract_html(module_type, ai_result)
     if clean_html:
+        html += '<div class="ai-section-title">AI 분석 결과</div>'
         html += f'<div class="ai-result-content">{sanitize_bcg_html_for_pdf(clean_html)}</div>'
-    else:
+    elif not input_data:
         html += '<div class="no-result">AI 분석 결과가 없습니다. 모듈에서 AI 분석을 실행해주세요.</div>'
 
     html += '</div>'
     return html
 
 
-def generate_module_pdf(project, module_type, ai_result):
+def generate_module_pdf(project, module_type, ai_result, input_data=None):
     meta = MODULE_META.get(module_type, {'name': module_type, 'icon': ''})
     now = datetime.now().strftime('%Y년 %m월 %d일')
 
@@ -289,7 +383,7 @@ def generate_module_pdf(project, module_type, ai_result):
     </div>
     '''
 
-    body = build_module_html(module_type, ai_result)
+    body = build_module_html(module_type, ai_result, input_data=input_data)
 
     html = f'''<!DOCTYPE html>
 <html>
@@ -349,7 +443,8 @@ def generate_full_report_pdf(project, modules, analyses):
     for module in modules:
         analysis = analyses.get(module['key'])
         ai_result = analysis.ai_result if analysis else None
-        modules_html += build_module_html(module['key'], ai_result)
+        input_data = json.loads(analysis.input_data) if analysis and analysis.input_data else None
+        modules_html += build_module_html(module['key'], ai_result, input_data=input_data)
 
     html = f'''<!DOCTYPE html>
 <html>

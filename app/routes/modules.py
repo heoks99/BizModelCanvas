@@ -143,6 +143,7 @@ def export_module_docx(project_id, module_type):
     project = get_project_or_404(project_id)
     analysis = Analysis.query.filter_by(project_id=project_id, module_type=module_type).first()
     ai_result = analysis.ai_result if analysis else None
+    input_data = json.loads(analysis.input_data) if analysis and analysis.input_data else None
 
     from app.services.pdf_service import generate_module_pdf, MODULE_META
     MODULE_STEP = {
@@ -153,7 +154,7 @@ def export_module_docx(project_id, module_type):
         'execution':      '05',
         'validation':     '06',
     }
-    buf = generate_module_pdf(project, module_type, ai_result)
+    buf = generate_module_pdf(project, module_type, ai_result, input_data=input_data)
     module_name = MODULE_META.get(module_type, {}).get('name', module_type)
     step = MODULE_STEP.get(module_type, '00')
     filename = f"{project.name}_Step{step}_{module_name}.pdf"
@@ -184,8 +185,10 @@ def export_sub_pdf(project_id, module_type, sub_type):
         except Exception:
             ai_result = analysis.ai_result
 
+    input_data = json.loads(analysis.input_data) if analysis and analysis.input_data else None
+
     from app.services.pdf_service import generate_module_pdf
-    buf = generate_module_pdf(project, module_type, ai_result)
+    buf = generate_module_pdf(project, module_type, ai_result, input_data=input_data)
     sub_label = SUB_LABELS.get(sub_type, sub_type)
     filename = f"{project.name}_Step02_{sub_label}.pdf"
     return send_file(buf, mimetype='application/pdf',
