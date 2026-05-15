@@ -121,22 +121,23 @@ def forgot_password():
     error_msg = None
 
     if request.method == 'POST':
-        email = request.form.get('email', '').strip()
-        user = User.query.filter_by(email=email).first()
+        try:
+            email = request.form.get('email', '').strip()
+            user = User.query.filter_by(email=email).first()
 
-        if user:
-            token = user.generate_reset_token()
-            db.session.commit()
-            reset_url = url_for('auth.reset_password', token=token, _external=True)
-            try:
+            if user:
+                token = user.generate_reset_token()
+                db.session.commit()
+                reset_url = url_for('auth.reset_password', token=token, _external=True)
                 send_reset_email(user.email, user.username, reset_url)
-                send_result = 'success'
-            except Exception as e:
-                send_result = 'error'
-                error_msg = str(e)
-        else:
+
             # 보안상 존재 여부 무관하게 성공처럼 표시
             send_result = 'success'
+
+        except Exception as e:
+            import traceback
+            send_result = 'error'
+            error_msg = traceback.format_exc()
 
     return render_template('auth/forgot_password.html',
                            send_result=send_result, error_msg=error_msg)
