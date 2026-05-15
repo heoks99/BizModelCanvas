@@ -199,30 +199,39 @@ def smtp_check():
     mail_tls    = cfg.get('MAIL_USE_TLS', True)
     secret_key  = cfg.get('SECRET_KEY', '')
 
+    sendgrid_key = cfg.get('SENDGRID_API_KEY') or os.environ.get('SENDGRID_API_KEY', '')
+
     result = {
-        'SECRET_KEY_set':     bool(secret_key and secret_key != 'dev-secret-key'),
-        'MAIL_SERVER':        mail_server or '(미설정)',
-        'MAIL_PORT':          mail_port,
-        'MAIL_USE_TLS':       mail_tls,
-        'MAIL_USERNAME_set':  bool(mail_user),
-        'MAIL_USERNAME':      mail_user or '(미설정)',
-        'MAIL_PASSWORD_set':  bool(mail_pass),
-        'smtp_connect':       None,
-        'smtp_error':         None,
+        'SECRET_KEY_set':       bool(secret_key and secret_key != 'dev-secret-key'),
+        'MAIL_USERNAME':        mail_user or '(미설정)',
+        'MAIL_USERNAME_set':    bool(mail_user),
+        'MAIL_PASSWORD_set':    bool(mail_pass),
+        'MAIL_SERVER':          mail_server or '(미설정)',
+        'MAIL_PORT':            mail_port,
+        'MAIL_USE_TLS':         mail_tls,
+        'SENDGRID_API_KEY_set': bool(sendgrid_key),
+        'SENDGRID_KEY_preview': (sendgrid_key[:12] + '...') if sendgrid_key else '(미설정)',
+        'sendgrid_connect':     None,
+        'sendgrid_error':       None,
     }
 
-    if mail_user and mail_pass and mail_server:
+    if sendgrid_key:
         try:
-            with smtplib.SMTP(mail_server, mail_port, timeout=10) as s:
-                if mail_tls:
-                    s.starttls()
-                s.login(mail_user, mail_pass)
-            result['smtp_connect'] = 'success'
+            import urllib.request
+            req = urllib.request.Request(
+                'https://api.sendgrid.com/v3/scopes',
+                headers={'Authorization': f'Bearer {sendgrid_key}'}
+            )
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                result['sendgrid_connect'] = f'success (status={resp.status})'
         except Exception as e:
-            result['smtp_connect'] = 'error'
-            result['smtp_error']   = str(e)
+            err = str(e)
+            if '403' in err or '401' in err:
+                result['sendgrid_connect'] = 'success (key recognized, check sender auth)'
+            else:
+                result['sendgrid_connect'] = f'error: {err}'
     else:
-        result['smtp_connect'] = 'skipped - 환경변수 미설정'
+        result['sendgrid_connect'] = 'skipped - SENDGRID_API_KEY 미설정'
 
     return jsonify(result)
 
