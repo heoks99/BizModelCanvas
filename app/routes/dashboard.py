@@ -186,6 +186,47 @@ def delete_project(project_id):
     return redirect(url_for('dashboard.index'))
 
 
+@dashboard_bp.route('/api/smtp-check')
+def smtp_check():
+    """SMTP 환경변수 및 연결 진단 (로그인 불필요)"""
+    import os, smtplib
+    from flask import current_app
+    cfg = current_app.config
+    mail_user   = cfg.get('MAIL_USERNAME', '')
+    mail_pass   = cfg.get('MAIL_PASSWORD', '')
+    mail_server = cfg.get('MAIL_SERVER', '')
+    mail_port   = cfg.get('MAIL_PORT', 587)
+    mail_tls    = cfg.get('MAIL_USE_TLS', True)
+    secret_key  = cfg.get('SECRET_KEY', '')
+
+    result = {
+        'SECRET_KEY_set':     bool(secret_key and secret_key != 'dev-secret-key'),
+        'MAIL_SERVER':        mail_server or '(미설정)',
+        'MAIL_PORT':          mail_port,
+        'MAIL_USE_TLS':       mail_tls,
+        'MAIL_USERNAME_set':  bool(mail_user),
+        'MAIL_USERNAME':      mail_user or '(미설정)',
+        'MAIL_PASSWORD_set':  bool(mail_pass),
+        'smtp_connect':       None,
+        'smtp_error':         None,
+    }
+
+    if mail_user and mail_pass and mail_server:
+        try:
+            with smtplib.SMTP(mail_server, mail_port, timeout=10) as s:
+                if mail_tls:
+                    s.starttls()
+                s.login(mail_user, mail_pass)
+            result['smtp_connect'] = 'success'
+        except Exception as e:
+            result['smtp_connect'] = 'error'
+            result['smtp_error']   = str(e)
+    else:
+        result['smtp_connect'] = 'skipped - 환경변수 미설정'
+
+    return jsonify(result)
+
+
 @dashboard_bp.route('/api/health')
 @login_required
 def api_health():
