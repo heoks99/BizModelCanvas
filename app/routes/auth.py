@@ -16,13 +16,14 @@ def login():
         password = request.form.get('password', '')
         user = User.query.filter_by(username=username).first()
 
+        remember = request.form.get('remember_me') == 'on'
         if user and user.check_password(password):
             if user.status == 'pending':
                 flash('가입 승인 대기 중입니다. 관리자 승인 후 로그인할 수 있습니다.', 'error')
             elif user.status == 'inactive':
                 flash('비활성화된 계정입니다. 관리자에게 문의해주세요.', 'error')
             else:
-                login_user(user)
+                login_user(user, remember=remember)
                 next_page = request.args.get('next')
                 return redirect(next_page or url_for('dashboard.index'))
         else:

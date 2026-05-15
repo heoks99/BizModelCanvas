@@ -11,6 +11,7 @@ class Config:
         _db_url = _db_url.replace('postgresql://', 'postgresql+psycopg2://', 1)
     SQLALCHEMY_DATABASE_URI = _db_url
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    REMEMBER_COOKIE_DURATION = 60 * 60 * 24 * 30  # 30일
     ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY', '')
     # SMTP 메일 설정
     MAIL_SERVER   = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
