@@ -1,3 +1,15 @@
+// ===== 한글 입력 차단 (.no-korean) =====
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.no-korean').forEach(el => {
+        el.addEventListener('input', () => {
+            el.value = el.value.replace(/[ㄱ-ㅎㅏ-ㅣ가-힣]/g, '');
+        });
+        el.addEventListener('compositionend', () => {
+            el.value = el.value.replace(/[ㄱ-ㅎㅏ-ㅣ가-힣]/g, '');
+        });
+    });
+});
+
 // ===== 글자 수 카운터 =====
 const CHAR_MAX = 2000;
 
