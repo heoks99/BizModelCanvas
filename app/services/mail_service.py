@@ -1,20 +1,15 @@
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import os
 from flask import current_app
 
 
 def send_reset_email(to_email, username, reset_url):
-    cfg = current_app.config
-    mail_user = cfg.get('MAIL_USERNAME', '')
-    mail_pass = cfg.get('MAIL_PASSWORD', '')
-    mail_sender = cfg.get('MAIL_DEFAULT_SENDER') or mail_user
-    mail_server = cfg.get('MAIL_SERVER', 'smtp.gmail.com')
-    mail_port = cfg.get('MAIL_PORT', 587)
-    mail_tls = cfg.get('MAIL_USE_TLS', True)
+    api_key = current_app.config.get('SENDGRID_API_KEY') or os.environ.get('SENDGRID_API_KEY', '')
+    sender  = current_app.config.get('MAIL_DEFAULT_SENDER') or current_app.config.get('MAIL_USERNAME', '')
 
-    if not mail_user or not mail_pass:
-        raise RuntimeError('SMTP 설정이 되어 있지 않습니다. .env 파일에 MAIL_USERNAME과 MAIL_PASSWORD를 설정해주세요.')
+    if not api_key:
+        raise RuntimeError('SENDGRID_API_KEY 환경변수가 설정되어 있지 않습니다. Railway Variables를 확인해주세요.')
+    if not sender:
+        raise RuntimeError('MAIL_DEFAULT_SENDER 환경변수가 설정되어 있지 않습니다.')
 
     html = f"""
     <div style="font-family:sans-serif; max-width:480px; margin:0 auto; padding:32px; background:#f8f9ff; border-radius:12px;">
@@ -32,18 +27,21 @@ def send_reset_email(to_email, username, reset_url):
             링크: <a href="{reset_url}" style="color:#4f6ef7;">{reset_url}</a>
         </p>
         <hr style="border:none; border-top:1px solid #e0e4f0; margin:24px 0;">
-        <p style="color:#8b92b8; font-size:11px;">사업모델캔버스</p>
+        <p style="color:#8b92b8; font-size:11px;">사업전략관리포탈</p>
     </div>
     """
 
-    msg = MIMEMultipart('alternative')
-    msg['Subject'] = '[사업모델캔버스] 비밀번호 재설정 안내'
-    msg['From'] = mail_sender
-    msg['To'] = to_email
-    msg.attach(MIMEText(html, 'html', 'utf-8'))
+    from sendgrid import SendGridAPIClient
+    from sendgrid.helpers.mail import Mail
 
-    with smtplib.SMTP(mail_server, mail_port) as server:
-        if mail_tls:
-            server.starttls()
-        server.login(mail_user, mail_pass)
-        server.sendmail(mail_sender, to_email, msg.as_string())
+    message = Mail(
+        from_email=sender,
+        to_emails=to_email,
+        subject='[사업전략관리포탈] 비밀번호 재설정 안내',
+        html_content=html,
+    )
+    sg = SendGridAPIClient(api_key)
+    response = sg.send(message)
+
+    if response.status_code not in (200, 202):
+        raise RuntimeError(f'SendGrid 발송 실패: status={response.status_code} body={response.body}')
