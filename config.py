@@ -5,10 +5,11 @@ load_dotenv(override=True)
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key')
-    SQLALCHEMY_DATABASE_URI = os.environ.get(
-        'DATABASE_URL',
-        'sqlite:///strategy_portal.db'
-    )
+    _db_url = os.environ.get('DATABASE_URL', 'sqlite:///strategy_portal.db')
+    # SQLAlchemy는 postgresql+psycopg2:// 형식 요구 (Railway는 postgresql:// 제공)
+    if _db_url.startswith('postgresql://'):
+        _db_url = _db_url.replace('postgresql://', 'postgresql+psycopg2://', 1)
+    SQLALCHEMY_DATABASE_URI = _db_url
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY', '')
     # SMTP 메일 설정
