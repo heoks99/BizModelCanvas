@@ -117,26 +117,29 @@ def forgot_password():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard.index'))
 
+    send_result = None  # None | 'success' | 'error'
+    error_msg = None
+
     if request.method == 'POST':
         email = request.form.get('email', '').strip()
         user = User.query.filter_by(email=email).first()
 
-        # 보안상 존재 여부 무관하게 동일 메시지
         if user:
             token = user.generate_reset_token()
             db.session.commit()
             reset_url = url_for('auth.reset_password', token=token, _external=True)
             try:
                 send_reset_email(user.email, user.username, reset_url)
-                flash('비밀번호 재설정 링크를 이메일로 발송했습니다. 받은 편지함을 확인해주세요.', 'success')
+                send_result = 'success'
             except Exception as e:
-                flash(f'이메일 발송 실패: {str(e)}', 'error')
+                send_result = 'error'
+                error_msg = str(e)
         else:
-            flash('비밀번호 재설정 링크를 이메일로 발송했습니다. 받은 편지함을 확인해주세요.', 'success')
+            # 보안상 존재 여부 무관하게 성공처럼 표시
+            send_result = 'success'
 
-        return redirect(url_for('auth.login'))
-
-    return render_template('auth/forgot_password.html')
+    return render_template('auth/forgot_password.html',
+                           send_result=send_result, error_msg=error_msg)
 
 
 @auth_bp.route('/reset-password/<token>', methods=['GET', 'POST'])
