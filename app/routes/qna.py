@@ -27,9 +27,9 @@ def _call_claude(system, user_msg, app):
 
 
 def _build_system():
-    from app.services.ai_service import BCG_SYSTEM
+    from app.services.ai_service import BMC_SYSTEM
     return (
-        BCG_SYSTEM +
+        BMC_SYSTEM +
         "\n사용자의 전략 질문에 대해 BCG 수석 컨설턴트로서 전문적으로 답변하세요. "
         "답변은 순수 HTML로만 작성하세요."
     )
