@@ -188,7 +188,7 @@ def delete_project(project_id):
 
 @dashboard_bp.route('/api/smtp-check')
 def smtp_check():
-    """SMTP 환경변수 및 연결 진단 (로그인 불필요)"""
+    """SMTP/DB/SendGrid 환경 진단 (로그인 불필요)"""
     import os, smtplib
     from flask import current_app
     cfg = current_app.config
@@ -199,9 +199,24 @@ def smtp_check():
     mail_tls    = cfg.get('MAIL_USE_TLS', True)
     secret_key  = cfg.get('SECRET_KEY', '')
 
+    # DB 연결 상태 확인
+    db_url = cfg.get('SQLALCHEMY_DATABASE_URI', '')
+    db_type = 'postgresql' if 'postgresql' in db_url else ('sqlite' if 'sqlite' in db_url else 'unknown')
+    db_info = {'type': db_type, 'connected': False, 'error': None,
+               'users': 0, 'projects': 0}
+    try:
+        from app.models.user import User
+        from app.models.project import Project
+        db_info['users']     = User.query.count()
+        db_info['projects']  = Project.query.count()
+        db_info['connected'] = True
+    except Exception as e:
+        db_info['error'] = str(e)
+
     sendgrid_key = cfg.get('SENDGRID_API_KEY') or os.environ.get('SENDGRID_API_KEY', '')
 
     result = {
+        'db':                   db_info,
         'SECRET_KEY_set':       bool(secret_key and secret_key != 'dev-secret-key'),
         'MAIL_USERNAME':        mail_user or '(미설정)',
         'MAIL_USERNAME_set':    bool(mail_user),
