@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>사용자 매뉴얼 — 사업전략관리포탈</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Malgun Gothic', '맑은 고딕', sans-serif; font-size: 14px; color: #1a1a2e; background: #f5f7ff; line-height: 1.7; }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  /* 표지 */
+  .cover { background: linear-gradient(135deg, #1a1a2e 0%, #2d3561 100%); color: #fff; border-radius: 16px; padding: 56px 48px; margin-bottom: 48px; }
+  .cover-badge { display: inline-block; background: #4f6ef7; color: #fff; font-size: 11px; font-weight: 700; padding: 4px 14px; border-radius: 20px; margin-bottom: 20px; letter-spacing: 1px; }
+  .cover h1 { font-size: 32px; font-weight: 800; margin-bottom: 10px; }
+  .cover p { font-size: 15px; color: #a0aec0; margin-bottom: 6px; }
+  .cover-meta { margin-top: 28px; font-size: 13px; color: #718096; display: flex; gap: 24px; flex-wrap: wrap; }
+  .cover-meta span { display: flex; align-items: center; gap: 6px; }
+
+  /* 목차 */
+  .toc { background: #fff; border-radius: 12px; padding: 32px 36px; margin-bottom: 40px; box-shadow: 0 2px 12px rgba(79,110,247,0.08); }
+  .toc h2 { font-size: 16px; color: #4f6ef7; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #e8edff; }
+  .toc ol { padding-left: 20px; }
+  .toc li { margin-bottom: 8px; }
+  .toc a { color: #4f6ef7; text-decoration: none; font-size: 13px; }
+  .toc a:hover { text-decoration: underline; }
+  .toc .sub { padding-left: 16px; margin-top: 4px; list-style: disc; }
+  .toc .sub li { margin-bottom: 4px; }
+
+  /* 섹션 */
+  .section { background: #fff; border-radius: 12px; padding: 36px; margin-bottom: 28px; box-shadow: 0 2px 12px rgba(79,110,247,0.06); }
+  .section-num { display: inline-block; background: #4f6ef7; color: #fff; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; margin-bottom: 12px; }
+  .section h2 { font-size: 20px; font-weight: 700; color: #1a1a2e; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #e8edff; }
+  .section h3 { font-size: 15px; font-weight: 700; color: #4f6ef7; margin: 24px 0 12px; }
+  .section h4 { font-size: 13px; font-weight: 700; color: #333; margin: 16px 0 8px; }
+  .section p { margin-bottom: 10px; color: #444; font-size: 13px; }
+
+  /* 단계 박스 */
+  .steps { counter-reset: step; }
+  .step { display: flex; gap: 16px; margin-bottom: 16px; align-items: flex-start; }
+  .step-num { min-width: 28px; height: 28px; background: #4f6ef7; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; margin-top: 2px; flex-shrink: 0; }
+  .step-body { flex: 1; }
+  .step-body strong { display: block; font-size: 13px; color: #1a1a2e; margin-bottom: 4px; }
+  .step-body span { font-size: 12px; color: #666; }
+
+  /* 테이블 */
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 13px; }
+  th { background: #4f6ef7; color: #fff; padding: 9px 12px; text-align: left; font-weight: 600; }
+  td { border: 1px solid #e8edff; padding: 8px 12px; vertical-align: top; color: #444; }
+  tr:nth-child(even) td { background: #f8f9ff; }
+
+  /* 알림 박스 */
+  .info  { background: #eef2ff; border-left: 4px solid #4f6ef7; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 13px; color: #3730a3; }
+  .warn  { background: #fff8ee; border-left: 4px solid #f5a623; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 13px; color: #92400e; }
+  .tip   { background: #f0fdf4; border-left: 4px solid #3ecf8e; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 13px; color: #065f46; }
+
+  /* 모듈 카드 */
+  .module-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin: 16px 0; }
+  .module-card { background: #f8f9ff; border: 1px solid #e0e7ff; border-radius: 10px; padding: 16px; }
+  .module-card .badge { display: inline-block; background: #4f6ef7; color: #fff; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; margin-bottom: 8px; }
+  .module-card h4 { font-size: 13px; font-weight: 700; color: #1a1a2e; margin-bottom: 6px; }
+  .module-card p { font-size: 12px; color: #666; margin: 0; }
+  .module-card ul { font-size: 12px; color: #666; padding-left: 16px; margin: 4px 0 0; }
+
+  /* 기능 리스트 */
+  .feat-list { list-style: none; padding: 0; }
+  .feat-list li { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid #f0f3ff; font-size: 13px; }
+  .feat-list li:last-child { border-bottom: none; }
+  .feat-list .icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+  @media print {
+    body { background: #fff; }
+    .wrap { padding: 20px; }
+    .section { box-shadow: none; border: 1px solid #ddd; page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 표지 -->
+  <div class="cover">
+    <div class="cover-badge">USER MANUAL v1.1</div>
+    <h1>사용자 매뉴얼</h1>
+    <p>사업전략관리포탈 — BizModelCanvas</p>
+    <p>사업모델 설계 및 전략 분석 플랫폼 사용 안내서</p>
+    <div class="cover-meta">
+      <span>📅 2026년 5월</span>
+      <span>📌 버전 v1.1.0</span>
+      <span>🌐 https://bizmodelcanvas-production.up.railway.app</span>
+    </div>
+  </div>
+
+  <!-- 목차 -->
+  <div class="toc">
+    <h2>목차</h2>
+    <ol>
+      <li><a href="#s1">시작하기 — 회원가입 및 로그인</a></li>
+      <li><a href="#s2">대시보드 — 프로젝트 관리</a></li>
+      <li><a href="#s3">6단계 사업모델 분석 모듈</a>
+        <ul class="sub">
+          <li><a href="#s3-1">① 사업 정의</a></li>
+          <li><a href="#s3-2">② 환경 분석</a></li>
+          <li><a href="#s3-3">③ 가치 설계</a></li>
+          <li><a href="#s3-4">④ 수익 구조</a></li>
+          <li><a href="#s3-5">⑤ 실행 체계</a></li>
+          <li><a href="#s3-6">⑥ 검증·정제</a></li>
+        </ul>
+      </li>
+      <li><a href="#s4">AI 분석 기능 활용</a></li>
+      <li><a href="#s5">파일 저장 및 다운로드</a></li>
+      <li><a href="#s6">질의응답(Q&amp;A)</a></li>
+      <li><a href="#s7">검색</a></li>
+      <li><a href="#s8">계정 관리</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. 시작하기 -->
+  <div class="section" id="s1">
+    <div class="section-num">01</div>
+    <h2>시작하기 — 회원가입 및 로그인</h2>
+
+    <h3>회원가입</h3>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><strong>회원가입 페이지 접속</strong><span>로그인 화면 하단의 '회원가입' 링크를 클릭합니다.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><strong>필수 정보 입력</strong><span>아이디, 이름, 이메일, 조직명, 직책, 비밀번호를 모두 입력합니다.</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><strong>승인 대기</strong><span>가입 완료 후 관리자 승인을 기다립니다. 첫 번째 가입자는 자동으로 관리자 권한이 부여됩니다.</span></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><strong>로그인</strong><span>승인 완료 후 아이디와 비밀번호로 로그인합니다.</span></div></div>
+    </div>
+
+    <div class="warn">아이디와 비밀번호에는 한글을 사용할 수 없습니다. 영문, 숫자, 특수문자만 입력 가능합니다.</div>
+
+    <h3>로그인</h3>
+    <table>
+      <tr><th>항목</th><th>설명</th></tr>
+      <tr><td>아이디</td><td>가입 시 등록한 아이디 (영문/숫자)</td></tr>
+      <tr><td>비밀번호</td><td>가입 시 설정한 비밀번호 (최소 4자)</td></tr>
+      <tr><td>로그인 상태 유지</td><td>체크 시 브라우저를 닫아도 30일간 로그인 유지</td></tr>
+    </table>
+
+    <h3>비밀번호 찾기</h3>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><strong>비밀번호를 잊으셨나요? 클릭</strong><span>로그인 화면 하단 링크를 클릭합니다.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><strong>가입 이메일 입력</strong><span>가입 시 등록한 이메일 주소를 입력하고 '재설정 링크 발송'을 클릭합니다.</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><strong>이메일 확인</strong><span>받은 편지함에서 재설정 링크를 클릭합니다. 링크는 1시간 동안 유효합니다.</span></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><strong>새 비밀번호 설정</strong><span>새 비밀번호를 입력하고 저장합니다.</span></div></div>
+    </div>
+  </div>
+
+  <!-- 2. 대시보드 -->
+  <div class="section" id="s2">
+    <div class="section-num">02</div>
+    <h2>대시보드 — 프로젝트 관리</h2>
+
+    <h3>대시보드 구성</h3>
+    <p>로그인하면 대시보드가 표시됩니다. 내 프로젝트 목록과 다른 사용자가 공개한 프로젝트를 조회할 수 있습니다.</p>
+
+    <h3>프로젝트 생성</h3>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><strong>새 프로젝트 클릭</strong><span>좌측 사이드바 하단의 '＋ 새 프로젝트'를 클릭합니다.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><strong>프로젝트 정보 입력</strong><span>프로젝트명(필수), 설명, 조직명, 사업 담당자, 수행 담당자, 공개 여부를 입력합니다.</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><strong>생성 완료</strong><span>프로젝트 상세 페이지로 이동하며 6단계 분석을 시작할 수 있습니다.</span></div></div>
+    </div>
+
+    <h3>프로젝트 공개/비공개 설정</h3>
+    <p>프로젝트 상세 화면에서 공개 여부를 토글할 수 있습니다. 공개로 설정하면 다른 사용자도 조회할 수 있습니다 (편집은 소유자만 가능).</p>
+
+    <div class="tip">좌측 사이드바에서 내 모든 프로젝트를 조직별로 확인하고 빠르게 이동할 수 있습니다.</div>
+  </div>
+
+  <!-- 3. 6단계 모듈 -->
+  <div class="section" id="s3">
+    <div class="section-num">03</div>
+    <h2>6단계 사업모델 분석 모듈</h2>
+
+    <p>각 프로젝트는 아래 6단계 모듈로 구성됩니다. 순서대로 작성하는 것을 권장하지만, 언제든지 원하는 단계부터 시작할 수 있습니다.</p>
+
+    <div class="module-grid">
+      <div class="module-card" id="s3-1">
+        <div class="badge">Step 01</div>
+        <h4>🎯 사업 정의</h4>
+        <p>사업의 기본 틀을 정의합니다.</p>
+        <ul>
+          <li>사업 도메인</li>
+          <li>핵심 제품·서비스 범위</li>
+          <li>매출 구조 및 주요 고객군</li>
+          <li>기업 규모 및 보유 역량</li>
+          <li>해결하려는 고객 문제</li>
+        </ul>
+      </div>
+      <div class="module-card" id="s3-2">
+        <div class="badge">Step 02</div>
+        <h4>🌐 환경 분석</h4>
+        <p>외부 환경을 5가지 프레임워크로 분석합니다.</p>
+        <ul>
+          <li>PESTEL 분석</li>
+          <li>5 Forces 분석</li>
+          <li>SWOT 분석</li>
+          <li>VRIO 분석</li>
+          <li>고객 세그먼트 맵</li>
+        </ul>
+      </div>
+      <div class="module-card" id="s3-3">
+        <div class="badge">Step 03</div>
+        <h4>💡 가치 설계</h4>
+        <p>제품과 서비스의 가치를 설계합니다.</p>
+        <ul>
+          <li>핵심 제품/서비스</li>
+          <li>차별화 포인트</li>
+          <li>고객 경험 여정</li>
+          <li>핵심 자원·활동·파트너십</li>
+        </ul>
+      </div>
+      <div class="module-card" id="s3-4">
+        <div class="badge">Step 04</div>
+        <h4>💰 수익 구조</h4>
+        <p>수익 모델과 비용 구조를 정의합니다.</p>
+        <ul>
+          <li>수익 모델 유형</li>
+          <li>가격 전략</li>
+          <li>고객 획득 채널</li>
+          <li>비용 구조 / 단위 경제성</li>
+        </ul>
+      </div>
+      <div class="module-card" id="s3-5">
+        <div class="badge">Step 05</div>
+        <h4>🚀 실행 체계</h4>
+        <p>실행 계획을 수립합니다.</p>
+        <ul>
+          <li>실행 로드맵</li>
+          <li>핵심 성과지표 (KPI)</li>
+          <li>조직 및 역할</li>
+          <li>필요 자원·예산 / 리스크</li>
+        </ul>
+      </div>
+      <div class="module-card" id="s3-6">
+        <div class="badge">Step 06</div>
+        <h4>🔬 검증·정제</h4>
+        <p>가설을 검증하고 모델을 개선합니다.</p>
+        <ul>
+          <li>검증 가설 (핵심 가정)</li>
+          <li>검증 방법 (MVP/실험)</li>
+          <li>수집된 데이터/피드백</li>
+          <li>학습·인사이트 / 피벗</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>데이터 입력 및 저장</h3>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><strong>모듈 탭 클릭</strong><span>프로젝트 상세 화면에서 원하는 단계 탭을 클릭합니다.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><strong>입력 필드 작성</strong><span>각 항목을 입력합니다. 최대 2,000자까지 입력 가능하며 우측 하단에 글자 수가 표시됩니다.</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><strong>💾 저장 클릭</strong><span>작성 완료 후 저장 버튼을 클릭합니다. 저장하지 않으면 데이터가 유실됩니다.</span></div></div>
+    </div>
+
+    <div class="warn">입력 데이터는 저장 후에만 AI 분석에 사용됩니다. 반드시 저장 후 AI 분석을 요청하세요.</div>
+  </div>
+
+  <!-- 4. AI 분석 -->
+  <div class="section" id="s4">
+    <div class="section-num">04</div>
+    <h2>AI 분석 기능 활용</h2>
+
+    <p>Claude AI(BCG 수석 컨설턴트 수준)를 활용한 다양한 분석 기능을 제공합니다.</p>
+
+    <h3>AI 분석 종류</h3>
+    <table>
+      <tr><th>기능</th><th>버튼</th><th>설명</th></tr>
+      <tr><td>AI 자동 데이터 입력</td><td>✦ AI 자동 데이터 입력</td><td>사업 개요를 입력하면 AI가 모든 필드를 자동으로 작성합니다.</td></tr>
+      <tr><td>AI 분석 실행</td><td>✦ AI 분석</td><td>입력된 데이터를 기반으로 전문 컨설팅 수준의 분석 보고서를 생성합니다.</td></tr>
+      <tr><td>필드별 AI 질문</td><td>각 필드 우측 ? 아이콘</td><td>특정 필드에 대해 AI에게 질문하고 답변을 입력란에 반영합니다.</td></tr>
+    </table>
+
+    <h3>AI 자동 데이터 입력 사용법</h3>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><strong>AI 자동 데이터 입력 버튼 클릭</strong><span>모듈 상단의 '✦ AI 자동 데이터 입력' 버튼을 클릭합니다.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><strong>사업 개요 입력</strong><span>팝업창에 사업의 핵심 내용을 간략히 입력합니다. (예: "B2B SaaS 기반 HR 관리 솔루션, 중소기업 대상")</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><strong>AI 입력 확인</strong><span>AI가 생성한 내용이 각 필드에 자동으로 채워집니다. 내용을 검토하고 필요 시 수정 후 저장합니다.</span></div></div>
+    </div>
+
+    <h3>AI 분석 실행 사용법</h3>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><strong>데이터 저장 확인</strong><span>입력 데이터가 저장되어 있어야 합니다.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><strong>✦ AI 분석 버튼 클릭</strong><span>분석 요청 버튼을 클릭합니다. 분석에는 30초~2분 정도 소요됩니다.</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><strong>결과 확인</strong><span>화면 하단에 분석 보고서가 표시됩니다. 표, 게이지, 매트릭스 등 시각화 요소가 포함됩니다.</span></div></div>
+    </div>
+
+    <h3>환경 분석(Step 02) 특이사항</h3>
+    <p>환경 분석은 PESTEL, 5 Forces, SWOT, VRIO, 고객세그먼트 5개 서브모듈로 구성됩니다. 각 서브모듈을 탭으로 이동하며 개별 분석을 실행할 수 있습니다.</p>
+    <div class="info">환경 분석은 서브모듈별로 독립적으로 저장·분석됩니다. 하나의 서브모듈을 저장해도 다른 서브모듈에는 영향이 없습니다.</div>
+  </div>
+
+  <!-- 5. 파일 저장 -->
+  <div class="section" id="s5">
+    <div class="section-num">05</div>
+    <h2>파일 저장 및 다운로드</h2>
+
+    <p>작성한 데이터와 AI 분석 결과를 PDF로 다운로드할 수 있습니다.</p>
+
+    <h3>파일 저장 종류</h3>
+    <table>
+      <tr><th>종류</th><th>버튼 위치</th><th>포함 내용</th><th>파일명 형식</th></tr>
+      <tr><td>단계별 파일 저장</td><td>각 모듈 하단 '📄 단계 파일 저장'</td><td>해당 단계 입력 데이터 + AI 분석 결과</td><td>{프로젝트명}_Step{번호}_{단계명}_{월일시}.pdf</td></tr>
+      <tr><td>서브모듈 파일 저장</td><td>환경분석 각 탭 '📄 파일 저장'</td><td>해당 서브모듈 입력 데이터 + AI 분석 결과</td><td>{프로젝트명}_Step02_{분석명}_{월일시}.pdf</td></tr>
+      <tr><td>전체 통합 보고서</td><td>프로젝트 상단 '📋 전체 파일 저장'</td><td>6단계 전체 입력 데이터 + AI 분석 결과</td><td>{프로젝트명}_비즈니스모델설계_통합보고서_{월일시}.pdf</td></tr>
+    </table>
+
+    <div class="tip">파일명 끝의 숫자(예: 051514)는 월일시(05월 15일 14시) 형식입니다. 여러 버전을 다운로드해도 파일명이 겹치지 않습니다.</div>
+    <div class="info">AI 분석을 실행하지 않은 단계는 '입력 데이터'만 PDF에 포함됩니다. AI 분석 결과가 있는 단계는 입력 데이터와 분석 결과가 모두 포함됩니다.</div>
+  </div>
+
+  <!-- 6. 질의응답 -->
+  <div class="section" id="s6">
+    <div class="section-num">06</div>
+    <h2>질의응답(Q&amp;A)</h2>
+
+    <p>사업 전략에 관한 질문을 등록하고 AI로부터 전문적인 답변을 받을 수 있습니다.</p>
+
+    <h3>새 질문 작성</h3>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><strong>질의응답 메뉴 클릭</strong><span>좌측 사이드바의 '💬 질의응답'을 클릭합니다.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><strong>새 질문 작성</strong><span>제목과 질문 내용을 입력합니다.</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><strong>관련 프로젝트 선택 (선택)</strong><span>질문과 관련된 프로젝트를 선택하면 AI가 프로젝트 정보를 참고하여 더 정확한 답변을 제공합니다.</span></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><strong>저장+AI답변 클릭</strong><span>AI 답변을 즉시 요청하거나 '저장만' 선택 후 나중에 요청할 수 있습니다.</span></div></div>
+    </div>
+
+    <h3>답글 및 추가 질문</h3>
+    <p>질문 상세 화면에서 답글을 추가할 수 있습니다. 답글에도 AI 답변을 요청할 수 있으며, AI는 이전 대화 맥락을 참고하여 답변합니다.</p>
+
+    <div class="tip">AI 답변은 백그라운드에서 생성됩니다. 답변 생성 중에는 로딩 표시가 나타나며, 완료되면 자동으로 화면에 표시됩니다.</div>
+  </div>
+
+  <!-- 7. 검색 -->
+  <div class="section" id="s7">
+    <div class="section-num">07</div>
+    <h2>검색</h2>
+
+    <p>좌측 사이드바 상단의 검색창에서 프로젝트명, 입력 데이터, AI 분석 결과를 통합 검색할 수 있습니다.</p>
+
+    <table>
+      <tr><th>검색 대상</th><th>설명</th></tr>
+      <tr><td>프로젝트명/설명</td><td>프로젝트 이름이나 설명에 검색어가 포함된 경우</td></tr>
+      <tr><td>모듈 입력 데이터</td><td>각 단계에 입력한 텍스트 내용</td></tr>
+      <tr><td>AI 분석 결과</td><td>AI가 생성한 분석 보고서 내용</td></tr>
+    </table>
+
+    <div class="info">검색 결과는 연관도 순으로 정렬되며, 검색어 주변 내용이 발췌문으로 표시됩니다.</div>
+  </div>
+
+  <!-- 8. 계정 관리 -->
+  <div class="section" id="s8">
+    <div class="section-num">08</div>
+    <h2>계정 관리</h2>
+
+    <h3>프로필 수정</h3>
+    <p>좌측 사이드바 하단의 이름을 클릭하면 프로필 페이지로 이동합니다.</p>
+    <table>
+      <tr><th>항목</th><th>수정 가능 여부</th></tr>
+      <tr><td>이름, 이메일, 조직명, 직책</td><td>✅ 수정 가능</td></tr>
+      <tr><td>비밀번호</td><td>✅ 현재 비밀번호 확인 후 변경 가능</td></tr>
+      <tr><td>아이디</td><td>❌ 변경 불가</td></tr>
+    </table>
+
+    <h3>로그아웃</h3>
+    <p>사이드바 하단의 '로그아웃' 버튼을 클릭합니다.</p>
+  </div>
+
+</div>
+</body>
+</html>

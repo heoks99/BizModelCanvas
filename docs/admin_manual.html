@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>운영자 매뉴얼 — 사업전략관리포탈</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Malgun Gothic', '맑은 고딕', sans-serif; font-size: 14px; color: #1a1a2e; background: #f5f7ff; line-height: 1.7; }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  .cover { background: linear-gradient(135deg, #1a1a2e 0%, #3d1a6e 100%); color: #fff; border-radius: 16px; padding: 56px 48px; margin-bottom: 48px; }
+  .cover-badge { display: inline-block; background: #7c3aed; color: #fff; font-size: 11px; font-weight: 700; padding: 4px 14px; border-radius: 20px; margin-bottom: 20px; letter-spacing: 1px; }
+  .cover h1 { font-size: 32px; font-weight: 800; margin-bottom: 10px; }
+  .cover p { font-size: 15px; color: #a0aec0; margin-bottom: 6px; }
+  .cover-meta { margin-top: 28px; font-size: 13px; color: #718096; display: flex; gap: 24px; flex-wrap: wrap; }
+
+  .toc { background: #fff; border-radius: 12px; padding: 32px 36px; margin-bottom: 40px; box-shadow: 0 2px 12px rgba(124,58,237,0.08); }
+  .toc h2 { font-size: 16px; color: #7c3aed; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #ede9fe; }
+  .toc ol { padding-left: 20px; }
+  .toc li { margin-bottom: 8px; }
+  .toc a { color: #7c3aed; text-decoration: none; font-size: 13px; }
+  .toc a:hover { text-decoration: underline; }
+  .toc .sub { padding-left: 16px; margin-top: 4px; list-style: disc; }
+  .toc .sub li { margin-bottom: 4px; }
+
+  .section { background: #fff; border-radius: 12px; padding: 36px; margin-bottom: 28px; box-shadow: 0 2px 12px rgba(124,58,237,0.06); }
+  .section-num { display: inline-block; background: #7c3aed; color: #fff; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; margin-bottom: 12px; }
+  .section h2 { font-size: 20px; font-weight: 700; color: #1a1a2e; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #ede9fe; }
+  .section h3 { font-size: 15px; font-weight: 700; color: #7c3aed; margin: 24px 0 12px; }
+  .section h4 { font-size: 13px; font-weight: 700; color: #333; margin: 16px 0 8px; }
+  .section p { margin-bottom: 10px; color: #444; font-size: 13px; }
+
+  .steps { }
+  .step { display: flex; gap: 16px; margin-bottom: 16px; align-items: flex-start; }
+  .step-num { min-width: 28px; height: 28px; background: #7c3aed; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; margin-top: 2px; flex-shrink: 0; }
+  .step-body { flex: 1; }
+  .step-body strong { display: block; font-size: 13px; color: #1a1a2e; margin-bottom: 4px; }
+  .step-body span { font-size: 12px; color: #666; }
+
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 13px; }
+  th { background: #7c3aed; color: #fff; padding: 9px 12px; text-align: left; font-weight: 600; }
+  td { border: 1px solid #ede9fe; padding: 8px 12px; vertical-align: top; color: #444; }
+  tr:nth-child(even) td { background: #faf8ff; }
+
+  .info  { background: #eef2ff; border-left: 4px solid #4f6ef7; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 13px; color: #3730a3; }
+  .warn  { background: #fff8ee; border-left: 4px solid #f5a623; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 13px; color: #92400e; }
+  .danger{ background: #fff1f2; border-left: 4px solid #ef4444; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 13px; color: #991b1b; }
+  .tip   { background: #f0fdf4; border-left: 4px solid #3ecf8e; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 13px; color: #065f46; }
+
+  .env-table td:first-child { font-family: monospace; font-size: 12px; color: #7c3aed; background: #faf8ff; }
+  .status-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+  .badge-pending  { background: #fef3c7; color: #92400e; }
+  .badge-active   { background: #d1fae5; color: #065f46; }
+  .badge-inactive { background: #fee2e2; color: #991b1b; }
+  .badge-admin    { background: #ede9fe; color: #5b21b6; }
+
+  code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 12px; color: #7c3aed; }
+
+  @media print {
+    body { background: #fff; }
+    .wrap { padding: 20px; }
+    .section { box-shadow: none; border: 1px solid #ddd; page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 표지 -->
+  <div class="cover">
+    <div class="cover-badge">ADMIN MANUAL v1.1</div>
+    <h1>운영자 매뉴얼</h1>
+    <p>사업전략관리포탈 — BizModelCanvas</p>
+    <p>시스템 운영, 회원 관리, 인프라 관리 안내서</p>
+    <div class="cover-meta">
+      <span>📅 2026년 5월</span>
+      <span>📌 버전 v1.1.0</span>
+      <span>🌐 https://bizmodelcanvas-production.up.railway.app</span>
+    </div>
+  </div>
+
+  <!-- 목차 -->
+  <div class="toc">
+    <h2>목차</h2>
+    <ol>
+      <li><a href="#s1">시스템 구성 및 인프라</a></li>
+      <li><a href="#s2">환경변수 관리</a></li>
+      <li><a href="#s3">회원 관리</a>
+        <ul class="sub">
+          <li><a href="#s3-1">회원 승인</a></li>
+          <li><a href="#s3-2">회원 상태·역할 관리</a></li>
+          <li><a href="#s3-3">회원 정보 수정 및 삭제</a></li>
+        </ul>
+      </li>
+      <li><a href="#s4">데이터베이스 관리</a></li>
+      <li><a href="#s5">배포 및 업데이트</a></li>
+      <li><a href="#s6">장애 대응 및 진단</a></li>
+      <li><a href="#s7">보안 관리</a></li>
+      <li><a href="#s8">운영 체크리스트</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. 시스템 구성 -->
+  <div class="section" id="s1">
+    <div class="section-num">01</div>
+    <h2>시스템 구성 및 인프라</h2>
+
+    <h3>기술 스택</h3>
+    <table>
+      <tr><th>구성 요소</th><th>기술</th><th>비고</th></tr>
+      <tr><td>웹 프레임워크</td><td>Flask 3.0.3</td><td>Python 3.12.9</td></tr>
+      <tr><td>웹 서버</td><td>Gunicorn + Gevent</td><td>workers=1, timeout=300s</td></tr>
+      <tr><td>데이터베이스</td><td>PostgreSQL</td><td>Railway PostgreSQL 플러그인</td></tr>
+      <tr><td>AI 엔진</td><td>Anthropic Claude API</td><td>claude-opus-4-6 모델</td></tr>
+      <tr><td>이메일 발송</td><td>SendGrid API</td><td>비밀번호 재설정 메일</td></tr>
+      <tr><td>PDF 생성</td><td>xhtml2pdf + ReportLab</td><td>한글 폰트: 맑은고딕 번들</td></tr>
+      <tr><td>호스팅</td><td>Railway (Hobby Plan)</td><td>월 $5, 크레딧 포함</td></tr>
+      <tr><td>소스 관리</td><td>GitHub</td><td>heoks99/BizModelCanvas</td></tr>
+    </table>
+
+    <h3>Railway 인프라 구성</h3>
+    <table>
+      <tr><th>서비스</th><th>역할</th><th>비고</th></tr>
+      <tr><td>웹앱 서비스</td><td>Flask 애플리케이션 실행</td><td>GitHub main 브랜치 자동 배포</td></tr>
+      <tr><td>PostgreSQL 서비스</td><td>데이터 영구 저장</td><td>DATABASE_URL 자동 주입</td></tr>
+    </table>
+
+    <h3>접속 정보</h3>
+    <table>
+      <tr><th>항목</th><th>URL/경로</th></tr>
+      <tr><td>서비스 URL</td><td>https://bizmodelcanvas-production.up.railway.app</td></tr>
+      <tr><td>Railway 대시보드</td><td>https://railway.com/dashboard</td></tr>
+      <tr><td>GitHub 저장소</td><td>https://github.com/heoks99/BizModelCanvas</td></tr>
+      <tr><td>관리자 페이지</td><td>/admin/</td></tr>
+      <tr><td>SMTP 진단</td><td>/api/smtp-check</td></tr>
+      <tr><td>API 진단</td><td>/api/health (로그인 필요)</td></tr>
+    </table>
+  </div>
+
+  <!-- 2. 환경변수 -->
+  <div class="section" id="s2">
+    <div class="section-num">02</div>
+    <h2>환경변수 관리</h2>
+
+    <p>Railway 대시보드 → BizModelCanvas 프로젝트 → 웹앱 서비스 → <strong>Variables</strong> 탭에서 관리합니다.</p>
+
+    <h3>필수 환경변수</h3>
+    <table class="env-table">
+      <tr><th>변수명</th><th>설명</th><th>예시값</th></tr>
+      <tr><td>SECRET_KEY</td><td>Flask 세션 암호화 키 (랜덤 문자열)</td><td>abc123xyz... (32자 이상 권장)</td></tr>
+      <tr><td>ANTHROPIC_API_KEY</td><td>Claude AI API 키</td><td>sk-ant-api03-...</td></tr>
+      <tr><td>DATABASE_URL</td><td>PostgreSQL 연결 문자열 (Railway 자동 주입)</td><td>postgresql://user:pass@host/db</td></tr>
+      <tr><td>SENDGRID_API_KEY</td><td>SendGrid 이메일 발송 API 키</td><td>SG.xxxxxxxxxxxxxxx</td></tr>
+      <tr><td>MAIL_DEFAULT_SENDER</td><td>발신자 이메일 주소</td><td>heoksgg@gmail.com</td></tr>
+    </table>
+
+    <h3>선택 환경변수 (기본값 사용 가능)</h3>
+    <table class="env-table">
+      <tr><th>변수명</th><th>기본값</th><th>설명</th></tr>
+      <tr><td>MAIL_SERVER</td><td>smtp.gmail.com</td><td>SMTP 서버 (현재 미사용)</td></tr>
+      <tr><td>MAIL_PORT</td><td>587</td><td>SMTP 포트 (현재 미사용)</td></tr>
+      <tr><td>MAIL_USE_TLS</td><td>true</td><td>TLS 사용 여부 (현재 미사용)</td></tr>
+      <tr><td>MAIL_USERNAME</td><td></td><td>SMTP 계정 (현재 미사용)</td></tr>
+      <tr><td>MAIL_PASSWORD</td><td></td><td>SMTP 비밀번호 (현재 미사용)</td></tr>
+    </table>
+
+    <div class="danger">SECRET_KEY는 반드시 안전한 랜덤 문자열로 설정해야 합니다. 기본값(dev-secret-key) 사용 시 보안 취약점이 발생합니다.</div>
+
+    <h3>환경변수 변경 시 주의사항</h3>
+    <div class="warn">환경변수 저장 후 Railway가 자동으로 재배포합니다. 재배포 중에는 약 1~2분간 서비스가 중단될 수 있습니다.</div>
+  </div>
+
+  <!-- 3. 회원 관리 -->
+  <div class="section" id="s3">
+    <div class="section-num">03</div>
+    <h2>회원 관리</h2>
+
+    <p>관리자 메뉴(<code>/admin/</code>)에서 모든 회원을 관리합니다. 관리자 역할을 가진 계정만 접근 가능합니다.</p>
+
+    <h3>회원 상태 종류</h3>
+    <table>
+      <tr><th>상태</th><th>설명</th><th>로그인 가능 여부</th></tr>
+      <tr><td><span class="status-badge badge-pending">대기</span> pending</td><td>가입 후 승인 대기 중</td><td>❌ 불가</td></tr>
+      <tr><td><span class="status-badge badge-active">활성</span> active</td><td>정상 사용 가능</td><td>✅ 가능</td></tr>
+      <tr><td><span class="status-badge badge-inactive">비활성</span> inactive</td><td>계정 정지 상태</td><td>❌ 불가</td></tr>
+    </table>
+
+    <h3>회원 역할 종류</h3>
+    <table>
+      <tr><th>역할</th><th>설명</th><th>관리자 메뉴 접근</th></tr>
+      <tr><td><span class="status-badge badge-admin">관리자</span> admin</td><td>전체 관리 권한 보유</td><td>✅ 가능</td></tr>
+      <tr><td>일반회원 member</td><td>일반 사용자</td><td>❌ 불가</td></tr>
+    </table>
+
+    <h3 id="s3-1">신규 회원 승인</h3>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><strong>관리자 메뉴 접속</strong><span>사이드바의 '⚙️ 관리자' 메뉴를 클릭합니다.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><strong>승인 대기 목록 확인</strong><span>상단 통계에서 '대기' 숫자를 확인하고, 승인 대기 목록에서 회원 정보를 검토합니다.</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><strong>승인 또는 거절</strong><span>승인: 상태가 'active'로 변경되어 즉시 로그인 가능합니다. 거절: 상태가 'inactive'로 변경됩니다.</span></div></div>
+    </div>
+
+    <div class="tip">신규 가입 알림 기능은 현재 미구현 상태입니다. 정기적으로 관리자 페이지를 확인하여 대기 회원을 처리해주세요.</div>
+
+    <h3 id="s3-2">회원 상태·역할 변경</h3>
+    <p>전체 회원 목록에서 각 회원의 상태와 역할을 변경할 수 있습니다.</p>
+    <table>
+      <tr><th>작업</th><th>방법</th><th>제한사항</th></tr>
+      <tr><td>상태 변경</td><td>회원 목록 → 상태 버튼 클릭</td><td>자기 자신의 상태 변경 불가</td></tr>
+      <tr><td>역할 변경</td><td>회원 목록 → 역할 토글 버튼</td><td>자기 자신의 역할 변경 불가</td></tr>
+    </table>
+
+    <h3 id="s3-3">회원 정보 수정 및 삭제</h3>
+    <div class="warn">회원 삭제 시 해당 회원의 모든 프로젝트와 분석 데이터가 함께 삭제됩니다. 삭제 전 반드시 확인하세요.</div>
+    <table>
+      <tr><th>작업</th><th>방법</th><th>수정 가능 항목</th></tr>
+      <tr><td>정보 수정</td><td>회원 목록 → 수정 버튼</td><td>이름, 이메일, 조직, 직책, 비밀번호, 역할, 상태</td></tr>
+      <tr><td>회원 삭제</td><td>회원 상세 → 삭제 버튼</td><td>— (복구 불가)</td></tr>
+    </table>
+  </div>
+
+  <!-- 4. DB 관리 -->
+  <div class="section" id="s4">
+    <div class="section-num">04</div>
+    <h2>데이터베이스 관리</h2>
+
+    <h3>DB 접속 방법</h3>
+    <p>Railway 대시보드 → PostgreSQL 서비스 → <strong>Query</strong> 탭에서 직접 SQL 실행 가능합니다.</p>
+
+    <h3>주요 테이블 구조</h3>
+    <table>
+      <tr><th>테이블</th><th>설명</th><th>주요 컬럼</th></tr>
+      <tr><td>users</td><td>사용자 계정</td><td>id, username, email, role, status, reset_token</td></tr>
+      <tr><td>project</td><td>프로젝트 정보</td><td>id, name, organization, owner_id, is_public</td></tr>
+      <tr><td>analysis</td><td>모듈 분석 데이터</td><td>id, project_id, module_type, input_data(JSON), ai_result</td></tr>
+      <tr><td>qn_a</td><td>질의응답 게시글</td><td>id, owner_id, title, content, ai_answer, ai_pending</td></tr>
+      <tr><td>qn_a_comment</td><td>질의응답 댓글</td><td>id, qna_id, owner_id, content, ai_answer</td></tr>
+    </table>
+
+    <h3>컬럼 추가 시 주의사항</h3>
+    <p>이 프로젝트는 Flask-Migrate를 사용하지 않습니다. 모델에 컬럼을 추가한 경우 Railway PostgreSQL Query 탭에서 직접 실행해야 합니다.</p>
+    <div class="info">
+      예시: users 테이블에 phone 컬럼 추가<br>
+      <code>ALTER TABLE users ADD COLUMN phone VARCHAR(20);</code>
+    </div>
+
+    <h3>데이터 초기화 (주의)</h3>
+    <div class="danger">아래 SQL은 모든 사용자 데이터를 영구적으로 삭제합니다. 신중하게 실행하세요.</div>
+    <div class="info">
+      전체 데이터 초기화 순서 (외래키 순서 주의):<br>
+      <code>TRUNCATE TABLE qn_a_comment, qn_a, analysis, project, users RESTART IDENTITY CASCADE;</code>
+    </div>
+
+    <h3>백업</h3>
+    <p>Railway PostgreSQL 서비스 → <strong>Backups</strong> 탭에서 수동 백업을 생성할 수 있습니다. 중요한 작업 전에는 반드시 백업을 생성하세요.</p>
+  </div>
+
+  <!-- 5. 배포 및 업데이트 -->
+  <div class="section" id="s5">
+    <div class="section-num">05</div>
+    <h2>배포 및 업데이트</h2>
+
+    <h3>자동 배포 흐름</h3>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><strong>코드 수정</strong><span>로컬에서 코드를 수정합니다.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><strong>GitHub push</strong><span>git push origin main 실행 시 Railway가 자동으로 빌드·배포를 시작합니다.</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><strong>빌드 완료 대기</strong><span>Railway 대시보드에서 배포 상태를 확인합니다. 보통 1~3분 소요됩니다.</span></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><strong>서비스 확인</strong><span>배포 완료 후 포탈에 접속하여 정상 동작을 확인합니다.</span></div></div>
+    </div>
+
+    <h3>버전 태그 관리</h3>
+    <table>
+      <tr><th>버전</th><th>주요 변경사항</th><th>태그</th></tr>
+      <tr><td>v1.0.0</td><td>초기 릴리즈 — 6단계 모듈, AI 분석, PDF, Q&A</td><td>v1.0.0</td></tr>
+      <tr><td>v1.1.0</td><td>PostgreSQL 전환, 자동 로그인, SendGrid 이메일, PDF 입력데이터 포함</td><td>v1.1.0</td></tr>
+    </table>
+
+    <h3>롤백 방법</h3>
+    <p>Railway 대시보드 → Deployments 탭 → 이전 배포 항목 → <strong>Rollback</strong> 버튼을 클릭합니다.</p>
+    <div class="warn">롤백 시 코드는 이전 버전으로 돌아가지만 데이터베이스 스키마는 롤백되지 않습니다. DB 마이그레이션이 포함된 경우 별도 처리가 필요합니다.</div>
+
+    <h3>로컬 개발 환경 실행</h3>
+    <div class="info">
+      1. 저장소 클론: <code>git clone https://github.com/heoks99/BizModelCanvas.git</code><br>
+      2. 패키지 설치: <code>pip install -r requirements.txt</code><br>
+      3. .env 파일 설정 (.env.example 참고)<br>
+      4. 서버 실행: <code>python run.py</code> → http://localhost:5000
+    </div>
+  </div>
+
+  <!-- 6. 장애 대응 -->
+  <div class="section" id="s6">
+    <div class="section-num">06</div>
+    <h2>장애 대응 및 진단</h2>
+
+    <h3>진단 엔드포인트</h3>
+    <table>
+      <tr><th>URL</th><th>설명</th><th>로그인 필요</th></tr>
+      <tr><td>/api/smtp-check</td><td>SMTP/SendGrid 설정 및 연결 상태 확인</td><td>❌</td></tr>
+      <tr><td>/api/health</td><td>Claude API 연결 및 응답 확인</td><td>✅</td></tr>
+    </table>
+
+    <h3>주요 장애 유형 및 대응</h3>
+    <table>
+      <tr><th>증상</th><th>원인</th><th>조치</th></tr>
+      <tr><td>로그인 후 세션이 즉시 만료됨</td><td>SECRET_KEY 미설정 또는 재시작마다 변경</td><td>Railway Variables에 고정 SECRET_KEY 설정</td></tr>
+      <tr><td>AI 분석 실행 안 됨</td><td>ANTHROPIC_API_KEY 미설정 또는 만료</td><td>/api/health 확인, API 키 재발급 후 Variables 업데이트</td></tr>
+      <tr><td>이메일 발송 안 됨</td><td>SENDGRID_API_KEY 미설정, 발신자 미인증</td><td>/api/smtp-check 확인, SendGrid Sender Authentication 확인</td></tr>
+      <tr><td>PDF 생성 500 에러</td><td>프로젝트 필드 None 값, 폰트 파일 누락</td><td>에러 로그 확인, 폰트 파일(app/static/fonts/) 존재 여부 확인</td></tr>
+      <tr><td>데이터가 사라짐</td><td>SQLite 사용 중 컨테이너 재시작</td><td>PostgreSQL 연결 확인, DATABASE_URL 환경변수 확인</td></tr>
+      <tr><td>Internal Server Error</td><td>코드 오류 또는 DB 연결 실패</td><td>Railway Logs 탭에서 상세 에러 확인</td></tr>
+    </table>
+
+    <h3>Railway 로그 확인 방법</h3>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><strong>Railway 대시보드 접속</strong><span>railway.com/dashboard → BizModelCanvas 프로젝트</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><strong>웹앱 서비스 클릭</strong><span>서비스 목록에서 웹앱 서비스를 선택합니다.</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><strong>Observability → Logs 탭</strong><span>실시간 로그를 확인합니다. 빨간색 줄이 에러입니다.</span></div></div>
+    </div>
+
+    <h3>비용 모니터링</h3>
+    <p>Railway 대시보드 → <strong>Usage</strong> 탭에서 이번 달 사용량과 예상 비용을 확인합니다.</p>
+    <div class="tip">Hobby Plan은 월 $5 크레딧이 포함됩니다. 웹앱 + PostgreSQL 합산 비용이 $5를 초과하면 추가 비용이 청구됩니다. 현재 예상 월 비용은 약 $1~2 수준입니다.</div>
+  </div>
+
+  <!-- 7. 보안 관리 -->
+  <div class="section" id="s7">
+    <div class="section-num">07</div>
+    <h2>보안 관리</h2>
+
+    <h3>계정 보안</h3>
+    <table>
+      <tr><th>항목</th><th>현황</th><th>권장사항</th></tr>
+      <tr><td>관리자 계정</td><td>첫 번째 가입자 자동 부여</td><td>관리자 계정은 최소 인원만 유지</td></tr>
+      <tr><td>비밀번호 정책</td><td>최소 4자 이상</td><td>영문+숫자+특수문자 조합 권장 안내</td></tr>
+      <tr><td>비밀번호 재설정 토큰</td><td>1시간 유효</td><td>현재 설정 유지</td></tr>
+      <tr><td>자동 로그인 쿠키</td><td>30일 유효</td><td>공용 PC 사용 시 로그아웃 안내</td></tr>
+    </table>
+
+    <h3>API 키 관리</h3>
+    <div class="danger">
+      API 키는 절대 GitHub에 커밋하지 마세요.<br>
+      .env 파일은 .gitignore에 포함되어 있습니다. 확인 명령: <code>git check-ignore -v .env</code>
+    </div>
+
+    <table>
+      <tr><th>API 키</th><th>만료/갱신 주기</th><th>갱신 방법</th></tr>
+      <tr><td>ANTHROPIC_API_KEY</td><td>만료 없음 (수동 폐기 가능)</td><td>console.anthropic.com에서 재발급 후 Railway Variables 업데이트</td></tr>
+      <tr><td>SENDGRID_API_KEY</td><td>만료 없음 (수동 폐기 가능)</td><td>app.sendgrid.com → API Keys에서 재발급</td></tr>
+    </table>
+
+    <h3>접근 제어</h3>
+    <ul style="padding-left:20px; font-size:13px; color:#444;">
+      <li style="margin-bottom:8px;">모든 페이지는 로그인 필수 (<code>@login_required</code>)</li>
+      <li style="margin-bottom:8px;">관리자 페이지는 admin 역할 필수 (<code>@admin_required</code>)</li>
+      <li style="margin-bottom:8px;">프로젝트 편집은 소유자만 가능</li>
+      <li style="margin-bottom:8px;">진단 엔드포인트 <code>/api/smtp-check</code>는 로그인 없이 접근 가능 — 운영 안정화 후 <code>@login_required</code> 추가 권장</li>
+    </ul>
+  </div>
+
+  <!-- 8. 운영 체크리스트 -->
+  <div class="section" id="s8">
+    <div class="section-num">08</div>
+    <h2>운영 체크리스트</h2>
+
+    <h3>초기 운영 설정 체크리스트</h3>
+    <table>
+      <tr><th>항목</th><th>확인 방법</th><th>완료</th></tr>
+      <tr><td>SECRET_KEY 설정 (기본값 아님)</td><td>/api/smtp-check → SECRET_KEY_set: true</td><td>☐</td></tr>
+      <tr><td>ANTHROPIC_API_KEY 설정</td><td>/api/health → status: ok</td><td>☐</td></tr>
+      <tr><td>DATABASE_URL 설정 (PostgreSQL)</td><td>로그인 후 데이터 저장 테스트</td><td>☐</td></tr>
+      <tr><td>SENDGRID_API_KEY 설정</td><td>/api/smtp-check → sendgrid_connect: success</td><td>☐</td></tr>
+      <tr><td>SendGrid 발신자 인증 완료</td><td>비밀번호 찾기 이메일 발송 테스트</td><td>☐</td></tr>
+      <tr><td>관리자 계정 비밀번호 변경</td><td>프로필 → 비밀번호 변경</td><td>☐</td></tr>
+    </table>
+
+    <h3>정기 운영 체크리스트 (월 1회)</h3>
+    <table>
+      <tr><th>항목</th><th>확인 방법</th></tr>
+      <tr><td>Railway 사용량 및 비용 확인</td><td>railway.com/dashboard → Usage</td></tr>
+      <tr><td>승인 대기 회원 처리</td><td>/admin/ → 승인 대기 목록</td></tr>
+      <tr><td>비활성 회원 정리</td><td>/admin/ → 전체 회원 목록</td></tr>
+      <tr><td>DB 백업 생성</td><td>Railway PostgreSQL → Backups → Create Backup</td></tr>
+      <tr><td>API 키 유효성 확인</td><td>/api/health, /api/smtp-check</td></tr>
+    </table>
+
+    <h3>장애 발생 시 빠른 대응 순서</h3>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><strong>Railway 로그 확인</strong><span>Observability → Logs에서 에러 메시지 확인</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><strong>진단 엔드포인트 확인</strong><span>/api/smtp-check로 환경변수 및 외부 서비스 연결 상태 점검</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><strong>환경변수 확인</strong><span>Variables 탭에서 필수 환경변수 누락 여부 확인</span></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><strong>재배포 시도</strong><span>Deployments → 최신 배포 → Redeploy</span></div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-body"><strong>롤백</strong><span>문제가 최근 배포로 인한 경우 이전 버전으로 롤백</span></div></div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
