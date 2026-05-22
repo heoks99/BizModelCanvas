@@ -37,15 +37,18 @@ def register():
         return redirect(url_for('dashboard.index'))
 
     if request.method == 'POST':
-        username = request.form.get('username', '').strip()
-        full_name = request.form.get('full_name', '').strip()
-        email = request.form.get('email', '').strip()
-        organization = request.form.get('organization', '').strip()
-        job_title = request.form.get('job_title', '').strip()
-        password = request.form.get('password', '')
+        username         = request.form.get('username', '').strip()
+        full_name        = request.form.get('full_name', '').strip()
+        email            = request.form.get('email', '').strip()
+        organization     = request.form.get('organization', '').strip()
+        job_title        = request.form.get('job_title', '').strip()
+        password         = request.form.get('password', '')
+        confirm_password = request.form.get('confirm_password', '')
 
-        if not all([username, full_name, email, organization, job_title, password]):
+        if not all([username, full_name, email, organization, job_title, password, confirm_password]):
             flash('모든 필수 항목을 입력해주세요.', 'error')
+        elif password != confirm_password:
+            flash('비밀번호가 일치하지 않습니다.', 'error')
         elif User.query.filter_by(username=username).first():
             flash('이미 사용 중인 아이디입니다.', 'error')
         elif User.query.filter_by(email=email).first():

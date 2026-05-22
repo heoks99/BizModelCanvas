@@ -7,7 +7,7 @@
         <h1>회원가입</h1>
         <p>사업모델캔버스에 오신 것을 환영합니다</p>
     </div>
-    <form method="POST" class="auth-form">
+    <form method="POST" class="auth-form" id="registerForm">
         <div class="form-group">
             <label>아이디 <span class="auth-required">*</span></label>
             <input type="text" name="username" placeholder="아이디를 입력하세요" required autofocus class="no-korean">
@@ -30,10 +30,91 @@
         </div>
         <div class="form-group">
             <label>비밀번호 <span class="auth-required">*</span></label>
-            <input type="password" name="password" placeholder="비밀번호를 입력하세요" required class="no-korean">
+            <div class="pw-wrapper">
+                <input type="password" name="password" id="password"
+                       placeholder="비밀번호를 입력하세요" required class="no-korean">
+                <button type="button" class="pw-toggle" data-target="password" aria-label="비밀번호 표시/숨기기"></button>
+            </div>
         </div>
-        <button type="submit" class="btn btn-primary btn-full">회원가입</button>
+        <div class="form-group">
+            <label>비밀번호 확인 <span class="auth-required">*</span></label>
+            <div class="pw-wrapper">
+                <input type="password" name="confirm_password" id="confirmPassword"
+                       placeholder="비밀번호를 다시 입력하세요" required class="no-korean">
+                <button type="button" class="pw-toggle" data-target="confirmPassword" aria-label="비밀번호 표시/숨기기"></button>
+            </div>
+            <div class="pw-match-msg" id="pwMatchMsg"></div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full" id="submitBtn">회원가입</button>
     </form>
     <p class="auth-link">이미 계정이 있으신가요? <a href="{{ url_for('auth.login') }}">로그인</a></p>
 </div>
+
+<script>
+(function () {
+    const pwInput      = document.getElementById('password');
+    const cfInput      = document.getElementById('confirmPassword');
+    const matchMsg     = document.getElementById('pwMatchMsg');
+    const submitBtn    = document.getElementById('submitBtn');
+
+    /* 눈 아이콘 SVG */
+    const iconOpen  = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+    </svg>`;
+    const iconClosed = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+    </svg>`;
+
+    /* 토글 버튼 초기화 */
+    document.querySelectorAll('.pw-toggle').forEach(function (btn) {
+        btn.innerHTML = iconOpen;
+        btn.addEventListener('click', function () {
+            const targetId = btn.dataset.target;
+            const input    = document.getElementById(targetId);
+            const isHidden = input.type === 'password';
+            input.type     = isHidden ? 'text' : 'password';
+            btn.innerHTML  = isHidden ? iconClosed : iconOpen;
+        });
+    });
+
+    /* 비밀번호 일치 검사 */
+    function checkMatch() {
+        const pw = pwInput.value;
+        const cf = cfInput.value;
+        if (!cf) {
+            matchMsg.textContent = '';
+            cfInput.classList.remove('input-ok', 'input-error');
+            submitBtn.disabled = false;
+            return;
+        }
+        if (pw === cf) {
+            matchMsg.textContent = '비밀번호가 일치합니다.';
+            matchMsg.className   = 'pw-match-msg pw-match-ok';
+            cfInput.classList.add('input-ok');
+            cfInput.classList.remove('input-error');
+            submitBtn.disabled = false;
+        } else {
+            matchMsg.textContent = '비밀번호가 일치하지 않습니다.';
+            matchMsg.className   = 'pw-match-msg pw-match-err';
+            cfInput.classList.add('input-error');
+            cfInput.classList.remove('input-ok');
+            submitBtn.disabled = true;
+        }
+    }
+
+    pwInput.addEventListener('input', checkMatch);
+    cfInput.addEventListener('input', checkMatch);
+
+    /* 폼 제출 최종 검증 */
+    document.getElementById('registerForm').addEventListener('submit', function (e) {
+        if (pwInput.value !== cfInput.value) {
+            e.preventDefault();
+            matchMsg.textContent = '비밀번호가 일치하지 않습니다.';
+            matchMsg.className   = 'pw-match-msg pw-match-err';
+            cfInput.focus();
+        }
+    });
+})();
+</script>
 {% endblock auth_content %}

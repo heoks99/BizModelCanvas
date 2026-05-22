@@ -1,15 +1,19 @@
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 import os
 from flask import current_app
 
 
 def send_reset_email(to_email, username, reset_url):
-    api_key = current_app.config.get('SENDGRID_API_KEY') or os.environ.get('SENDGRID_API_KEY', '')
-    sender  = current_app.config.get('MAIL_DEFAULT_SENDER') or current_app.config.get('MAIL_USERNAME', '')
+    mail_server   = current_app.config.get('MAIL_SERVER') or os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+    mail_port     = int(current_app.config.get('MAIL_PORT') or os.environ.get('MAIL_PORT', 587))
+    mail_username = current_app.config.get('MAIL_USERNAME') or os.environ.get('MAIL_USERNAME', '')
+    mail_password = current_app.config.get('MAIL_PASSWORD') or os.environ.get('MAIL_PASSWORD', '')
+    sender        = current_app.config.get('MAIL_DEFAULT_SENDER') or mail_username
 
-    if not api_key:
-        raise RuntimeError('SENDGRID_API_KEY 환경변수가 설정되어 있지 않습니다. Railway Variables를 확인해주세요.')
-    if not sender:
-        raise RuntimeError('MAIL_DEFAULT_SENDER 환경변수가 설정되어 있지 않습니다.')
+    if not mail_username or not mail_password:
+        raise RuntimeError('MAIL_USERNAME / MAIL_PASSWORD 환경변수가 설정되어 있지 않습니다.')
 
     html = f"""
     <div style="font-family:sans-serif; max-width:480px; margin:0 auto; padding:32px; background:#f8f9ff; border-radius:12px;">
@@ -31,17 +35,14 @@ def send_reset_email(to_email, username, reset_url):
     </div>
     """
 
-    from sendgrid import SendGridAPIClient
-    from sendgrid.helpers.mail import Mail
+    msg = MIMEMultipart('alternative')
+    msg['Subject'] = '[사업전략관리포탈] 비밀번호 재설정 안내'
+    msg['From'] = sender
+    msg['To'] = to_email
+    msg.attach(MIMEText(html, 'html', 'utf-8'))
 
-    message = Mail(
-        from_email=sender,
-        to_emails=to_email,
-        subject='[사업전략관리포탈] 비밀번호 재설정 안내',
-        html_content=html,
-    )
-    sg = SendGridAPIClient(api_key)
-    response = sg.send(message)
-
-    if response.status_code not in (200, 202):
-        raise RuntimeError(f'SendGrid 발송 실패: status={response.status_code} body={response.body}')
+    with smtplib.SMTP(mail_server, mail_port) as server:
+        server.ehlo()
+        server.starttls()
+        server.login(mail_username, mail_password)
+        server.sendmail(sender, to_email, msg.as_string())

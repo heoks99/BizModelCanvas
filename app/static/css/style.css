@@ -366,6 +366,37 @@ body {
 .auth-link a:hover { text-decoration: underline; }
 .auth-required { color: var(--danger); font-size: 11px; margin-left: 2px; }
 
+/* 비밀번호 입력 래퍼 (토글 버튼 포함) */
+.pw-wrapper { position: relative; }
+.pw-wrapper input { padding-right: 38px; }
+.pw-toggle {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    transition: color 0.15s;
+}
+.pw-toggle:hover { color: var(--text-secondary); }
+.pw-toggle svg { width: 16px; height: 16px; }
+
+/* 비밀번호 확인 일치 상태 */
+.pw-match-msg {
+    font-size: 11px;
+    margin-top: 5px;
+    min-height: 14px;
+}
+.pw-match-ok  { color: var(--success); }
+.pw-match-err { color: var(--danger); }
+input.input-error { border-color: var(--danger); }
+input.input-ok    { border-color: var(--success); }
+
 /* ===== 공통 폼 ===== */
 label {
     display: block;
