@@ -130,17 +130,24 @@ _BCG_CLASS_STYLES = {
 }
 
 # table/th/td 기본 스타일 (class 없는 태그용)
-_TABLE_TAG_CSS = (
-    "table { width:100%; border-collapse:collapse; font-size:9pt; margin-bottom:12px; }\n"
-    "th { background:#4f6ef7; color:white; padding:5px 8px; text-align:left; font-size:9pt; }\n"
-    "td { border:1px solid #dde3ff; padding:5px 8px; vertical-align:top; font-size:9pt; }\n"
-    "tr:nth-child(even) td { background:#f8f9ff; }\n"
-    "h3 { font-size:10pt; font-weight:bold; color:#4f6ef7; margin:10px 0 6px; }\n"
-    "h4 { font-size:9.5pt; font-weight:bold; color:#333; margin:8px 0 4px; }\n"
-    "ul { margin:4px 0 4px 14px; padding:0; }\n"
-    "li { margin-bottom:2px; }\n"
-    "p { margin:0 0 6px; }\n"
-)
+# font-family 명시: xhtml2pdf는 일부 요소에서 body 폰트를 상속하지 않아 한글 깨짐 발생
+def _table_tag_css():
+    f = KOREAN_FONT
+    return (
+        f"table {{ width:100%; border-collapse:collapse; font-size:9pt; font-family:{f}; margin-bottom:12px; }}\n"
+        f"th {{ background:#4f6ef7; color:white; padding:5px 8px; text-align:left; font-size:9pt; font-family:{f}; }}\n"
+        f"td {{ border:1px solid #dde3ff; padding:5px 8px; vertical-align:top; font-size:9pt; font-family:{f}; }}\n"
+        "tr:nth-child(even) td { background:#f8f9ff; }\n"
+        f"h3 {{ font-size:10pt; font-weight:bold; color:#4f6ef7; font-family:{f}; margin:10px 0 6px; }}\n"
+        f"h4 {{ font-size:9.5pt; font-weight:bold; color:#333; font-family:{f}; margin:8px 0 4px; }}\n"
+        f"ul {{ margin:4px 0 4px 14px; padding:0; }}\n"
+        f"li {{ margin-bottom:2px; font-family:{f}; }}\n"
+        f"p {{ margin:0 0 6px; font-family:{f}; }}\n"
+        f"span {{ font-family:{f}; }}\n"
+        f"strong {{ font-family:{f}; }}\n"
+        f"em {{ font-family:{f}; }}\n"
+    )
+_TABLE_TAG_CSS = _table_tag_css()
 
 
 def sanitize_bcg_html_for_pdf(html_text):
@@ -168,6 +175,18 @@ def sanitize_bcg_html_for_pdf(html_text):
     )
     # CSS 변수 var() 제거 (xhtml2pdf 미지원 → inherit으로 대체)
     html_text = re.sub(r'var\([^)]+\)', 'inherit', html_text)
+
+    # font-family 인라인 스타일 → 한글 폰트로 강제 교체
+    # (xhtml2pdf는 미등록 폰트를 Helvetica로 폴백 → 한글 깨짐)
+    def _force_korean_font(m):
+        return re.sub(
+            r'font-family\s*:\s*[^;}"\']+',
+            f'font-family:{KOREAN_FONT}',
+            m.group(0),
+            flags=re.IGNORECASE
+        )
+    html_text = re.sub(r'style\s*=\s*"[^"]*"', _force_korean_font, html_text, flags=re.IGNORECASE)
+    html_text = re.sub(r"style\s*=\s*'[^']*'", _force_korean_font, html_text, flags=re.IGNORECASE)
 
     # gauge용 inline-block → block 으로 교체 (xhtml2pdf는 inline-block 미지원)
     # gauge div 바깥에 씌워진 "display:inline-block; width:60%;" 패턴을 테이블로 대체하기 전에
@@ -267,20 +286,20 @@ PDF_CSS = (
     ".module-header { background: #f0f3ff; border-left: 4px solid #4f6ef7; padding: 10px 14px; margin-bottom: 16px; page-break-after: avoid; }\n"
     ".module-header h2 { font-size: 13pt; font-weight: bold; color: #1a1a2e; margin: 0 0 2px; }\n"
     ".module-header p { font-size: 9pt; color: #666; margin: 0; }\n"
-    ".ai-result-content { font-size: 10pt; color: #333; line-height: 1.7; }\n"
-    ".ai-result-content h2 { font-size: 11pt; color: #4f6ef7; margin: 12px 0 6px; }\n"
-    ".ai-result-content h3 { font-size: 10pt; color: #333; font-weight: bold; margin: 10px 0 4px; }\n"
-    ".ai-result-content h4 { font-size: 10pt; color: #555; font-weight: bold; margin: 8px 0 4px; }\n"
+    ".ai-result-content { font-size: 10pt; color: #333; line-height: 1.7; font-family: " + KOREAN_FONT + "; }\n"
+    ".ai-result-content h2 { font-size: 11pt; color: #4f6ef7; margin: 12px 0 6px; font-family: " + KOREAN_FONT + "; }\n"
+    ".ai-result-content h3 { font-size: 10pt; color: #333; font-weight: bold; margin: 10px 0 4px; font-family: " + KOREAN_FONT + "; }\n"
+    ".ai-result-content h4 { font-size: 10pt; color: #555; font-weight: bold; margin: 8px 0 4px; font-family: " + KOREAN_FONT + "; }\n"
     ".ai-result-content ul { margin: 6px 0 6px 16px; padding: 0; }\n"
-    ".ai-result-content li { margin-bottom: 3px; }\n"
-    ".ai-result-content strong { color: #1a1a2e; }\n"
-    ".ai-result-content p { margin: 0 0 8px; }\n"
-    ".no-result { color: #aaa; font-style: italic; font-size: 9pt; }\n"
+    ".ai-result-content li { margin-bottom: 3px; font-family: " + KOREAN_FONT + "; }\n"
+    ".ai-result-content strong { color: #1a1a2e; font-family: " + KOREAN_FONT + "; }\n"
+    ".ai-result-content p { margin: 0 0 8px; font-family: " + KOREAN_FONT + "; }\n"
+    ".no-result { color: #aaa; font-style: italic; font-size: 9pt; font-family: " + KOREAN_FONT + "; }\n"
     ".input-section { margin-bottom: 20px; }\n"
-    ".input-section-title { font-size: 11pt; font-weight: bold; color: #1a1a2e; background: #f0f3ff; border-left: 4px solid #4f6ef7; padding: 6px 12px; margin-bottom: 10px; }\n"
+    ".input-section-title { font-size: 11pt; font-weight: bold; color: #1a1a2e; background: #f0f3ff; border-left: 4px solid #4f6ef7; padding: 6px 12px; margin-bottom: 10px; font-family: " + KOREAN_FONT + "; }\n"
     ".input-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 9pt; }\n"
-    ".input-table th { background: #4f6ef7; color: white; padding: 6px 10px; text-align: left; width: 28%; font-size: 9pt; vertical-align: top; }\n"
-    ".input-table td { border: 1px solid #dde3ff; padding: 6px 10px; vertical-align: top; color: #333; line-height: 1.6; white-space: pre-wrap; }\n"
+    ".input-table th { background: #4f6ef7; color: white; padding: 6px 10px; text-align: left; width: 28%; font-size: 9pt; vertical-align: top; font-family: " + KOREAN_FONT + "; }\n"
+    ".input-table td { border: 1px solid #dde3ff; padding: 6px 10px; vertical-align: top; color: #333; line-height: 1.6; white-space: pre-wrap; font-family: " + KOREAN_FONT + "; }\n"
     ".input-empty { color: #bbb; font-style: italic; }\n"
     ".ai-section-title { font-size: 11pt; font-weight: bold; color: #4f6ef7; border-bottom: 2px solid #4f6ef7; padding-bottom: 4px; margin: 18px 0 10px; }\n"
     ".status-saved { color: #f5a623; font-weight: bold; }\n"
