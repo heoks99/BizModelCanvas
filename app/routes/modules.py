@@ -168,6 +168,9 @@ def export_module_docx(project_id, module_type):
 @login_required
 def export_sub_pdf(project_id, module_type, sub_type):
     """env_analysis 서브모듈 개별 PDF 저장"""
+    import logging, traceback
+    logger = logging.getLogger(__name__)
+
     project = get_project_or_404(project_id)
     analysis = Analysis.query.filter_by(project_id=project_id, module_type=module_type).first()
 
@@ -178,19 +181,56 @@ def export_sub_pdf(project_id, module_type, sub_type):
         'vrio':        'VRIO분석',
         'segment':     '고객세그먼트맵',
     }
+    SUB_FIELD_KEYS = {
+        'pestel':      'pestel_data',
+        'five_forces': 'five_forces_data',
+        'swot':        'swot_data',
+        'vrio':        'vrio_data',
+        'segment':     'segment_data',
+    }
 
+    # 해당 서브타입의 AI 결과만 추출
     ai_result = None
     if analysis and analysis.ai_result:
         try:
             d = json.loads(analysis.ai_result)
-            ai_result = d.get(sub_type, '')
+            ai_result = d.get(sub_type, '') if isinstance(d, dict) else analysis.ai_result
         except Exception:
             ai_result = analysis.ai_result
 
-    input_data = json.loads(analysis.input_data) if analysis and analysis.input_data else None
+    # 해당 서브타입의 입력 데이터만 추출
+    input_data = None
+    if analysis and analysis.input_data:
+        try:
+            all_input = json.loads(analysis.input_data)
+            fname = SUB_FIELD_KEYS.get(sub_type)
+            if fname and all_input.get(fname):
+                input_data = {fname: all_input[fname]}
+        except Exception:
+            pass
+
+    # 서브타입 전용 module_type 키 사용 (PDF 제목·필드 라벨 분리)
+    pdf_module_type = f'env_sub_{sub_type}'
 
     from app.services.pdf_service import generate_module_pdf
-    buf = generate_module_pdf(project, module_type, ai_result, input_data=input_data)
+    try:
+        buf = generate_module_pdf(project, pdf_module_type, ai_result, input_data=input_data)
+    except Exception as exc:
+        logger.error('Sub PDF error [project=%s sub=%s]: %s\n%s',
+                     project_id, sub_type, exc, traceback.format_exc())
+        from flask import flash, redirect, url_for
+        flash(f'PDF 생성 중 오류가 발생했습니다: {type(exc).__name__}: {exc}', 'error')
+        return redirect(url_for('dashboard.project_detail',
+                                project_id=project_id, tab_key=module_type))
+
+    content = buf.read()
+    if not content:
+        from flask import flash, redirect, url_for
+        flash('PDF 생성에 실패했습니다. AI 분석을 먼저 실행해주세요.', 'error')
+        return redirect(url_for('dashboard.project_detail',
+                                project_id=project_id, tab_key=module_type))
+
+    buf.seek(0)
     sub_label = SUB_LABELS.get(sub_type, sub_type)
     ts = datetime.now().strftime('%m%d%H')
     filename = f"{project.name}_Step02_{sub_label}_{ts}.pdf"

@@ -46,12 +46,18 @@ except Exception as _e:
 
 # 모듈 메타 정보
 MODULE_META = {
-    'biz_definition': {'name': '사업 정의', 'icon': '🎯'},
-    'env_analysis':   {'name': '환경 분석', 'icon': '🌐'},
-    'value_design':   {'name': '가치 설계', 'icon': '💡'},
-    'revenue_model':  {'name': '수익 구조', 'icon': '💰'},
-    'execution':      {'name': '실행 체계', 'icon': '🚀'},
-    'validation':     {'name': '검증·정제', 'icon': '🔬'},
+    'biz_definition':      {'name': '사업 정의',         'icon': ''},
+    'env_analysis':        {'name': '환경 분석',         'icon': ''},
+    'value_design':        {'name': '가치 설계',         'icon': ''},
+    'revenue_model':       {'name': '수익 구조',         'icon': ''},
+    'execution':           {'name': '실행 체계',         'icon': ''},
+    'validation':          {'name': '검증·정제',         'icon': ''},
+    # 서브모듈 개별 PDF용
+    'env_sub_pestel':      {'name': 'PESTEL 분석',       'icon': ''},
+    'env_sub_five_forces': {'name': '5 Forces 분석',     'icon': ''},
+    'env_sub_swot':        {'name': 'SWOT 분석',         'icon': ''},
+    'env_sub_vrio':        {'name': 'VRIO 분석',         'icon': ''},
+    'env_sub_segment':     {'name': '고객 세그먼트 맵',  'icon': ''},
 }
 
 # 각 모듈 입력 필드 라벨 (PDF 입력 데이터 섹션 출력용)
@@ -64,13 +70,18 @@ MODULE_FIELD_LABELS = {
         ('customer_problem',  '해결하려는 고객 문제'),
     ],
     'env_analysis': [
-        ('market_size',      '시장 규모 및 성장성'),
-        ('competition',      '경쟁 환경'),
-        ('customer_trend',   '고객 트렌드'),
-        ('tech_regulation',  '기술·규제 환경'),
-        ('opportunities',    '기회 요인'),
-        ('threats',          '위협 요인'),
+        ('pestel_data',      'PESTEL 분석 데이터'),
+        ('five_forces_data', '5 Forces 분석 데이터'),
+        ('swot_data',        'SWOT 분석 데이터'),
+        ('vrio_data',        'VRIO 분석 데이터'),
+        ('segment_data',     '고객 세그먼트 맵 데이터'),
     ],
+    # 서브모듈 개별 PDF용
+    'env_sub_pestel':      [('pestel_data',      'PESTEL 입력 데이터')],
+    'env_sub_five_forces': [('five_forces_data', '5 Forces 입력 데이터')],
+    'env_sub_swot':        [('swot_data',        'SWOT 입력 데이터')],
+    'env_sub_vrio':        [('vrio_data',        'VRIO 입력 데이터')],
+    'env_sub_segment':     [('segment_data',     '고객 세그먼트 맵 입력 데이터')],
     'value_design': [
         ('core_product',      '핵심 제품/서비스'),
         ('differentiation',   '차별화 포인트'),
