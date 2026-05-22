@@ -883,6 +883,12 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); }
 }
 .env-top-tab.active .env-tab-done { background: rgba(255,255,255,0.3); }
 
+.env-all-analyze-btn {
+    margin-left: auto;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
 .env-top-actions {
     display: flex;
     align-items: center;
