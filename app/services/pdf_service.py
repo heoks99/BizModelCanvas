@@ -271,6 +271,50 @@ def _convert_gauge_to_simple(html_text):
     return re.sub(pattern, gauge_replacer, html_text, flags=re.IGNORECASE | re.DOTALL)
 
 
+def _finalize_html_for_pisa(html: str) -> str:
+    """pisa.CreatePDF 직전 전체 HTML에 적용 — reportlab이 처리 못하는 색상 일괄 변환."""
+    import colorsys
+
+    def _hsl_to_hex(h_str, s_str, l_str):
+        try:
+            h = float(h_str)
+            s = float(s_str.replace('%', '')) / 100
+            l = float(l_str.replace('%', '')) / 100
+            r, g, b = colorsys.hls_to_rgb(h / 360, l, s)
+            return '#{:02x}{:02x}{:02x}'.format(int(r * 255), int(g * 255), int(b * 255))
+        except Exception:
+            return '#333333'
+
+    # rgba(r,g,b,a) → rgb(r,g,b)
+    html = re.sub(
+        r'rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*[\d.]+\s*\)',
+        lambda m: f'rgb({m.group(1)},{m.group(2)},{m.group(3)})',
+        html, flags=re.IGNORECASE
+    )
+    # CSS4 공백 구문: rgb(r g b / a) or rgba(r g b / a)
+    html = re.sub(
+        r'rgba?\(\s*(\d+)\s+(\d+)\s+(\d+)\s*/\s*[\d.]+%?\s*\)',
+        lambda m: f'rgb({m.group(1)},{m.group(2)},{m.group(3)})',
+        html, flags=re.IGNORECASE
+    )
+    # hsla(h,s,l,a) → hex
+    html = re.sub(
+        r'hsla\(\s*([\d.]+)\s*,\s*([\d.]+%?)\s*,\s*([\d.]+%?)\s*,\s*[\d.]+\s*\)',
+        lambda m: _hsl_to_hex(m.group(1), m.group(2), m.group(3)),
+        html, flags=re.IGNORECASE
+    )
+    # hsl(h,s,l) → hex  (xhtml2pdf 미지원)
+    html = re.sub(
+        r'hsl\(\s*([\d.]+)\s*,\s*([\d.]+%?)\s*,\s*([\d.]+%?)\s*\)',
+        lambda m: _hsl_to_hex(m.group(1), m.group(2), m.group(3)),
+        html, flags=re.IGNORECASE
+    )
+    # CSS variables var(--...) → inherit
+    html = re.sub(r'var\([^)]+\)', 'inherit', html)
+
+    return html
+
+
 PDF_CSS = (
     "@page { size: A4 landscape; margin: 16mm 18mm 18mm 18mm; }\n"
     "body { font-family: " + KOREAN_FONT + "; font-size: 10pt; color: #1a1a2e; line-height: 1.6; }\n"
@@ -446,6 +490,7 @@ def generate_module_pdf(project, module_type, ai_result, input_data=None):
 </body>
 </html>'''
 
+    html = _finalize_html_for_pisa(html)
     buf = io.BytesIO()
     status = pisa.CreatePDF(io.BytesIO(html.encode('utf-8')), dest=buf)
     if status.err:
@@ -510,6 +555,7 @@ def generate_full_report_pdf(project, modules, analyses):
 </body>
 </html>'''
 
+    html = _finalize_html_for_pisa(html)
     buf = io.BytesIO()
     status = pisa.CreatePDF(io.BytesIO(html.encode('utf-8')), dest=buf)
     if status.err:
