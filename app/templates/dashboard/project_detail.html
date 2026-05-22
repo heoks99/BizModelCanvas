@@ -406,13 +406,6 @@
             {% if ai_result and ai_result.get(key) %}<span class="env-tab-done">✓</span>{% endif %}
         </button>
         {% endfor %}
-        {% if is_owner %}
-        <button type="button" class="btn btn-ai btn-sm env-all-analyze-btn"
-                id="env-all-analyze-btn"
-                onclick="runAllSubAnalysisWithModal()">
-            🤖 전체 AI 분석
-        </button>
-        {% endif %}
     </div>
 
     {# 각 프레임워크 패널: 상단(입력) + 하단(결과) 세로 분할 #}
@@ -599,78 +592,6 @@ function openEnvAskAllModal(key, fname, label) {
     document.querySelector('#ask-all-modal .ask-submit-btn').disabled = false;
     document.getElementById('ask-all-modal').classList.add('active');
     setTimeout(() => document.getElementById('ask-all-question-input').focus(), 100);
-}
-
-// env_analysis 전체 순차 분석 — 모달에서 스타일 선택 후 실행
-let _allAnalyzeExtraPrompt = '';
-function runAllSubAnalysisWithModal() {
-    window._currentEnvSubType = '';
-    _allAnalyzeExtraPrompt = '';
-    // analyze-modal을 전체 분석용으로 재활용
-    const input = document.getElementById('analyze-extra-input');
-    if (input) input.value = '';
-    document.querySelectorAll('.analyze-preset-btn').forEach(b => b.classList.remove('active'));
-    const defaultBtn = document.querySelector('.analyze-preset-btn[data-text=""]');
-    if (defaultBtn) defaultBtn.classList.add('active');
-    // 모달 타이틀 변경
-    const titleEl = document.querySelector('#analyze-modal .ask-modal-title > div > div:first-child');
-    if (titleEl) titleEl.textContent = '전체 환경분석 AI 분석 실행';
-    document.getElementById('analyze-run-btn').disabled = false;
-    document.getElementById('analyze-btn-text').textContent = '🤖 전체 분석 시작';
-    // 버튼 클릭 시 전체 분석 실행하도록 교체
-    const runBtn = document.getElementById('analyze-run-btn');
-    runBtn.onclick = function() { submitAllSubAnalysis(); };
-    document.getElementById('analyze-modal').classList.add('active');
-    setTimeout(() => { if (input) input.focus(); }, 100);
-}
-
-async function submitAllSubAnalysis() {
-    const extraPrompt = (document.getElementById('analyze-extra-input')?.value || '').trim();
-    closeAnalyzeModalDirect();
-
-    // 버튼 원래대로 복구
-    document.getElementById('analyze-run-btn').onclick = function() { submitAnalysis(); };
-
-    const allBtn = document.getElementById('env-all-analyze-btn');
-    if (allBtn) { allBtn.disabled = true; allBtn.textContent = '분석 중...'; }
-
-    for (const sub of ENV_SUB_TYPES) {
-        await new Promise((resolve) => {
-            const resultDiv = document.getElementById('ai-result-' + sub);
-            if (!resultDiv) { resolve(); return; }
-            const tabBtn = document.querySelector(`.env-top-tab[data-key="${sub}"]`);
-            if (tabBtn) switchEnvFull(tabBtn);
-            resultDiv.innerHTML = `
-                <div class="ai-loading">
-                    <div class="ai-loading-orb"></div>
-                    <div class="ai-loading-text">
-                        <span>Claude AI 분석 중</span>
-                        <span class="ai-loading-dots"><span>.</span><span>.</span><span>.</span></span>
-                    </div>
-                </div>`;
-            fetch(`/projects/${projectId}/modules/${moduleType}/analyze`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sub_type: sub, extra_prompt: extraPrompt }),
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.error) {
-                    resultDiv.innerHTML = `<div class="flash flash-error">${data.error}</div>`;
-                } else {
-                    resultDiv.innerHTML = renderAIResult(data.result, moduleType);
-                    const tb = document.querySelector(`.env-top-tab[data-key="${sub}"]`);
-                    if (tb && !tb.querySelector('.env-tab-done')) {
-                        tb.insertAdjacentHTML('beforeend', '<span class="env-tab-done">✓</span>');
-                    }
-                }
-                resolve();
-            })
-            .catch(() => { resolve(); });
-        });
-    }
-
-    if (allBtn) { allBtn.disabled = false; allBtn.textContent = '🤖 전체 AI 분석'; }
 }
 
 // env_analysis 항목별 분석 — 모달 먼저 열기
