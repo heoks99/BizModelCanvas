@@ -160,6 +160,9 @@ def toggle_public(project_id):
 @dashboard_bp.route('/projects/<int:project_id>/pdf')
 @login_required
 def export_full_docx(project_id):
+    import logging, traceback
+    logger = logging.getLogger(__name__)
+
     from app.services.pdf_service import generate_full_report_pdf
 
     project = Project.query.filter_by(id=project_id).first_or_404()
@@ -169,7 +172,22 @@ def export_full_docx(project_id):
 
     analyses = {a.module_type: a for a in project.analyses}
     modules = [{'key': m['key'], 'name': m['name']} for m in MODULES]
-    buf = generate_full_report_pdf(project, modules, analyses)
+
+    try:
+        buf = generate_full_report_pdf(project, modules, analyses)
+    except Exception as exc:
+        logger.error('PDF generation error [project=%s]: %s\n%s',
+                     project_id, exc, traceback.format_exc())
+        flash(f'PDF 생성 중 오류가 발생했습니다: {type(exc).__name__}: {exc}', 'error')
+        return redirect(url_for('dashboard.project_detail', project_id=project_id))
+
+    content = buf.read()
+    if not content:
+        logger.error('PDF is empty (pisa failed silently) [project=%s]', project_id)
+        flash('PDF 생성에 실패했습니다. 분석 결과를 확인하거나 관리자에게 문의하세요.', 'error')
+        return redirect(url_for('dashboard.project_detail', project_id=project_id))
+
+    buf.seek(0)
     ts = datetime.now().strftime('%m%d%H')
     filename = f"{project.name}_비즈니스모델설계_통합보고서_{ts}.pdf"
     return send_file(buf, mimetype='application/pdf',

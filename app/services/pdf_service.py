@@ -1,9 +1,12 @@
 import io
 import json
+import logging
 import os
 import re
 from datetime import datetime
 from xhtml2pdf import pisa, default as xpdf_default
+
+logger = logging.getLogger(__name__)
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase.pdfmetrics import registerFontFamily
@@ -144,6 +147,12 @@ def sanitize_bcg_html_for_pdf(html_text):
     """BCG HTML의 class 속성을 xhtml2pdf 호환 인라인 style로 변환."""
     if not html_text:
         return ''
+
+    # xhtml2pdf가 처리할 수 없는 태그 제거
+    html_text = re.sub(r'<script[^>]*>.*?</script>', '', html_text, flags=re.DOTALL | re.IGNORECASE)
+    html_text = re.sub(r'<style[^>]*>.*?</style>',  '', html_text, flags=re.DOTALL | re.IGNORECASE)
+    # 이모지 제거 (reportlab 폰트 렌더링 실패 방지)
+    html_text = re.sub(r'[\U00010000-\U0010ffff]', '', html_text)
 
     # gauge용 inline-block → block 으로 교체 (xhtml2pdf는 inline-block 미지원)
     # gauge div 바깥에 씌워진 "display:inline-block; width:60%;" 패턴을 테이블로 대체하기 전에
@@ -404,7 +413,9 @@ def generate_module_pdf(project, module_type, ai_result, input_data=None):
 </html>'''
 
     buf = io.BytesIO()
-    pisa.CreatePDF(io.BytesIO(html.encode('utf-8')), dest=buf)
+    status = pisa.CreatePDF(io.BytesIO(html.encode('utf-8')), dest=buf)
+    if status.err:
+        logger.error('pisa error in generate_module_pdf: err=%s', status.err)
     buf.seek(0)
     return buf
 
@@ -466,6 +477,8 @@ def generate_full_report_pdf(project, modules, analyses):
 </html>'''
 
     buf = io.BytesIO()
-    pisa.CreatePDF(io.BytesIO(html.encode('utf-8')), dest=buf)
+    status = pisa.CreatePDF(io.BytesIO(html.encode('utf-8')), dest=buf)
+    if status.err:
+        logger.error('pisa error in generate_full_report_pdf: err=%s', status.err)
     buf.seek(0)
     return buf
