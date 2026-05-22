@@ -359,7 +359,11 @@ function setAnalyzePreset(btn) {
 
 function submitAnalysis() {
     const extraPrompt = (document.getElementById('analyze-extra-input')?.value || '').trim();
-    const resultDiv = document.getElementById('ai-result');
+    const subType     = window._currentEnvSubType || '';
+
+    // env_analysis 하위 탭은 전용 결과 div, 그 외 모듈은 공통 ai-result
+    const resultDivId = subType ? 'ai-result-' + subType : 'ai-result';
+    const resultDiv   = document.getElementById(resultDivId);
     if (!resultDiv) return;
 
     closeAnalyzeModalDirect();
@@ -379,7 +383,7 @@ function submitAnalysis() {
     fetch(`/projects/${projectId}/modules/${moduleType}/analyze`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ extra_prompt: extraPrompt }),
+        body: JSON.stringify({ extra_prompt: extraPrompt, sub_type: subType }),
     })
     .then(res => res.text().then(text => {
         try { return { ok: res.ok, status: res.status, data: JSON.parse(text) }; }
@@ -392,12 +396,21 @@ function submitAnalysis() {
             resultDiv.innerHTML = `<div class="flash flash-error"><strong>오류 (HTTP ${status}):</strong> ${data.error}</div>`;
         } else {
             resultDiv.innerHTML = renderAIResult(data.result, moduleType);
+            // env_analysis: 완료 뱃지 표시
+            if (subType) {
+                const tb = document.querySelector(`.env-top-tab[data-key="${subType}"]`);
+                if (tb && !tb.querySelector('.env-tab-done')) {
+                    tb.insertAdjacentHTML('beforeend', '<span class="env-tab-done">✓</span>');
+                }
+            }
         }
+        window._currentEnvSubType = '';
     })
     .catch(err => {
         document.getElementById('analyze-run-btn').disabled = false;
         document.getElementById('analyze-btn-text').textContent = '🤖 AI 분석 시작';
         resultDiv.innerHTML = `<div class="flash flash-error">네트워크 오류: ${err.message || err}</div>`;
+        window._currentEnvSubType = '';
     });
 }
 

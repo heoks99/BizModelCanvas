@@ -456,7 +456,7 @@
                 {% if is_owner %}
                 <div class="env-col-actions">
                     <button type="button" class="btn btn-ai btn-sm"
-                            onclick="runSubAnalysis('{{ key }}')">🤖 AI 분석</button>
+                            onclick="openSubAnalyzeModal('{{ key }}')">🤖 AI 분석</button>
                     <a href="{{ url_for('modules.export_sub_pdf', project_id=project.id, module_type=active_tab, sub_type=key) }}"
                        class="btn btn-ghost btn-sm">📄 파일 저장</a>
                 </div>
@@ -594,7 +594,15 @@ function openEnvAskAllModal(key, fname, label) {
     setTimeout(() => document.getElementById('ask-all-question-input').focus(), 100);
 }
 
-// env_analysis 항목별 단독 분석
+// env_analysis 항목별 분석 — 모달 먼저 열기
+function openSubAnalyzeModal(subType) {
+    const tabBtn = document.querySelector(`.env-top-tab[data-key="${subType}"]`);
+    if (tabBtn) switchEnvFull(tabBtn);
+    window._currentEnvSubType = subType;
+    runAnalysis(); // analyze-modal 오픈 (main.js)
+}
+
+// env_analysis 항목별 단독 분석 (직접 호출용 — 전체 순차 분석에서 사용)
 function runSubAnalysis(subType) {
     const resultDiv = document.getElementById('ai-result-' + subType);
     if (!resultDiv) return;
