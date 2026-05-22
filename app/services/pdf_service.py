@@ -154,6 +154,21 @@ def sanitize_bcg_html_for_pdf(html_text):
     # 이모지 제거 (reportlab 폰트 렌더링 실패 방지)
     html_text = re.sub(r'[\U00010000-\U0010ffff]', '', html_text)
 
+    # rgba() → rgb() : reportlab은 alpha 채널 미지원 → AssertionError 발생
+    html_text = re.sub(
+        r'rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*[\d.]+\s*\)',
+        lambda m: f'rgb({m.group(1)},{m.group(2)},{m.group(3)})',
+        html_text, flags=re.IGNORECASE
+    )
+    # hsla() → hsl() : alpha 제거
+    html_text = re.sub(
+        r'hsla\(\s*([^,]+)\s*,\s*([^,]+)\s*,\s*([^,]+)\s*,\s*[\d.]+\s*\)',
+        lambda m: f'hsl({m.group(1)},{m.group(2)},{m.group(3)})',
+        html_text, flags=re.IGNORECASE
+    )
+    # CSS 변수 var() 제거 (xhtml2pdf 미지원 → inherit으로 대체)
+    html_text = re.sub(r'var\([^)]+\)', 'inherit', html_text)
+
     # gauge용 inline-block → block 으로 교체 (xhtml2pdf는 inline-block 미지원)
     # gauge div 바깥에 씌워진 "display:inline-block; width:60%;" 패턴을 테이블로 대체하기 전에
     # 단순히 display:block 으로 정규화
