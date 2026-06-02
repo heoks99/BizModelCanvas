@@ -67,7 +67,12 @@ def analyze(project_id, module_type):
     try:
         result = analyze_with_claude(module_type, input_data, project.name, project.organization, extra_prompt, sub_type)
     except Exception as e:
-        return jsonify({'error': f'AI 분석 중 오류가 발생했습니다: {str(e)}'}), 500
+        err_str = str(e)
+        if '529' in err_str or 'overloaded' in err_str.lower():
+            msg = 'Claude AI 서버가 일시적으로 과부하 상태입니다. 잠시 후 다시 시도해주세요.'
+        else:
+            msg = f'AI 분석 중 오류가 발생했습니다: {err_str}'
+        return jsonify({'error': msg}), 500
 
     # AI 서비스가 에러 HTML을 반환한 경우 JSON error로 전환
     if result.startswith('<div class="bcg-insight-warn"><strong>AI 분석 오류'):

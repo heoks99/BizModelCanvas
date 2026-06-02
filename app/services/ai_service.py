@@ -1,4 +1,5 @@
 import re
+import time
 import anthropic
 
 BMC_SYSTEM = """당신은 비즈니스 모델 설계 전문 컨설턴트입니다.
@@ -299,6 +300,24 @@ ANALYZE_MAX_TOKENS = 15000
 ASK_ALL_MAX_TOKENS = 3000
 ASK_SINGLE_MAX_TOKENS = 2000
 
+_RETRY_DELAYS = [5, 15, 30]  # seconds between retries on 529 overloaded
+
+
+def _call_claude(client, **kwargs):
+    """Call client.messages.create with retry on HTTP 529 overloaded."""
+    last_exc = None
+    for attempt, delay in enumerate([0] + _RETRY_DELAYS):
+        if delay:
+            time.sleep(delay)
+        try:
+            return client.messages.create(**kwargs)
+        except anthropic.APIStatusError as e:
+            if e.status_code == 529:
+                last_exc = e
+                continue
+            raise
+    raise last_exc
+
 
 def ask_all_fields_with_claude(module_type: str, question: str, project_name: str,
                                 organization: str, single_field: str = '') -> dict:
@@ -337,7 +356,7 @@ def ask_all_fields_with_claude(module_type: str, question: str, project_name: st
         from flask import current_app
         api_key = current_app.config.get('ANTHROPIC_API_KEY', '')
         client = anthropic.Anthropic(api_key=api_key)
-        message = client.messages.create(
+        message = _call_claude(client,
             model='claude-opus-4-6',
             max_tokens=max_tokens,
             system=system,
@@ -401,7 +420,7 @@ def ask_field_with_claude(_module_type: str, field_label: str, question: str, pr
         from flask import current_app
         api_key = current_app.config.get('ANTHROPIC_API_KEY', '')
         client = anthropic.Anthropic(api_key=api_key)
-        message = client.messages.create(
+        message = _call_claude(client,
             model='claude-opus-4-6',
             max_tokens=ASK_MAX_TOKENS,
             system=system,
@@ -505,7 +524,7 @@ def analyze_with_claude(module_type: str, input_data: dict, project_name: str, i
             from flask import current_app
             api_key = current_app.config.get('ANTHROPIC_API_KEY', '')
             client = anthropic.Anthropic(api_key=api_key)
-            message = client.messages.create(
+            message = _call_claude(client,
                 model='claude-opus-4-6',
                 max_tokens=ANALYZE_MAX_TOKENS,
                 messages=[{'role': 'user', 'content': prompt}]
@@ -541,7 +560,7 @@ def analyze_with_claude(module_type: str, input_data: dict, project_name: str, i
         from flask import current_app
         api_key = current_app.config.get('ANTHROPIC_API_KEY', '')
         client = anthropic.Anthropic(api_key=api_key)
-        message = client.messages.create(
+        message = _call_claude(client,
             model='claude-opus-4-6',
             max_tokens=ANALYZE_MAX_TOKENS,
             messages=[{'role': 'user', 'content': prompt}]
@@ -558,7 +577,7 @@ def analyze_with_claude(module_type: str, input_data: dict, project_name: str, i
                 "출력 규칙: 순수 HTML만, 코드블록 금지, 모든 태그 정상 닫힘 필수.\n\n"
                 f"{result}"
             )
-            shorten_msg = client.messages.create(
+            shorten_msg = _call_claude(client,
                 model='claude-opus-4-6',
                 max_tokens=ANALYZE_MAX_TOKENS,
                 messages=[{'role': 'user', 'content': shorten_prompt}]
