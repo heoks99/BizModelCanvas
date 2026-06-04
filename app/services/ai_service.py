@@ -323,6 +323,7 @@ def ask_all_fields_with_claude(module_type: str, question: str, project_name: st
                                 organization: str, single_field: str = '') -> dict:
     """single_field가 지정되면 해당 필드 1개만 요청 (env 서브모듈 AI 자동 입력용)."""
     import json as _json
+    from datetime import date
 
     all_fields = MODULE_FIELDS.get(module_type, [])
     if not all_fields:
@@ -341,8 +342,10 @@ def ask_all_fields_with_claude(module_type: str, question: str, project_name: st
         f'- {fname}: {label} ({desc})' for fname, label, desc in fields
     )
     field_example = '{' + ', '.join(f'"{fname}": "내용"' for fname, _, _ in fields) + '}'
+    today_str = date.today().strftime('%Y년 %m월 %d일')
 
     system = (
+        f"오늘 날짜는 {today_str}입니다. 날짜 관련 내용은 이 날짜를 기준으로 작성하세요. "
         f"당신은 비즈니스 모델 설계 전문가입니다. "
         f"프로젝트명: {project_name}, 수행 조직: {organization or '미입력'}. "
         "사용자의 질문/상황 설명을 바탕으로 각 입력 필드에 바로 붙여넣을 수 있는 "
@@ -407,7 +410,10 @@ def _fix_truncated_json(raw: str) -> str:
 
 
 def ask_field_with_claude(_module_type: str, field_label: str, question: str, project_name: str, organization: str) -> str:
+    from datetime import date
+    today_str = date.today().strftime('%Y년 %m월 %d일')
     system = (
+        f"오늘 날짜는 {today_str}입니다. 날짜 관련 내용은 이 날짜를 기준으로 작성하세요. "
         f"당신은 비즈니스 모델 설계 전문가입니다. "
         f"프로젝트명: {project_name}, 수행 조직: {organization or '미입력'}. "
         f"사용자가 '{field_label}' 항목 입력을 위해 질문합니다. "
@@ -504,6 +510,9 @@ _ENV_SUB_FIELDS = {
 
 
 def analyze_with_claude(module_type: str, input_data: dict, project_name: str, industry: str, extra_prompt: str = '', sub_type: str = '') -> str:
+    from datetime import date
+    today_prefix = f'[분석 기준일: {date.today().strftime("%Y년 %m월 %d일")}]\n\n'
+
     # env_analysis 항목별 단독 분석
     if module_type == 'env_analysis' and sub_type and sub_type in ENV_ANALYSIS_SUB_PROMPTS:
         prompt_template = ENV_ANALYSIS_SUB_PROMPTS[sub_type]
@@ -520,6 +529,7 @@ def analyze_with_claude(module_type: str, input_data: dict, project_name: str, i
             for k, v in filtered.items():
                 prompt = prompt.replace('{' + k + '}', v)
             prompt = re.sub(r'\{[^}]+\}', '(미입력)', prompt)
+        prompt = today_prefix + prompt
         try:
             from flask import current_app
             api_key = current_app.config.get('ANTHROPIC_API_KEY', '')
@@ -552,6 +562,8 @@ def analyze_with_claude(module_type: str, input_data: dict, project_name: str, i
         for key, value in input_data.items():
             prompt = prompt.replace('{' + key + '}', value or '(미입력)')
         prompt = re.sub(r'\{[^}]+\}', '(미입력)', prompt)
+
+    prompt = today_prefix + prompt
 
     if extra_prompt and extra_prompt.strip():
         prompt += f'\n\n[추가 분석 지시사항]\n{extra_prompt.strip()}'
