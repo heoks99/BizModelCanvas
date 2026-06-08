@@ -2306,6 +2306,11 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); }
     padding: 24px;
     max-width: 760px;
 }
+.resizable-card-wrap .form-card {
+    max-width: none;
+    flex: 1;
+    min-width: 0;
+}
 .form-group { margin-bottom: 20px; }
 .form-group label {
     display: block;
