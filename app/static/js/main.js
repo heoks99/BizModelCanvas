@@ -570,6 +570,58 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+// ===== 리사이즈 가능 카드 (project-info, edit-form) =====
+function initCardResize(wrapId, storageKey, defaultW) {
+    const wrap = document.getElementById(wrapId);
+    if (!wrap) return;
+    const handle = wrap.querySelector('.card-resize-handle');
+    if (!handle) return;
+
+    const MIN_W = 360;
+
+    function applyWidth(w) {
+        const max = wrap.parentElement ? wrap.parentElement.offsetWidth : window.innerWidth;
+        wrap.style.width = Math.max(MIN_W, Math.min(w, max)) + 'px';
+    }
+
+    const saved = parseInt(localStorage.getItem(storageKey));
+    applyWidth(!isNaN(saved) ? saved : defaultW);
+
+    let startX, startW;
+
+    handle.addEventListener('mousedown', e => {
+        e.preventDefault();
+        startX = e.clientX;
+        startW = wrap.offsetWidth;
+        handle.classList.add('dragging');
+        document.body.style.cursor     = 'col-resize';
+        document.body.style.userSelect = 'none';
+    });
+
+    document.addEventListener('mousemove', e => {
+        if (!handle.classList.contains('dragging')) return;
+        applyWidth(startW + (e.clientX - startX));
+    });
+
+    document.addEventListener('mouseup', () => {
+        if (!handle.classList.contains('dragging')) return;
+        handle.classList.remove('dragging');
+        document.body.style.cursor     = '';
+        document.body.style.userSelect = '';
+        localStorage.setItem(storageKey, wrap.offsetWidth);
+    });
+
+    handle.addEventListener('dblclick', () => {
+        applyWidth(defaultW);
+        localStorage.setItem(storageKey, defaultW);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initCardResize('proj-info-wrap',  'proj_info_card_w',  960);
+    initCardResize('edit-form-wrap',  'edit_form_card_w',  960);
+});
+
 // ===== env-col-resizer 드래그 (env-full-wrap 레이아웃) =====
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.env-col-resizer').forEach(resizer => {

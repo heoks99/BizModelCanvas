@@ -198,6 +198,7 @@
         {% endif %}
     </div>
 </div>
+<div class="resizable-card-wrap" id="proj-info-wrap">
 <div class="project-info-card">
     <div class="pi-row"><span class="pi-key">프로젝트명</span><span class="pi-val pi-val-name">{{ project.name }}</span></div>
     {% if project.description %}
@@ -220,6 +221,8 @@
     <div class="pi-row"><span class="pi-key">소유자</span><span class="pi-val">{{ project.owner.username }}</span></div>
     {% endif %}
 </div>
+<div class="card-resize-handle" title="드래그하여 너비 조절"></div>
+</div>{# /resizable-card-wrap #}
 {% if is_owner %}
 <div style="margin-top:20px; display:flex; gap:8px;">
     <a href="{{ url_for('dashboard.edit_project', project_id=project.id) }}" class="btn btn-primary">✏️ 프로젝트 수정</a>
