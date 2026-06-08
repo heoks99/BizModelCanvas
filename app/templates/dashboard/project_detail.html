@@ -200,7 +200,7 @@
 </div>
 <div class="resizable-card-wrap" id="proj-info-wrap">
 <div class="project-info-card">
-    <div class="pi-row"><span class="pi-key">프로젝트명</span><span class="pi-val pi-val-name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ project.name }}</span></div>
+    <div class="pi-row"><span class="pi-key">프로젝트명</span><span class="pi-val pi-val-name" style="display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:5em;">{{ project.name }}</span></div>
     {% if project.description %}
     <div class="pi-row"><span class="pi-key">사업내용</span><span class="pi-val" style="white-space:pre-wrap;">{{ project.description }}</span></div>
     {% endif %}
