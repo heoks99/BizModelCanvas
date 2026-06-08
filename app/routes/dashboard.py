@@ -83,7 +83,8 @@ def project_detail(project_id, tab_key=None):
     import json
     project = Project.query.filter_by(id=project_id).first_or_404()
     is_owner = project.owner_id == current_user.id
-    if not is_owner and not project.is_public:
+    is_admin = current_user.role == 'admin'
+    if not is_owner and not project.is_public and not is_admin:
         flash('접근 권한이 없습니다.', 'error')
         return redirect(url_for('dashboard.index'))
 
@@ -129,6 +130,7 @@ def project_detail(project_id, tab_key=None):
                            modules=MODULES,
                            analyses=analyses,
                            is_owner=is_owner,
+                           is_admin=is_admin,
                            active_tab=active_tab,
                            input_data=input_data,
                            ai_result=ai_result,

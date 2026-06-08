@@ -118,7 +118,11 @@
             <button type="submit" class="btn btn-danger">삭제</button>
         </form>
         {% else %}
+        {% if not project.is_public and is_admin %}
+        <span class="badge badge-private" style="padding:6px 12px;">🔒 비공개 프로젝트 (관리자 읽기 전용)</span>
+        {% else %}
         <span class="badge badge-public" style="padding:6px 12px;">🌐 공개 프로젝트 (읽기 전용)</span>
+        {% endif %}
         {% endif %}
     </div>
 </div>
