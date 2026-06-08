@@ -873,6 +873,32 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); }
     min-height: 0;
 }
 
+/* ===== 환경 분석 — 읽기 전용 모드 레이아웃 오버라이드 ===== */
+.env-readonly-mode {
+    overflow: visible;
+    flex: none;
+}
+.env-readonly-mode .env-full-panel {
+    flex: none;
+    overflow-y: visible;
+}
+.env-readonly-mode .env-full-panel.active {
+    display: block;
+}
+/* 읽기 전용에서 입력 데이터 영역 숨김 — AI 리포트만 표시 */
+.env-readonly-mode .env-input-row {
+    display: none;
+}
+.env-readonly-mode .env-result-row {
+    flex: none;
+    min-height: 400px;
+}
+.env-readonly-mode .env-ai-result-row {
+    flex: none;
+    overflow-y: visible;
+    max-height: none;
+}
+
 /* 구 좌우 분할 클래스 — 하위 호환용 */
 .env-input-col {
     display: flex;

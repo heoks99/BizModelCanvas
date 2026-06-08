@@ -463,7 +463,7 @@
 ] %}
 
 {# ── 환경분석: 상단 탭 nav ── #}
-<div class="env-full-wrap">
+<div class="env-full-wrap{% if not is_owner %} env-readonly-mode{% endif %}">
     <div class="env-top-nav">
         {% for key, icon, label, fname, hint in env_tabs %}
         <button type="button"
