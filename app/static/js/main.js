@@ -585,7 +585,8 @@ function initCardResize(wrapId, storageKey, defaultW) {
     }
 
     const saved = parseInt(localStorage.getItem(storageKey));
-    applyWidth(!isNaN(saved) ? saved : defaultW);
+    if (!isNaN(saved)) applyWidth(saved);
+    // 저장값 없으면 CSS width:100% 그대로 유지
 
     let startX, startW;
 

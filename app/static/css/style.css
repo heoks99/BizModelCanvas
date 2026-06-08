@@ -2866,7 +2866,7 @@ button.admin-role-badge:hover { opacity: 0.75; }
 .resizable-card-wrap {
     display: flex;
     align-items: stretch;
-    width: 960px;
+    width: 100%;
     min-width: 360px;
     max-width: 100%;
 }
@@ -2896,7 +2896,7 @@ button.admin-role-badge:hover { opacity: 0.75; }
     background: var(--bg-secondary);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 24px 28px;
+    padding: 24px 34px;
     flex: 1;
     min-width: 0;
     display: flex;
@@ -2913,7 +2913,7 @@ button.admin-role-badge:hover { opacity: 0.75; }
 .pi-row:last-child { border-bottom: none; }
 .pi-key {
     flex-shrink: 0;
-    width: 80px;
+    width: 96px;
     font-size: 12px;
     font-weight: 600;
     color: var(--text-muted);
