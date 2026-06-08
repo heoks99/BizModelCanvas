@@ -529,8 +529,10 @@
                 {% if is_owner %}
                 <button type="button" class="btn btn-ai" onclick="runAnalysis()">🤖 AI 분석 실행</button>
                 {% endif %}
+                {% if is_owner %}
                 <a href="{{ url_for('modules.export_module_docx', project_id=project.id, module_type=active_tab) }}"
                    class="btn btn-ghost">📄 단계 파일 저장</a>
+                {% endif %}
             </div>
         </div>
         <div id="ai-result" class="ai-result">
