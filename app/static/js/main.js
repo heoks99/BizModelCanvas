@@ -320,13 +320,6 @@ function toggleOrg(header) {
     projects.classList.toggle('collapsed');
 }
 
-// ===== 사이드바 프로젝트 상세 토글 =====
-function toggleProjectDetail(row) {
-    const detail = row.nextElementSibling;
-    const isOpen = detail.classList.contains('open');
-    detail.classList.toggle('open', !isOpen);
-    row.classList.toggle('detail-open', !isOpen);
-}
 
 // ===== AI 분석 모달 =====
 function runAnalysis() {

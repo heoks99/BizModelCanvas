@@ -86,7 +86,7 @@
     }
 } %}
 
-{% set meta = TAB_META[active_tab] %}
+{% set meta = TAB_META.get(active_tab, {}) %}
 
 {% block module_nav %}
 {# ── 진행률 + 액션 버튼 한 행 ── #}
@@ -129,6 +129,16 @@
 
 {# 모듈 탭 상단 네비게이션 #}
 <nav class="module-step-nav">
+    {# 프로젝트 정보 탭 (맨 좌측) #}
+    <div class="step-nav-item">
+        <a href="{{ url_for('dashboard.project_detail', project_id=project.id, tab_key='project_info') }}"
+           class="step-nav-link step-nav-info{% if active_tab == 'project_info' %} active{% endif %}">
+            <span class="step-num">📋</span>
+            프로젝트 정보
+        </a>
+    </div>
+    <span class="step-arrow">›</span>
+
     {% for module in modules %}
     {% set is_active = (module.key == active_tab) %}
     {% set is_done = (analyses.get(module.key) and analyses.get(module.key).ai_result) %}
@@ -144,12 +154,20 @@
 
     {# 이전/다음 버튼 #}
     {% set ns = namespace(prev=None, next=None) %}
-    {% for module in modules %}
-        {% if module.key == active_tab %}
-            {% if not loop.first %}{% set ns.prev = modules[loop.index0 - 1].key %}{% endif %}
-            {% if not loop.last  %}{% set ns.next = modules[loop.index0 + 1].key %}{% endif %}
-        {% endif %}
-    {% endfor %}
+    {% if active_tab == 'project_info' %}
+        {% set ns.next = modules[0].key %}
+    {% else %}
+        {% for module in modules %}
+            {% if module.key == active_tab %}
+                {% if loop.first %}
+                    {% set ns.prev = 'project_info' %}
+                {% else %}
+                    {% set ns.prev = modules[loop.index0 - 1].key %}
+                {% endif %}
+                {% if not loop.last %}{% set ns.next = modules[loop.index0 + 1].key %}{% endif %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
     <div class="step-nav-prev-next">
         {% if ns.prev %}
         <a href="{{ url_for('dashboard.project_detail', project_id=project.id, tab_key=ns.prev) }}" class="step-nav-btn">‹ 이전</a>
@@ -167,6 +185,49 @@
 {% endblock %}
 
 {% block content %}
+
+{# ── 프로젝트 정보 탭 ── #}
+{% if active_tab == 'project_info' %}
+<div class="page-header" style="margin-top:4px; margin-bottom:16px;">
+    <h1 class="page-title" style="font-size:20px;">📋 프로젝트 정보</h1>
+</div>
+<div class="project-info-card">
+    <div class="pi-row"><span class="pi-key">프로젝트명</span><span class="pi-val pi-val-name">{{ project.name }}</span></div>
+    {% if project.description %}
+    <div class="pi-row"><span class="pi-key">사업내용</span><span class="pi-val">{{ project.description }}</span></div>
+    {% endif %}
+    {% if project.organization %}
+    <div class="pi-row"><span class="pi-key">수행조직</span><span class="pi-val">{{ project.organization }}</span></div>
+    {% endif %}
+    {% if project.business_manager %}
+    <div class="pi-row"><span class="pi-key">사업담당</span><span class="pi-val">{{ project.business_manager }}</span></div>
+    {% endif %}
+    {% if project.project_manager %}
+    <div class="pi-row"><span class="pi-key">수행담당</span><span class="pi-val">{{ project.project_manager }}</span></div>
+    {% endif %}
+    <div class="pi-row">
+        <span class="pi-key">공개 여부</span>
+        <span class="pi-val">
+            {% if project.is_public %}<span class="badge badge-public">🌐 공개</span>
+            {% else %}<span class="badge badge-private">🔒 비공개</span>{% endif %}
+        </span>
+    </div>
+    <div class="pi-row"><span class="pi-key">생성일</span><span class="pi-val">{{ project.created_at.strftime('%Y.%m.%d') }}</span></div>
+    <div class="pi-row"><span class="pi-key">최종 수정</span><span class="pi-val">{{ project.updated_at.strftime('%Y.%m.%d %H:%M') }}</span></div>
+    {% if is_owner %}
+    <div class="pi-row"><span class="pi-key">소유자</span><span class="pi-val">{{ current_user.full_name or current_user.username }}</span></div>
+    {% else %}
+    <div class="pi-row"><span class="pi-key">소유자</span><span class="pi-val">{{ project.owner.username }}</span></div>
+    {% endif %}
+</div>
+{% if is_owner %}
+<div style="margin-top:20px; display:flex; gap:8px;">
+    <a href="{{ url_for('dashboard.edit_project', project_id=project.id) }}" class="btn btn-primary">✏️ 프로젝트 수정</a>
+    <a href="{{ url_for('dashboard.project_detail', project_id=project.id, tab_key='biz_definition') }}" class="btn btn-ghost">① 사업 정의로 이동 →</a>
+</div>
+{% endif %}
+
+{% else %}
 
 {# ── 현재 탭 헤더 ── #}
 <div class="page-header" style="margin-top:4px; margin-bottom:0;">
@@ -699,4 +760,5 @@ async function togglePublic(projectId) {
     btn.disabled = false;
 }
 </script>
+{% endif %}{# /project_info else #}
 {% endblock %}

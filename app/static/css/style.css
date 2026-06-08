@@ -233,54 +233,8 @@ body {
     transition: transform 0.2s;
     flex-shrink: 0;
 }
-.sidebar-project-row.detail-open .sidebar-project-chevron { transform: rotate(90deg); }
-
-/* 상세 정보 패널 */
-.sidebar-project-detail {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.25s ease;
-    background: var(--bg-primary);
-    border-left: 2px solid var(--border);
-    margin: 0 10px 0 18px;
-    border-radius: 0 0 4px 4px;
-}
-.sidebar-project-detail.open { max-height: 200px; }
-.spd-row {
-    display: flex;
-    gap: 6px;
-    padding: 4px 10px;
-    font-size: 11px;
-    line-height: 1.4;
-}
-.spd-row:first-child { padding-top: 8px; }
-.spd-desc { padding-top: 2px; }
-.spd-key {
-    color: var(--text-muted);
-    flex-shrink: 0;
-    min-width: 48px;
-}
-.spd-val {
-    color: var(--text-secondary);
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-}
-.spd-open-btn {
-    display: block;
-    margin: 6px 10px 8px;
-    padding: 5px 10px;
-    background: var(--accent-light);
-    color: var(--accent);
-    border-radius: var(--radius-sm);
-    font-size: 11px;
-    font-weight: 600;
-    text-decoration: none;
-    text-align: center;
-    transition: background 0.15s;
-}
-.spd-open-btn:hover { background: rgba(79,110,247,.25); }
+/* sidebar-project-row는 이제 <a> 태그 — 링크 스타일 초기화 */
+a.sidebar-project-row { text-decoration: none; cursor: pointer; }
 
 .sidebar-nav { overflow-y: auto; }
 
@@ -2906,4 +2860,43 @@ button.admin-role-badge:hover { opacity: 0.75; }
 .admin-project-item:hover { background: var(--bg-hover); }
 .admin-project-name { font-size: 13px; font-weight: 600; color: var(--text-primary); flex: 1; }
 .admin-project-meta { font-size: 11px; color: var(--text-muted); }
+
+/* ===== 프로젝트 정보 탭 ===== */
+.project-info-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    max-width: 640px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+.pi-row {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+}
+.pi-row:last-child { border-bottom: none; }
+.pi-key {
+    flex-shrink: 0;
+    width: 80px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.pi-val {
+    font-size: 14px;
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+.pi-val-name { font-size: 16px; font-weight: 700; }
+
+/* 프로젝트 정보 탭 nav 스타일 */
+.step-nav-info { font-style: normal; }
+.step-nav-info .step-num { font-style: normal; }
 

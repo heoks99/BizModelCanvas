@@ -88,12 +88,12 @@ def project_detail(project_id, tab_key=None):
         flash('접근 권한이 없습니다.', 'error')
         return redirect(url_for('dashboard.index'))
 
-    valid_keys = [m['key'] for m in MODULES]
-    active_tab = tab_key if tab_key in valid_keys else valid_keys[0]
+    valid_keys = ['project_info'] + [m['key'] for m in MODULES]
+    active_tab = tab_key if tab_key in valid_keys else 'project_info'
 
     analyses = {a.module_type: a for a in project.analyses}
 
-    if request.method == 'POST' and is_owner:
+    if request.method == 'POST' and is_owner and active_tab != 'project_info':
         from app import db
         form_data = request.form.to_dict()
         env_sub_key = form_data.pop('_env_sub_key', '')  # 내부 제어용, DB 저장 제외
@@ -109,21 +109,25 @@ def project_detail(project_id, tab_key=None):
             redirect_url += f'#env-sub-{env_sub_key}'
         return redirect(redirect_url)
 
-    active_analysis = analyses.get(active_tab)
-    input_data = json.loads(active_analysis.input_data) if active_analysis and active_analysis.input_data else {}
-    raw_result = active_analysis.ai_result if active_analysis else None
-    # env_analysis는 sub_type별 dict로 저장 — dict이면 그대로, 아니면 None
-    if active_tab == 'env_analysis' and raw_result:
-        try:
-            parsed = json.loads(raw_result)
-            ai_result = parsed if isinstance(parsed, dict) else {}
-        except Exception:
-            ai_result = {}
+    if active_tab == 'project_info':
+        input_data = {}
+        ai_result = None
+        tab_fields = []
     else:
-        ai_result = raw_result
-
-    from app.services.ai_service import MODULE_FIELDS
-    tab_fields = MODULE_FIELDS.get(active_tab, [])
+        active_analysis = analyses.get(active_tab)
+        input_data = json.loads(active_analysis.input_data) if active_analysis and active_analysis.input_data else {}
+        raw_result = active_analysis.ai_result if active_analysis else None
+        # env_analysis는 sub_type별 dict로 저장 — dict이면 그대로, 아니면 None
+        if active_tab == 'env_analysis' and raw_result:
+            try:
+                parsed = json.loads(raw_result)
+                ai_result = parsed if isinstance(parsed, dict) else {}
+            except Exception:
+                ai_result = {}
+        else:
+            ai_result = raw_result
+        from app.services.ai_service import MODULE_FIELDS
+        tab_fields = MODULE_FIELDS.get(active_tab, [])
 
     return render_template('dashboard/project_detail.html',
                            project=project,

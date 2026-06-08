@@ -43,42 +43,12 @@
             {% for org_name, org_projects in sidebar_orgs.items() %}
             {% for p in org_projects %}
             {% set is_active = (request.view_args and request.view_args.get('project_id') == p.id) %}
-            <div class="sidebar-project-group">
-                <div class="sidebar-project-row {% if is_active %}active detail-open{% endif %}"
-                     onclick="toggleProjectDetail(this)">
-                    <span class="sidebar-project-dot">◆</span>
-                    <span class="sidebar-project-name">{{ p.name }}</span>
-                    <span class="sidebar-project-chevron">›</span>
-                </div>
-                <div class="sidebar-project-detail {% if is_active %}open{% endif %}">
-                    {% if p.organization %}
-                    <div class="spd-row">
-                        <span class="spd-key">수행조직</span>
-                        <span class="spd-val">{{ p.organization }}</span>
-                    </div>
-                    {% endif %}
-                    {% if p.business_manager %}
-                    <div class="spd-row">
-                        <span class="spd-key">사업담당</span>
-                        <span class="spd-val">{{ p.business_manager }}</span>
-                    </div>
-                    {% endif %}
-                    {% if p.project_manager %}
-                    <div class="spd-row">
-                        <span class="spd-key">수행담당</span>
-                        <span class="spd-val">{{ p.project_manager }}</span>
-                    </div>
-                    {% endif %}
-                    {% if p.description %}
-                    <div class="spd-row spd-desc">
-                        <span class="spd-key">사업내용</span>
-                        <span class="spd-val">{{ p.description }}</span>
-                    </div>
-                    {% endif %}
-                    <a href="{{ url_for('dashboard.project_detail', project_id=p.id) }}"
-                       class="spd-open-btn">열기 →</a>
-                </div>
-            </div>
+            <a href="{{ url_for('dashboard.project_detail', project_id=p.id, tab_key='project_info') }}"
+               class="sidebar-project-row {% if is_active %}active{% endif %}">
+                <span class="sidebar-project-dot">◆</span>
+                <span class="sidebar-project-name">{{ p.name }}</span>
+                <span class="sidebar-project-chevron">›</span>
+            </a>
             {% endfor %}
             {% endfor %}
             {% endif %}
