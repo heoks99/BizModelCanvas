@@ -20,10 +20,18 @@ MODULES = [
 @login_required
 def index():
     my_projects = Project.query.filter_by(owner_id=current_user.id).order_by(Project.updated_at.desc()).all()
-    public_projects = Project.query.filter(
-        Project.is_public == True,
-        Project.owner_id != current_user.id
-    ).order_by(Project.updated_at.desc()).all()
+
+    is_admin = current_user.role == 'admin'
+    if is_admin:
+        # 관리자: 다른 사용자의 공개·비공개 프로젝트 모두 표시
+        other_projects = Project.query.filter(
+            Project.owner_id != current_user.id
+        ).order_by(Project.updated_at.desc()).all()
+    else:
+        other_projects = Project.query.filter(
+            Project.is_public == True,
+            Project.owner_id != current_user.id
+        ).order_by(Project.updated_at.desc()).all()
 
     orgs = {}
     for p in my_projects:
@@ -32,7 +40,8 @@ def index():
 
     return render_template('dashboard/index.html',
                            projects=my_projects,
-                           public_projects=public_projects,
+                           public_projects=other_projects,
+                           is_admin=is_admin,
                            orgs=orgs)
 
 
