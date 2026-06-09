@@ -13,6 +13,7 @@
         <div class="sidebar-logo">
             <span class="logo-icon">◈</span>
             <span class="logo-text">사업모델캔버스</span>
+            <button class="sidebar-toggle-btn" id="sidebar-toggle" title="사이드바 접기/펼치기" aria-label="사이드바 토글">‹</button>
         </div>
         <!-- 사이드바 검색 -->
         <div class="sidebar-search">
@@ -27,15 +28,15 @@
         </div>
 
         <nav class="sidebar-nav">
-            <a href="{{ url_for('dashboard.index') }}" class="nav-item {% if request.endpoint == 'dashboard.index' %}active{% endif %}">
-                <span class="nav-icon">⊞</span> 대시보드
+            <a href="{{ url_for('dashboard.index') }}" class="nav-item {% if request.endpoint == 'dashboard.index' %}active{% endif %}" title="대시보드">
+                <span class="nav-icon">⊞</span><span class="nav-label"> 대시보드</span>
             </a>
-            <a href="{{ url_for('qna.index') }}" class="nav-item {% if request.blueprint == 'qna' %}active{% endif %}">
-                <span class="nav-icon">💬</span> 질의응답
+            <a href="{{ url_for('qna.index') }}" class="nav-item {% if request.blueprint == 'qna' %}active{% endif %}" title="질의응답">
+                <span class="nav-icon">💬</span><span class="nav-label"> 질의응답</span>
             </a>
             {% if current_user.role == 'admin' %}
-            <a href="{{ url_for('admin.index') }}" class="nav-item {% if request.blueprint == 'admin' %}active{% endif %}">
-                <span class="nav-icon">⚙️</span> 관리자
+            <a href="{{ url_for('admin.index') }}" class="nav-item {% if request.blueprint == 'admin' %}active{% endif %}" title="관리자">
+                <span class="nav-icon">⚙️</span><span class="nav-label"> 관리자</span>
             </a>
             {% endif %}
             {% if sidebar_orgs %}
@@ -52,8 +53,8 @@
             {% endfor %}
             {% endfor %}
             {% endif %}
-            <a href="{{ url_for('dashboard.new_project') }}" class="nav-item {% if request.endpoint == 'dashboard.new_project' %}active{% endif %}">
-                <span class="nav-icon">＋</span> 새 프로젝트
+            <a href="{{ url_for('dashboard.new_project') }}" class="nav-item {% if request.endpoint == 'dashboard.new_project' %}active{% endif %}" title="새 프로젝트">
+                <span class="nav-icon">＋</span><span class="nav-label"> 새 프로젝트</span>
             </a>
         </nav>
         <div class="sidebar-footer">

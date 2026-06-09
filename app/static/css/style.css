@@ -44,7 +44,71 @@ body {
     flex-direction: column;
     padding: 0;
     overflow: hidden;
+    transition: width 0.2s ease, min-width 0.2s ease;
 }
+
+/* ── 사이드바 토글 버튼 ── */
+.sidebar-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 18px;
+    line-height: 1;
+    transition: background 0.15s, color 0.15s, transform 0.2s;
+    padding: 0;
+}
+.sidebar-toggle-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+/* ── 사이드바 collapsed 상태 ── */
+.sidebar.collapsed {
+    width: 64px !important;
+    min-width: 64px !important;
+}
+.sidebar.collapsed .sidebar-logo {
+    padding: 14px 0;
+    justify-content: center;
+    gap: 0;
+}
+.sidebar.collapsed .logo-icon,
+.sidebar.collapsed .logo-text { display: none; }
+.sidebar.collapsed .sidebar-toggle-btn {
+    margin-left: 0;
+    transform: rotate(180deg);
+}
+.sidebar.collapsed .sidebar-search { display: none; }
+.sidebar.collapsed .sidebar-section-label { display: none; }
+.sidebar.collapsed .sidebar-project-row { display: none; }
+.sidebar.collapsed .sidebar-nav { padding: 12px 4px; }
+.sidebar.collapsed .nav-item {
+    justify-content: center;
+    padding: 10px 0;
+    gap: 0;
+    font-size: 0;
+}
+.sidebar.collapsed .nav-item .nav-icon { font-size: 18px; }
+.sidebar.collapsed .nav-label { display: none; }
+.sidebar.collapsed .sidebar-footer {
+    padding: 10px 4px;
+    align-items: center;
+}
+.sidebar.collapsed .user-info {
+    justify-content: center;
+    padding: 8px 4px;
+    margin: 0;
+}
+.sidebar.collapsed .user-info > span { font-size: 18px; }
+.sidebar.collapsed .user-info-text { display: none; }
+.sidebar.collapsed .logout-btn { display: none; }
+.sidebar.collapsed + .sidebar-resizer { display: none; }
 
 /* 사이드바 리사이저 핸들 */
 .sidebar-resizer {
@@ -469,7 +533,7 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); }
 /* ===== 프로젝트 그리드 ===== */
 .projects-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
     gap: 16px;
 }
 
@@ -3470,3 +3534,9 @@ button.admin-role-badge:hover { opacity: 0.75; }
 
 /* 공개 프로젝트 카드 소유자 뱃지 */
 .project-owner-badge { font-size: 11px; color: var(--text-muted); background: var(--bg-secondary); padding: 2px 7px; border-radius: 20px; border: 1px solid var(--border); }
+
+/* 프로젝트 카드 - 담당자 정보 */
+.project-managers { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-bottom: 12px; }
+.project-manager-item { display: flex; align-items: center; gap: 4px; font-size: 12px; }
+.project-manager-label { color: var(--text-muted); font-size: 11px; font-weight: 600; background: var(--bg-secondary); padding: 1px 5px; border-radius: 4px; border: 1px solid var(--border); white-space: nowrap; }
+.project-manager-name { color: var(--text-secondary); }

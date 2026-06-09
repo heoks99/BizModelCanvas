@@ -547,6 +547,7 @@ document.addEventListener('DOMContentLoaded', () => {
         startX = e.clientX;
         startW = sidebar.offsetWidth;
         resizer.classList.add('dragging');
+        sidebar.style.transition = 'none';
         document.body.style.cursor     = 'col-resize';
         document.body.style.userSelect = 'none';
     });
@@ -559,6 +560,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('mouseup', () => {
         if (!resizer.classList.contains('dragging')) return;
         resizer.classList.remove('dragging');
+        sidebar.style.transition = '';
         document.body.style.cursor     = '';
         document.body.style.userSelect = '';
         localStorage.setItem(STORAGE_KEY, sidebar.offsetWidth);
@@ -567,6 +569,33 @@ document.addEventListener('DOMContentLoaded', () => {
     resizer.addEventListener('dblclick', () => {
         applyWidth(DEFAULT_W);
         localStorage.setItem(STORAGE_KEY, DEFAULT_W);
+    });
+});
+
+// ===== 사이드바 토글 =====
+document.addEventListener('DOMContentLoaded', () => {
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    if (!toggleBtn) return;
+
+    const sidebar = document.querySelector('.sidebar');
+    const resizer = document.getElementById('sidebar-resizer');
+    const STORAGE_KEY = 'sidebar_collapsed';
+
+    function setCollapsed(collapsed) {
+        sidebar.classList.toggle('collapsed', collapsed);
+        if (resizer) resizer.style.display = collapsed ? 'none' : '';
+        localStorage.setItem(STORAGE_KEY, collapsed ? '1' : '0');
+    }
+
+    if (localStorage.getItem(STORAGE_KEY) === '1') {
+        // 애니메이션 없이 즉시 적용 (초기 로드)
+        sidebar.style.transition = 'none';
+        setCollapsed(true);
+        requestAnimationFrame(() => { sidebar.style.transition = ''; });
+    }
+
+    toggleBtn.addEventListener('click', () => {
+        setCollapsed(!sidebar.classList.contains('collapsed'));
     });
 });
 
