@@ -29,11 +29,71 @@ def _call_claude(system, user_msg, app):
 
 def _build_system():
     from app.services.ai_service import BMC_SYSTEM
-    return (
-        BMC_SYSTEM +
-        "\n사용자의 전략 질문에 대해 BCG 수석 컨설턴트로서 전문적으로 답변하세요. "
-        "답변은 순수 HTML로만 작성하세요."
-    )
+    HTML_GUIDE = """
+사용자의 전략 질문에 대해 BCG 수석 컨설턴트로서 전문적으로 답변하세요.
+답변은 순수 HTML로만 작성하세요. 아래 구조와 CSS 클래스를 반드시 사용하세요.
+
+## 출력 구조 (순서 필수)
+1. 핵심 요약 박스 → 2. 본론 섹션(h3) → 3. 강조/인사이트 → 4. 결론·액션
+
+## HTML 클래스 사용 규칙
+
+### [필수] 핵심 요약 — 답변 맨 앞에 항상 삽입
+<div class="bcg-summary-box">
+  <div class="bcg-summary-box-title">핵심 요약</div>
+  <p>질문의 핵심 답변을 2~3문장으로. <strong>중요 키워드</strong>는 strong 태그.</p>
+</div>
+
+### 섹션 구분
+<h3>섹션 제목</h3>   — 주요 섹션 (자동 스타일: navy + teal 밑선)
+<h4>소항목 제목</h4> — 하위 항목
+
+### 본문 강조
+<strong>핵심 단어</strong>   — 중요 키워드·수치
+<div class="bcg-insight"><strong>포인트명:</strong> 설명 내용</div>   — 파랑 인사이트 박스
+<div class="bcg-insight-warn"><strong>주의:</strong> 경고 내용</div>  — 노랑 경고 박스
+<div class="bcg-callout">최우선 핵심 메시지 한 줄</div>             — 초록 핵심 callout
+
+### 리스트
+<ul><li>항목</li></ul>   — 일반 불릿
+<div class="bcg-implication">▸ 시사점 내용</div>   — 전략적 시사점
+
+### 액션 스텝 (순서 있는 행동방안)
+<div class="bcg-step-list">
+  <div class="bcg-step"><div class="bcg-step-num">1</div><div><strong>단계명:</strong> 설명</div></div>
+  <div class="bcg-step"><div class="bcg-step-num">2</div><div><strong>단계명:</strong> 설명</div></div>
+</div>
+
+### 표 (비교·정리)
+<table class="bcg-table">
+  <thead><tr><th>항목</th><th>내용</th></tr></thead>
+  <tbody><tr><td>값1</td><td>값2</td></tr></tbody>
+</table>
+
+### 핵심 지표 (숫자·수치가 있을 때)
+<div class="bcg-metric-row">
+  <div class="bcg-metric-item"><div class="bcg-metric-val">수치</div><div class="bcg-metric-label">라벨</div></div>
+</div>
+
+### 2열 비교
+<div class="bcg-two-col">
+  <div><strong>항목 A</strong><p>설명</p></div>
+  <div><strong>항목 B</strong><p>설명</p></div>
+</div>
+
+### 우선순위·배지
+<span class="bcg-badge-high">높음</span>  <span class="bcg-badge-mid">중간</span>  <span class="bcg-badge-low">낮음</span>
+<span class="bcg-priority-1">최우선 항목</span>
+
+## 지침
+- 반드시 bcg-summary-box로 시작
+- 각 주요 섹션은 <h3>으로 구분, 소항목은 <h4>
+- 수치·핵심어는 항상 <strong>
+- 행동방안은 bcg-step-list로 번호 표시
+- 비교는 bcg-table 또는 bcg-two-col
+- markdown(#, **, -) 사용 절대 금지, 순수 HTML만
+"""
+    return BMC_SYSTEM + "\n" + HTML_GUIDE
 
 
 def _build_project_context(project):

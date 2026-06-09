@@ -2004,6 +2004,132 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); }
     margin: 2px;
 }
 
+/* ===================================================================
+   QnA AI 답변 — 가독성·강조·미니멀 시각화 추가 컴포넌트
+   WCAG 2.1 AA | #111827 on #FFFFFF | #1E3A5F on #EFF6FF
+   =================================================================== */
+
+/* 핵심 요약 박스 (답변 최상단) */
+.bcg-summary-box {
+    background: #1E3A5F;
+    color: #FFFFFF;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 0 0 22px;
+}
+.bcg-summary-box-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #0D9488;
+    margin-bottom: 8px;
+}
+.bcg-summary-box p,
+.bcg-summary-box li {
+    font-size: 14px;
+    color: #FFFFFF;
+    line-height: 1.7;
+    margin: 0 0 6px;
+}
+.bcg-summary-box strong { color: #5EEAD4; }
+
+/* 핵심 포인트 callout — 최우선 단일 메시지 */
+.bcg-callout {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background: #F0FDF4;
+    border: 1px solid #BBF7D0;
+    border-left: 4px solid #0D9488;
+    border-radius: 0 8px 8px 0;
+    padding: 13px 16px;
+    margin: 12px 0;
+    font-size: 13.5px;
+    color: #111827;
+    line-height: 1.65;
+}
+.bcg-callout::before {
+    content: "✦";
+    color: #0D9488;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+.bcg-callout strong { color: #065F46; font-weight: 700; }
+
+/* 액션 스텝 리스트 */
+.bcg-step-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 10px 0 18px;
+}
+.bcg-step {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    font-size: 13.5px;
+    color: #111827;
+    line-height: 1.65;
+}
+.bcg-step-num {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #1E3A5F;
+    color: #FFFFFF;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+.bcg-step strong { color: #1E3A5F; font-weight: 700; }
+
+/* 핵심 지표 카드 행 */
+.bcg-metric-row {
+    display: flex;
+    gap: 10px;
+    margin: 10px 0 18px;
+    flex-wrap: wrap;
+}
+.bcg-metric-item {
+    flex: 1;
+    min-width: 90px;
+    background: #F9FAFB;
+    border: 1px solid #E5E7EB;
+    border-top: 3px solid #0D9488;
+    border-radius: 6px;
+    padding: 12px 14px;
+    text-align: center;
+}
+.bcg-metric-val {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1E3A5F;
+    line-height: 1.2;
+}
+.bcg-metric-label {
+    font-size: 11px;
+    color: #6B7280;
+    margin-top: 4px;
+    line-height: 1.4;
+}
+
+/* 구분선 강조 제목 — bcg-report 내 h2 */
+.bcg-report h2 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111827;
+    border-bottom: 2px solid #1E3A5F;
+    padding-bottom: 8px;
+    margin: 26px 0 14px;
+}
+
 /* ===== AI 분석 실행 모달 ===== */
 .analyze-modal-inner {
     max-width: 520px;
