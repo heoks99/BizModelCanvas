@@ -53,6 +53,22 @@
                 <span class="module-dot {% if key in analysis_types %}done{% endif %}" title="{{ key }}"></span>
                 {% endfor %}
             </div>
+            {% if project.business_manager or project.project_manager %}
+            <div class="project-managers">
+                {% if project.business_manager %}
+                <span class="project-manager-item">
+                    <span class="project-manager-label">사업담당</span>
+                    <span class="project-manager-name">{{ project.business_manager }}</span>
+                </span>
+                {% endif %}
+                {% if project.project_manager %}
+                <span class="project-manager-item">
+                    <span class="project-manager-label">수행담당</span>
+                    <span class="project-manager-name">{{ project.project_manager }}</span>
+                </span>
+                {% endif %}
+            </div>
+            {% endif %}
             <div class="project-footer">
                 <span class="project-date">{{ project.updated_at | kst('%Y.%m.%d') }}</span>
                 {% if project.organization %}<span class="project-org">{{ project.organization }}</span>{% endif %}
@@ -102,6 +118,22 @@
             <span class="module-dot {% if key in analysis_types %}done{% endif %}" title="{{ key }}"></span>
             {% endfor %}
         </div>
+        {% if project.business_manager or project.project_manager %}
+        <div class="project-managers">
+            {% if project.business_manager %}
+            <span class="project-manager-item">
+                <span class="project-manager-label">사업담당</span>
+                <span class="project-manager-name">{{ project.business_manager }}</span>
+            </span>
+            {% endif %}
+            {% if project.project_manager %}
+            <span class="project-manager-item">
+                <span class="project-manager-label">수행담당</span>
+                <span class="project-manager-name">{{ project.project_manager }}</span>
+            </span>
+            {% endif %}
+        </div>
+        {% endif %}
         <div class="project-footer">
             <span class="project-date">{{ project.updated_at | kst('%Y.%m.%d') }}</span>
             {% if project.organization %}<span class="project-org">{{ project.organization }}</span>{% endif %}
@@ -140,6 +172,22 @@
             <span class="module-dot {% if key in analysis_types %}done{% endif %}" title="{{ key }}"></span>
             {% endfor %}
         </div>
+        {% if project.business_manager or project.project_manager %}
+        <div class="project-managers">
+            {% if project.business_manager %}
+            <span class="project-manager-item">
+                <span class="project-manager-label">사업담당</span>
+                <span class="project-manager-name">{{ project.business_manager }}</span>
+            </span>
+            {% endif %}
+            {% if project.project_manager %}
+            <span class="project-manager-item">
+                <span class="project-manager-label">수행담당</span>
+                <span class="project-manager-name">{{ project.project_manager }}</span>
+            </span>
+            {% endif %}
+        </div>
+        {% endif %}
         <div class="project-footer">
             <span class="project-date">{{ project.updated_at | kst('%Y.%m.%d') }}</span>
             {% if project.organization %}<span class="project-org">{{ project.organization }}</span>{% endif %}
