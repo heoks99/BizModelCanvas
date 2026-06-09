@@ -124,6 +124,7 @@ def analyze_qna():
   "recommendations": ["기능 개선 권고사항 (최대 5개)"]
 }}"""
 
+    raw = ''
     try:
         client = anthropic.Anthropic(api_key=current_app.config.get('ANTHROPIC_API_KEY', ''))
         message = client.messages.create(
@@ -134,14 +135,14 @@ def analyze_qna():
             messages=[{'role': 'user', 'content': user_msg}],
         )
         raw = next(b.text for b in message.content if b.type == 'text').strip()
-        raw = re.sub(r'^```[a-z]*\n?', '', raw)
-        raw = re.sub(r'\n?```$', '', raw)
-        result = json.loads(raw)
+        # 코드블록 제거 후 JSON 객체만 추출 (위치 무관)
+        json_match = re.search(r'\{.*\}', raw, re.DOTALL)
+        if not json_match:
+            return jsonify({'ok': False, 'msg': 'AI가 JSON 형식으로 응답하지 않았습니다.', 'raw': raw[:300]})
+        result = json.loads(json_match.group())
         return jsonify({'ok': True, 'result': result, 'analyzed_count': len(qnas)})
-    except json.JSONDecodeError as e:
-        return jsonify({'ok': False, 'msg': f'JSON 파싱 오류: {e}', 'raw': raw[:500]})
     except Exception as e:
-        return jsonify({'ok': False, 'msg': str(e)})
+        return jsonify({'ok': False, 'msg': str(e), 'raw': raw[:300]})
 
 
 @admin_bp.route('/users/<int:user_id>')

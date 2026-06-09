@@ -125,7 +125,7 @@
                         <span class="admin-status-badge status-inactive">미답변</span>
                         {% endif %}
                     </td>
-                    <td style="font-size:11px;white-space:nowrap;">{{ q.created_at.strftime('%m.%d %H:%M') }}</td>
+                    <td style="font-size:11px;white-space:nowrap;">{{ q.created_at | kst('%m.%d %H:%M') }}</td>
                 </tr>
                 {% endfor %}
                 </tbody>

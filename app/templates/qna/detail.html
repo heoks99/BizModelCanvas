@@ -28,7 +28,7 @@
                     <span class="qna-project-tag">{{ qna.project.name }}</span>
                     {% endif %}
                     <span class="feed-author">{{ qna.owner.username }}</span>
-                    <span class="qna-date">{{ qna.created_at.strftime('%Y.%m.%d %H:%M') }}</span>
+                    <span class="qna-date">{{ qna.created_at | kst }}</span>
                 </div>
                 <h2 class="feed-title">{{ qna.title }}</h2>
             </div>
@@ -89,7 +89,7 @@
         <div class="qna-divider-line"></div>
         <span class="qna-divider-label">
             <span class="qna-divider-dot"></span>
-            답글 {{ loop.index }} — {{ comment.created_at.strftime('%Y.%m.%d %H:%M') }}
+            답글 {{ loop.index }} — {{ comment.created_at | kst }}
         </span>
         <div class="qna-divider-line"></div>
     </div>
@@ -105,7 +105,7 @@
                     {% if comment.owner.role == 'admin' %}
                     <span class="qna-admin-badge">관리자</span>
                     {% endif %}
-                    <span class="qna-date">{{ comment.created_at.strftime('%Y.%m.%d %H:%M') }}</span>
+                    <span class="qna-date">{{ comment.created_at | kst }}</span>
                     {% if comment.owner_id == current_user.id or is_admin %}
                     <form method="POST"
                           action="{{ url_for('qna.delete_comment', qna_id=qna.id, comment_id=comment.id) }}"

@@ -31,7 +31,7 @@
             {% endfor %}
         </div>
         <div class="project-footer">
-            <span class="project-date">{{ project.updated_at.strftime('%Y.%m.%d') }}</span>
+            <span class="project-date">{{ project.updated_at | kst('%Y.%m.%d') }}</span>
             {% if project.organization %}<span class="project-org">{{ project.organization }}</span>{% endif %}
         </div>
     </a>
@@ -74,7 +74,7 @@
             {% endfor %}
         </div>
         <div class="project-footer">
-            <span class="project-date">{{ project.updated_at.strftime('%Y.%m.%d') }}</span>
+            <span class="project-date">{{ project.updated_at | kst('%Y.%m.%d') }}</span>
             {% if project.organization %}<span class="project-org">{{ project.organization }}</span>{% endif %}
             <span class="project-owner-badge">👤 {{ project.owner.username }}</span>
         </div>

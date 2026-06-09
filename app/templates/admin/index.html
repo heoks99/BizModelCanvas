@@ -73,7 +73,7 @@
             <td>{{ u.email }}</td>
             <td>{{ u.organization or '—' }}</td>
             <td>{{ u.job_title or '—' }}</td>
-            <td>{{ u.created_at.strftime('%Y.%m.%d') }}</td>
+            <td>{{ u.created_at | kst('%Y.%m.%d') }}</td>
             <td>
                 <button class="btn btn-ai btn-sm"
                         onclick="approveUser({{ u.id }})">✓ 승인</button>
@@ -118,7 +118,7 @@
                     {{ {'pending':'대기','active':'활성','inactive':'비활성'}.get(u.status, u.status) }}
                 </span>
             </td>
-            <td>{{ u.created_at.strftime('%Y.%m.%d') }}</td>
+            <td>{{ u.created_at | kst('%Y.%m.%d') }}</td>
             <td class="admin-actions">
                 <a href="{{ url_for('admin.edit_user', user_id=u.id) }}" class="btn btn-ghost btn-sm">수정</a>
                 {% if u.id != current_user.id %}

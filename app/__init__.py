@@ -1,4 +1,5 @@
 import markupsafe
+from datetime import timezone, timedelta
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, current_user
@@ -19,6 +20,12 @@ def create_app():
     @app.template_filter('nl2br')
     def nl2br(value):
         return markupsafe.Markup(markupsafe.escape(value).replace('\n', markupsafe.Markup('<br>')))
+
+    @app.template_filter('kst')
+    def kst_filter(dt, fmt='%Y.%m.%d %H:%M'):
+        if dt is None:
+            return ''
+        return (dt.replace(tzinfo=timezone.utc) + timedelta(hours=9)).strftime(fmt)
 
     from app.routes.auth import auth_bp
     from app.routes.dashboard import dashboard_bp

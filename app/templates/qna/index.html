@@ -24,7 +24,7 @@
                 <span class="qna-project-tag">{{ qna.project.name }}</span>
                 {% endif %}
                 <span class="qna-author-tag">{{ qna.owner.username }}</span>
-                <span class="qna-date">{{ qna.created_at.strftime('%Y.%m.%d %H:%M') }}</span>
+                <span class="qna-date">{{ qna.created_at | kst }}</span>
                 {% if qna.comments %}
                 <span class="qna-comment-count">💬 {{ qna.comments|length }}</span>
                 {% endif %}

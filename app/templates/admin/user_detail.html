@@ -36,7 +36,7 @@
                     {{ {'pending':'승인 대기','active':'활성','inactive':'비활성'}.get(user.status) }}
                 </span>
             </div>
-            <div class="admin-info-row"><span class="admin-info-key">가입일</span><span>{{ user.created_at.strftime('%Y년 %m월 %d일 %H:%M') }}</span></div>
+            <div class="admin-info-row"><span class="admin-info-key">가입일</span><span>{{ user.created_at | kst('%Y년 %m월 %d일 %H:%M') }}</span></div>
         </div>
     </div>
 
@@ -47,7 +47,7 @@
             {% for p in projects %}
             <a href="{{ url_for('dashboard.project_detail', project_id=p.id) }}" class="admin-project-item">
                 <span class="admin-project-name">{{ p.name }}</span>
-                <span class="admin-project-meta">{{ p.organization or '' }} · {{ p.updated_at.strftime('%Y.%m.%d') }}</span>
+                <span class="admin-project-meta">{{ p.organization or '' }} · {{ p.updated_at | kst('%Y.%m.%d') }}</span>
                 {% if p.is_public %}<span class="badge-public">🌐 공개</span>{% endif %}
             </a>
             {% endfor %}

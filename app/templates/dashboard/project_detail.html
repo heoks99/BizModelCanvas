@@ -213,8 +213,8 @@
     {% if project.project_manager %}
     <div class="pi-row"><span class="pi-key">수행담당</span><span class="pi-val">{{ project.project_manager }}</span></div>
     {% endif %}
-    <div class="pi-row"><span class="pi-key">생성일</span><span class="pi-val">{{ project.created_at.strftime('%Y.%m.%d') }}</span></div>
-    <div class="pi-row"><span class="pi-key">최종 수정</span><span class="pi-val">{{ project.updated_at.strftime('%Y.%m.%d %H:%M') }}</span></div>
+    <div class="pi-row"><span class="pi-key">생성일</span><span class="pi-val">{{ project.created_at | kst('%Y.%m.%d') }}</span></div>
+    <div class="pi-row"><span class="pi-key">최종 수정</span><span class="pi-val">{{ project.updated_at | kst }}</span></div>
     {% if is_owner %}
     <div class="pi-row"><span class="pi-key">소유자</span><span class="pi-val">{{ current_user.full_name or current_user.username }}</span></div>
     {% else %}
