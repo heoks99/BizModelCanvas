@@ -181,7 +181,8 @@ def export_full_docx(project_id):
     from app.services.pdf_service import generate_full_report_pdf
 
     project = Project.query.filter_by(id=project_id).first_or_404()
-    if project.owner_id != current_user.id and not project.is_public:
+    is_admin = current_user.role == 'admin'
+    if project.owner_id != current_user.id and not project.is_public and not is_admin:
         flash('접근 권한이 없습니다.', 'error')
         return redirect(url_for('dashboard.index'))
 
