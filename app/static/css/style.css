@@ -909,6 +909,47 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); }
     max-height: none;
 }
 
+/* ===== 환경 분석 — 관리자 순차 보기 모드 ===== */
+.env-admin-mode {
+    overflow: visible;
+    flex: none;
+}
+.env-admin-mode .env-top-nav {
+    display: none;
+}
+.env-admin-mode .env-full-panel {
+    display: flex;
+    flex-direction: column;
+    flex: none;
+    overflow-y: visible;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 20px;
+    margin-bottom: 8px;
+}
+.env-admin-mode .env-full-panel:last-child {
+    border-bottom: none;
+}
+.env-admin-mode .env-input-row {
+    display: flex;
+}
+.env-admin-mode .env-result-row {
+    flex: none;
+    min-height: 0;
+}
+.env-admin-mode .env-ai-result-row {
+    flex: none;
+    overflow-y: visible;
+    max-height: none;
+}
+.env-admin-panel-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-secondary);
+}
+
 /* 구 좌우 분할 클래스 — 하위 호환용 */
 .env-input-col {
     display: flex;

@@ -463,7 +463,7 @@
 ] %}
 
 {# ── 환경분석: 상단 탭 nav ── #}
-<div class="env-full-wrap{% if not is_owner %} env-readonly-mode{% endif %}">
+<div class="env-full-wrap{% if is_admin and not is_owner %} env-admin-mode{% elif not is_owner %} env-readonly-mode{% endif %}">
     <div class="env-top-nav">
         {% for key, icon, label, fname, hint in env_tabs %}
         <button type="button"
@@ -479,6 +479,10 @@
     {# 각 프레임워크 패널: 상단(입력) + 하단(결과) 세로 분할 #}
     {% for key, icon, label, fname, hint in env_tabs %}
     <div id="env-panel-{{ key }}" class="env-full-panel {% if loop.first %}active{% endif %}">
+
+        {% if is_admin and not is_owner %}
+        <div class="env-admin-panel-title">{{ icon }} {{ label }}</div>
+        {% endif %}
 
         {# 입력 영역 (상단) #}
         <div class="env-input-row">
