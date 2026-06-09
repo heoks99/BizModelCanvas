@@ -39,3 +39,16 @@ class QnAComment(db.Model):
 
     def __repr__(self):
         return f'<QnAComment {self.id}>'
+
+
+class QnAAnalysisResult(db.Model):
+    """질문 유형 AI 분석 결과 저장"""
+    __tablename__ = 'qna_analysis_results'
+
+    id = db.Column(db.Integer, primary_key=True)
+    result_json = db.Column(db.Text, nullable=False)
+    analyzed_count = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<QnAAnalysisResult {self.id} ({self.analyzed_count}건)>'

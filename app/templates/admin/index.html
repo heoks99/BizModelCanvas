@@ -74,9 +74,6 @@
         ⏳ 회원 승인 &amp; 계정 관리
         {% if stats.pending > 0 %}<span class="admin-tab-badge">{{ stats.pending }}</span>{% endif %}
     </button>
-    <button class="admin-tab-btn" id="tab-btn-members" onclick="switchTab('members')">
-        👥 전체 회원
-    </button>
     <button class="admin-tab-btn" id="tab-btn-qna" onclick="switchTab('qna')">
         💬 질의응답 현황
     </button>
@@ -168,49 +165,7 @@
     </div>
 </div>
 
-<!-- ② 전체 회원 탭 -->
-<div id="tab-members" class="admin-tab-content">
-    <div class="admin-section-label">전체 회원 ({{ users|length }}명)</div>
-    <div class="admin-table-wrap">
-        <table class="admin-table">
-            <thead>
-                <tr><th>이름</th><th>아이디</th><th>이메일</th><th>조직</th><th>직책</th><th>역할</th><th>상태</th><th>가입일</th><th>관리</th></tr>
-            </thead>
-            <tbody>
-            {% for u in users %}
-            <tr>
-                <td>{{ u.full_name or '—' }}</td>
-                <td><a href="{{ url_for('admin.user_detail', user_id=u.id) }}" class="admin-link">{{ u.username }}</a></td>
-                <td style="font-size:12px;">{{ u.email }}</td>
-                <td style="font-size:12px;">{{ u.organization or '—' }}</td>
-                <td style="font-size:12px;">{{ u.job_title or '—' }}</td>
-                <td>
-                    {% if u.id != current_user.id %}
-                    <button class="admin-role-badge {% if u.role == 'admin' %}role-admin{% else %}role-member{% endif %}"
-                            id="role-badge-m-{{ u.id }}" onclick="toggleRole({{ u.id }}, '{{ u.role }}')">
-                        {{ '관리자' if u.role == 'admin' else '일반' }}
-                    </button>
-                    {% else %}
-                    <span class="admin-role-badge role-admin">관리자 (나)</span>
-                    {% endif %}
-                </td>
-                <td>
-                    <span class="admin-status-badge status-{{ u.status }}" id="status-badge-m-{{ u.id }}">
-                        {{ {'pending':'대기','active':'활성','inactive':'비활성'}.get(u.status, u.status) }}
-                    </span>
-                </td>
-                <td>{{ u.created_at | kst('%Y.%m.%d') }}</td>
-                <td class="admin-actions">
-                    <a href="{{ url_for('admin.edit_user', user_id=u.id) }}" class="btn btn-ghost btn-sm">수정</a>
-                </td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<!-- ③ 질의응답 현황 탭 -->
+<!-- ② 질의응답 현황 탭 -->
 <div id="tab-qna" class="admin-tab-content">
     <div class="qna-admin-two-col">
         <!-- 사용자별 질문 현황 -->
@@ -283,7 +238,7 @@
     </div>
 </div>
 
-<!-- ④ 질문 유형 AI 분석 탭 -->
+<!-- ③ 질문 유형 AI 분석 탭 -->
 <div id="tab-analysis" class="admin-tab-content">
     <div class="qna-analyze-panel">
         <div class="qna-analyze-header">
@@ -291,17 +246,37 @@
                 <div class="qna-analyze-title">🤖 질문 유형 AI 분석</div>
                 <div class="qna-analyze-desc">
                     전체 질의응답을 Claude AI가 유형별로 분류·요약하여 기능 개선 인사이트를 제공합니다.<br>
-                    빈번하게 질문되는 유형을 파악하고, 각 유형별 사용자 니즈와 서비스 개선 방안을 도출합니다.
+                    분석 결과는 DB에 자동 저장되며, 파일로 내려받을 수 있습니다.
                 </div>
+                {% if last_analysis %}
+                <div style="margin-top:6px;font-size:12px;color:var(--text-muted);">
+                    마지막 분석: {{ last_analysis.created_at | kst }} · {{ last_analysis.analyzed_count }}건 기준
+                </div>
+                {% endif %}
             </div>
-            <button class="btn btn-ai" id="analyze-btn" onclick="runQnaAnalysis()">✦ AI 분석 실행</button>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                <a id="export-btn"
+                   href="{{ url_for('admin.export_qna_analysis') }}"
+                   class="btn btn-ghost"
+                   {% if not last_analysis %}style="display:none;"{% endif %}>
+                    📄 파일 저장
+                </a>
+                <button class="btn btn-ai" id="analyze-btn" onclick="runQnaAnalysis()">✦ AI 분석 실행</button>
+            </div>
         </div>
-        <div id="analyze-result" style="display:none;"></div>
+        <div id="analyze-result"></div>
     </div>
 </div>
 
 <script>
 const PENDING_COUNT = {{ stats.pending }};
+{% if last_analysis %}
+const LAST_ANALYSIS_DATA  = {{ last_analysis.result_json | safe }};
+const LAST_ANALYSIS_COUNT = {{ last_analysis.analyzed_count }};
+{% else %}
+const LAST_ANALYSIS_DATA  = null;
+const LAST_ANALYSIS_COUNT = 0;
+{% endif %}
 
 // ── 탭 전환 ──────────────────────────────────────────────────
 function switchTab(name) {
@@ -316,8 +291,13 @@ function switchTab(name) {
 
 document.addEventListener('DOMContentLoaded', () => {
     const hash = location.hash.replace('#', '');
-    const valid = ['approval', 'members', 'qna', 'analysis'];
-    switchTab(valid.includes(hash) ? hash : (PENDING_COUNT > 0 ? 'approval' : 'members'));
+    const valid = ['approval', 'qna', 'analysis'];
+    switchTab(valid.includes(hash) ? hash : (PENDING_COUNT > 0 ? 'approval' : 'qna'));
+
+    // 저장된 분석 결과 자동 렌더링
+    if (LAST_ANALYSIS_DATA) {
+        renderAnalysis(LAST_ANALYSIS_DATA, LAST_ANALYSIS_COUNT);
+    }
 });
 
 // ── 회원 관리 액션 ────────────────────────────────────────────
@@ -404,6 +384,9 @@ async function runQnaAnalysis() {
             return;
         }
         renderAnalysis(data.result, data.analyzed_count);
+        // 파일 저장 버튼 노출 (분석 후 DB 저장됐으므로)
+        const exportBtn = document.getElementById('export-btn');
+        if (exportBtn) exportBtn.style.display = '';
     } catch (e) {
         resultEl.innerHTML = `<div class="bcg-insight-warn" style="margin:16px 0;"><strong>오류:</strong> ${e.message}</div>`;
     } finally {

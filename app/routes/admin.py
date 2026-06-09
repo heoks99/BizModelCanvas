@@ -6,7 +6,7 @@ from functools import wraps
 from app import db
 from app.models.user import User
 from app.models.project import Project
-from app.models.qna import QnA, QnAComment
+from app.models.qna import QnA, QnAComment, QnAAnalysisResult
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -50,8 +50,10 @@ def index():
         .all()
     )
     recent_qnas = QnA.query.order_by(QnA.created_at.desc()).limit(30).all()
+    last_analysis = QnAAnalysisResult.query.order_by(QnAAnalysisResult.created_at.desc()).first()
     return render_template('admin/index.html', users=users, stats=stats,
-                           user_stats=user_stats, recent_qnas=recent_qnas)
+                           user_stats=user_stats, recent_qnas=recent_qnas,
+                           last_analysis=last_analysis)
 
 
 # ── QnA 대시보드 ──────────────────────────────────────────────
@@ -157,10 +159,75 @@ def analyze_qna():
         if not json_match:
             return jsonify({'ok': False, 'msg': 'AI가 JSON 형식으로 응답하지 않았습니다.', 'raw': raw[:300]})
         result = json.loads(json_match.group())
+
+        # DB 저장
+        record = QnAAnalysisResult(
+            result_json=json.dumps(result, ensure_ascii=False),
+            analyzed_count=len(qnas)
+        )
+        db.session.add(record)
+        db.session.commit()
+
         return jsonify({'ok': True, 'result': result, 'analyzed_count': len(qnas)})
     except Exception as e:
         current_app.logger.error(f'analyze_qna error: {e}', exc_info=True)
         return jsonify({'ok': False, 'msg': str(e), 'raw': raw[:300]})
+
+
+@admin_bp.route('/qna/analysis/export')
+@login_required
+@admin_required
+def export_qna_analysis():
+    from datetime import timezone, timedelta
+    from urllib.parse import quote
+    from flask import Response
+
+    record = QnAAnalysisResult.query.order_by(QnAAnalysisResult.created_at.desc()).first()
+    if not record:
+        flash('저장된 분석 결과가 없습니다. 먼저 AI 분석을 실행해주세요.', 'error')
+        return redirect(url_for('admin.index') + '#analysis')
+
+    result = json.loads(record.result_json)
+    kst = (record.created_at.replace(tzinfo=timezone.utc) + timedelta(hours=9))
+    kst_str = kst.strftime('%Y-%m-%d %H:%M')
+    ts_file = kst.strftime('%Y%m%d_%H%M')
+
+    sep = '=' * 60
+    lines = [
+        '질문 유형 AI 분석 결과',
+        f'분석일시: {kst_str} (KST)',
+        f'분석 질문 수: {record.analyzed_count}건',
+        sep, '',
+        '[ 전체 요약 ]',
+        result.get('summary', ''),
+        '',
+        '[ 질문 유형별 분류 ]',
+    ]
+    for i, cat in enumerate(result.get('categories', []), 1):
+        lines += [
+            '',
+            f"{i}. {cat.get('icon', '')} {cat.get('name', '')} ({cat.get('count', 0)}건)",
+            f"   설명: {cat.get('description', '')}",
+        ]
+        for ex in cat.get('examples', []):
+            lines.append(f"   - {ex}")
+        lines.append(f"   개선 제안: {cat.get('improvement', '')}")
+
+    lines += ['', sep, '', '[ 주요 이슈 & 사용자 니즈 ]']
+    for i, issue in enumerate(result.get('top_issues', []), 1):
+        lines.append(f"{i}. {issue}")
+
+    lines += ['', '[ 기능 개선 권고사항 ]']
+    for i, rec in enumerate(result.get('recommendations', []), 1):
+        lines.append(f"{i}. {rec}")
+
+    content = '\n'.join(lines)
+    filename = f'QnA분석결과_{ts_file}.txt'
+    return Response(
+        content.encode('utf-8-sig'),
+        mimetype='text/plain; charset=utf-8',
+        headers={'Content-Disposition': f"attachment; filename*=UTF-8''{quote(filename)}"}
+    )
 
 
 @admin_bp.route('/users/<int:user_id>')
