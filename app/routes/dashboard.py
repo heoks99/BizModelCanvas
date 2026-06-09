@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_required, current_user
 from app import db
 from app.models.project import Project, Analysis
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
@@ -203,7 +203,7 @@ def export_full_docx(project_id):
         return redirect(url_for('dashboard.project_detail', project_id=project_id))
 
     buf.seek(0)
-    ts = datetime.now().strftime('%m%d%H')
+    ts = datetime.now(timezone(timedelta(hours=9))).strftime('%m%d%H')
     filename = f"{project.name}_비즈니스모델설계_통합보고서_{ts}.pdf"
     return send_file(buf, mimetype='application/pdf',
                      as_attachment=True, download_name=filename)
