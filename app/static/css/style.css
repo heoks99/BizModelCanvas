@@ -2711,7 +2711,7 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); }
     display: flex;
     flex-direction: column;
     gap: 0;
-    max-width: 860px;
+    width: 100%;
 }
 
 .feed-entry {
