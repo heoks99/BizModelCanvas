@@ -911,8 +911,11 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); }
 
 /* ===== 환경 분석 — 관리자 순차 보기 모드 ===== */
 .env-admin-mode {
-    overflow: visible;
-    flex: none;
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 .env-admin-mode .env-top-nav {
     display: none;
@@ -920,8 +923,10 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); }
 .env-admin-mode .env-full-panel {
     display: flex;
     flex-direction: column;
+    width: 100%;
+    box-sizing: border-box;
     flex: none;
-    overflow-y: visible;
+    overflow: visible;
     border-bottom: 2px solid var(--border);
     padding-bottom: 20px;
     margin-bottom: 8px;
@@ -931,17 +936,25 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); }
 }
 .env-admin-mode .env-input-row {
     display: flex;
+    width: 100%;
+    box-sizing: border-box;
 }
 .env-admin-mode .env-result-row {
     flex: none;
+    width: 100%;
+    box-sizing: border-box;
     min-height: 0;
 }
 .env-admin-mode .env-ai-result-row {
     flex: none;
+    width: 100%;
+    box-sizing: border-box;
     overflow-y: visible;
     max-height: none;
 }
 .env-admin-panel-title {
+    width: 100%;
+    box-sizing: border-box;
     font-size: 15px;
     font-weight: 700;
     color: var(--text-primary);
