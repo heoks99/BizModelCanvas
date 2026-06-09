@@ -3582,3 +3582,411 @@ button.admin-role-badge:hover { opacity: 0.75; }
 .module-layout.input-collapsed .module-resizer { display: none; }
 .module-layout.input-collapsed .result-panel { flex: 1 !important; width: auto !important; }
 .module-layout.input-collapsed #toggle-input-btn { transform: rotate(180deg); }
+
+/* ───────────────────────────────────────────────────────────
+   게시판 (Board)
+─────────────────────────────────────────────────────────── */
+.board-page {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 28px 24px 60px;
+}
+
+/* 헤더 */
+.board-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+.board-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+.board-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+/* 탭 */
+.board-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 0;
+    border-bottom: 2px solid var(--border);
+}
+.board-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-decoration: none;
+    border-radius: 8px 8px 0 0;
+    border: 1px solid transparent;
+    border-bottom: none;
+    transition: background 0.15s, color 0.15s;
+    position: relative;
+    bottom: -2px;
+}
+.board-tab:hover {
+    color: var(--accent);
+    background: var(--bg-hover);
+}
+.board-tab.active {
+    color: var(--accent);
+    background: var(--bg-card);
+    border-color: var(--border);
+    border-bottom-color: var(--bg-card);
+}
+.board-tab-count {
+    background: var(--accent-light);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 20px;
+    min-width: 20px;
+    text-align: center;
+}
+.board-tab.active .board-tab-count {
+    background: var(--accent);
+    color: #fff;
+}
+
+/* 목록 테이블 */
+.board-list-wrap {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    overflow: hidden;
+}
+.board-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.board-table thead th {
+    background: var(--bg-secondary);
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+.board-row {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.12s;
+}
+.board-row:last-child { border-bottom: none; }
+.board-row:hover { background: var(--bg-hover); }
+.board-row-pinned { background: color-mix(in srgb, var(--accent) 4%, transparent); }
+.board-row-pinned:hover { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.board-row td { padding: 11px 14px; font-size: 13px; color: var(--text-secondary); vertical-align: middle; }
+.board-num { text-align: center; color: var(--text-muted) !important; font-size: 12px !important; }
+.pin-badge { font-size: 14px; }
+.board-title-cell { color: var(--text-primary) !important; }
+.board-item-link {
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+.board-item-link:hover { color: var(--accent); text-decoration: underline; }
+.file-icon { font-size: 13px; margin-left: 6px; opacity: 0.7; }
+.board-meta-cell { font-size: 12px !important; color: var(--text-muted) !important; white-space: nowrap; }
+
+/* 빈 목록 */
+.board-empty {
+    padding: 60px 24px;
+    text-align: center;
+    color: var(--text-muted);
+}
+.board-empty-icon { font-size: 40px; margin-bottom: 12px; }
+.board-empty p { font-size: 14px; }
+
+/* 글쓰기 버튼 */
+.btn-board-write {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.15s;
+}
+.btn-board-write:hover { opacity: 0.88; color: #fff; }
+
+/* 뒤로가기 */
+.board-back { margin-bottom: 16px; }
+.board-back-link {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.15s;
+}
+.board-back-link:hover { color: var(--accent); }
+
+/* 상세 카드 */
+.board-detail-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+}
+.board-detail-head {
+    padding: 28px 32px 20px;
+    border-bottom: 1px solid var(--border);
+}
+.board-detail-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+.board-cat-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+.board-cat-badge.notice {
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    color: var(--accent);
+}
+.board-cat-badge.manual {
+    background: color-mix(in srgb, #059669 12%, transparent);
+    color: #059669;
+}
+.board-pin-label {
+    font-size: 12px;
+    color: #d97706;
+    font-weight: 600;
+}
+.board-detail-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 14px;
+    line-height: 1.4;
+}
+.board-detail-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+.board-edited { font-style: italic; }
+
+/* 본문 */
+.board-detail-body {
+    padding: 28px 32px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    min-height: 80px;
+    border-bottom: 1px solid var(--border);
+    white-space: pre-wrap;
+}
+.board-no-content { color: var(--text-muted); font-style: italic; }
+
+/* 첨부파일 */
+.board-file-section {
+    padding: 16px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+.board-file-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+.board-file-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: background 0.15s, border-color 0.15s;
+    word-break: break-all;
+}
+.board-file-btn:hover {
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+/* 관리자 액션 */
+.board-detail-actions {
+    padding: 14px 32px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+.btn-board-edit {
+    padding: 7px 16px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.btn-board-edit:hover { background: var(--bg-hover); }
+.btn-board-delete {
+    padding: 7px 16px;
+    background: #fff1f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #dc2626;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.btn-board-delete:hover { background: #fee2e2; }
+
+/* 글쓰기·수정 폼 */
+.board-form-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+}
+.board-form-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 28px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+}
+.board-form { display: flex; flex-direction: column; gap: 20px; }
+.bf-row { display: flex; flex-direction: column; gap: 6px; }
+.bf-row-inline { flex-direction: row; align-items: center; }
+.bf-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+.bf-required { color: #ef4444; }
+.bf-radio-group { display: flex; gap: 20px; flex-wrap: wrap; }
+.bf-radio {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+.bf-radio input[type=radio] { accent-color: var(--accent); }
+.bf-check-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+.bf-check-label input[type=checkbox] { accent-color: var(--accent); }
+.bf-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: border-color 0.15s;
+}
+.bf-input:focus { outline: none; border-color: var(--accent); }
+.bf-textarea {
+    width: 100%;
+    min-height: 240px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-size: 14px;
+    line-height: 1.7;
+    resize: vertical;
+    transition: border-color 0.15s;
+    font-family: inherit;
+}
+.bf-textarea:focus { outline: none; border-color: var(--accent); }
+.bf-file {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+.bf-hint { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+.bf-current-file {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+.bf-actions {
+    display: flex;
+    gap: 10px;
+    padding-top: 8px;
+}
+.btn-board-submit {
+    padding: 10px 24px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+.btn-board-submit:hover { opacity: 0.88; }
+.btn-board-cancel {
+    padding: 10px 20px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: background 0.15s;
+}
+.btn-board-cancel:hover { background: var(--bg-hover); }

@@ -34,6 +34,9 @@
             <a href="{{ url_for('qna.index') }}" class="nav-item {% if request.blueprint == 'qna' %}active{% endif %}" title="질의응답">
                 <span class="nav-icon">💬</span><span class="nav-label"> 질의응답</span>
             </a>
+            <a href="{{ url_for('board.index') }}" class="nav-item {% if request.blueprint == 'board' %}active{% endif %}" title="게시판">
+                <span class="nav-icon">📋</span><span class="nav-label"> 게시판</span>
+            </a>
             {% if current_user.role == 'admin' %}
             <a href="{{ url_for('admin.index') }}" class="nav-item {% if request.blueprint == 'admin' %}active{% endif %}" title="관리자">
                 <span class="nav-icon">⚙️</span><span class="nav-label"> 관리자</span>

@@ -33,6 +33,7 @@ def create_app():
     from app.routes.search import search_bp
     from app.routes.qna import qna_bp
     from app.routes.admin import admin_bp
+    from app.routes.board import board_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
@@ -40,6 +41,7 @@ def create_app():
     app.register_blueprint(search_bp)
     app.register_blueprint(qna_bp)
     app.register_blueprint(admin_bp)
+    app.register_blueprint(board_bp)
 
     @app.context_processor
     def inject_sidebar_orgs():

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}{{ post.title }} — 게시판{% endblock %}
+
+{% block content %}
+<div class="board-page">
+
+  <!-- 뒤로 가기 -->
+  <div class="board-back">
+    <a href="{{ url_for('board.index', cat=post.category) }}" class="board-back-link">
+      ‹ {{ categories[post.category] }}
+    </a>
+  </div>
+
+  <!-- 게시글 -->
+  <div class="board-detail-card">
+
+    <!-- 제목 영역 -->
+    <div class="board-detail-head">
+      <div class="board-detail-meta-row">
+        <span class="board-cat-badge {{ post.category }}">
+          {% if post.category == 'notice' %}📢 공지사항{% else %}📁 매뉴얼{% endif %}
+        </span>
+        {% if post.is_pinned %}
+        <span class="board-pin-label">📌 상단고정</span>
+        {% endif %}
+      </div>
+      <h1 class="board-detail-title">{{ post.title }}</h1>
+      <div class="board-detail-info">
+        <span>👤 {{ post.owner.full_name or post.owner.username }}</span>
+        <span>📅 {{ post.created_at | kst }}</span>
+        <span>👁 {{ post.view_count or 0 }}회</span>
+        {% if post.updated_at and post.updated_at != post.created_at %}
+        <span class="board-edited">(수정됨: {{ post.updated_at | kst }})</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- 본문 -->
+    <div class="board-detail-body">
+      {% if post.content %}
+        {{ post.content | nl2br }}
+      {% else %}
+        <p class="board-no-content">본문 내용이 없습니다.</p>
+      {% endif %}
+    </div>
+
+    <!-- 첨부파일 -->
+    {% if post.file_name %}
+    <div class="board-file-section">
+      <div class="board-file-label">📎 첨부파일</div>
+      <a href="{{ url_for('board.download_file', post_id=post.id) }}" class="board-file-btn">
+        ⬇️ {{ post.file_name }}
+      </a>
+    </div>
+    {% endif %}
+
+    <!-- 관리자 액션 -->
+    {% if current_user.role == 'admin' %}
+    <div class="board-detail-actions">
+      <a href="{{ url_for('board.edit_post', post_id=post.id) }}" class="btn-board-edit">✏️ 수정</a>
+      <form action="{{ url_for('board.delete_post', post_id=post.id) }}" method="POST"
+            onsubmit="return confirm('이 게시글을 삭제하시겠습니까?');" style="display:inline">
+        <button type="submit" class="btn-board-delete">🗑 삭제</button>
+      </form>
+    </div>
+    {% endif %}
+
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}게시판 — 사업모델캔버스{% endblock %}
+
+{% block content %}
+<div class="board-page">
+
+  <!-- 헤더 -->
+  <div class="board-header">
+    <div class="board-header-left">
+      <h1 class="board-title">📋 게시판</h1>
+      <p class="board-subtitle">공지사항 및 매뉴얼을 확인하세요.</p>
+    </div>
+    {% if current_user.role == 'admin' %}
+    <a href="{{ url_for('board.new_post') }}" class="btn-board-write">✏️ 글쓰기</a>
+    {% endif %}
+  </div>
+
+  <!-- 탭 -->
+  <div class="board-tabs">
+    {% for key, label in categories.items() %}
+    <a href="{{ url_for('board.index', cat=key) }}"
+       class="board-tab {% if cat == key %}active{% endif %}">
+      {% if key == 'notice' %}📢{% else %}📁{% endif %}
+      {{ label }}
+      <span class="board-tab-count">{{ counts[key] }}</span>
+    </a>
+    {% endfor %}
+  </div>
+
+  <!-- 게시글 목록 -->
+  <div class="board-list-wrap">
+    {% if posts %}
+    <table class="board-table">
+      <thead>
+        <tr>
+          <th style="width:48px">번호</th>
+          <th>제목</th>
+          <th style="width:90px">작성자</th>
+          <th style="width:100px">날짜</th>
+          <th style="width:60px">조회</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for post in posts %}
+        <tr class="board-row {% if post.is_pinned %}board-row-pinned{% endif %}">
+          <td class="board-num">
+            {% if post.is_pinned %}
+              <span class="pin-badge">📌</span>
+            {% else %}
+              {{ post.id }}
+            {% endif %}
+          </td>
+          <td class="board-title-cell">
+            <a href="{{ url_for('board.detail', post_id=post.id) }}" class="board-item-link">
+              {{ post.title }}
+            </a>
+            {% if post.file_name %}
+            <span class="file-icon" title="{{ post.file_name }}">📎</span>
+            {% endif %}
+          </td>
+          <td class="board-meta-cell">{{ post.owner.full_name or post.owner.username }}</td>
+          <td class="board-meta-cell">{{ post.created_at | kst('%Y.%m.%d') }}</td>
+          <td class="board-meta-cell">{{ post.view_count or 0 }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="board-empty">
+      <div class="board-empty-icon">{% if cat == 'notice' %}📢{% else %}📁{% endif %}</div>
+      <p>등록된 {{ categories[cat] }}이 없습니다.</p>
+      {% if current_user.role == 'admin' %}
+      <a href="{{ url_for('board.new_post') }}" class="btn-board-write" style="margin-top:12px">✏️ 첫 번째 글 작성하기</a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

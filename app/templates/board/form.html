@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}{% if post %}게시글 수정{% else %}새 게시글{% endif %} — 게시판{% endblock %}
+
+{% block content %}
+<div class="board-page">
+
+  <div class="board-back">
+    <a href="{{ url_for('board.index') }}" class="board-back-link">‹ 게시판</a>
+  </div>
+
+  <div class="board-form-card">
+    <h2 class="board-form-title">
+      {% if post %}✏️ 게시글 수정{% else %}✏️ 새 게시글 작성{% endif %}
+    </h2>
+
+    <form method="POST" enctype="multipart/form-data" class="board-form">
+
+      <!-- 구분 -->
+      <div class="bf-row">
+        <label class="bf-label">구분 <span class="bf-required">*</span></label>
+        <div class="bf-radio-group">
+          {% for key, label in categories.items() %}
+          <label class="bf-radio">
+            <input type="radio" name="category" value="{{ key }}"
+                   {% if post and post.category == key %}checked
+                   {% elif not post and key == 'notice' %}checked{% endif %}>
+            {% if key == 'notice' %}📢{% else %}📁{% endif %} {{ label }}
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- 제목 -->
+      <div class="bf-row">
+        <label class="bf-label" for="title">제목 <span class="bf-required">*</span></label>
+        <input type="text" id="title" name="title" class="bf-input"
+               value="{{ post.title if post else '' }}"
+               placeholder="제목을 입력하세요" required maxlength="300">
+      </div>
+
+      <!-- 상단 고정 -->
+      <div class="bf-row bf-row-inline">
+        <label class="bf-check-label">
+          <input type="checkbox" name="is_pinned"
+                 {% if post and post.is_pinned %}checked{% endif %}>
+          📌 상단에 고정
+        </label>
+      </div>
+
+      <!-- 본문 -->
+      <div class="bf-row">
+        <label class="bf-label" for="content">본문</label>
+        <textarea id="content" name="content" class="bf-textarea"
+                  placeholder="내용을 입력하세요 (공지사항 내용, 매뉴얼 설명 등)">{{ post.content if post else '' }}</textarea>
+      </div>
+
+      <!-- 첨부파일 -->
+      <div class="bf-row">
+        <label class="bf-label">첨부파일</label>
+        {% if post and post.file_name %}
+        <div class="bf-current-file">
+          <span>📎 현재 파일: <strong>{{ post.file_name }}</strong></span>
+          <label class="bf-check-label" style="margin-left:16px">
+            <input type="checkbox" name="delete_file"> 파일 삭제
+          </label>
+        </div>
+        {% endif %}
+        <input type="file" name="file" class="bf-file"
+               accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.hwp,.zip,.txt,.png,.jpg">
+        <p class="bf-hint">PDF, Word, Excel, HWP, 이미지 등 (최대 16MB)</p>
+      </div>
+
+      <!-- 버튼 -->
+      <div class="bf-actions">
+        <button type="submit" class="btn-board-submit">
+          {% if post %}수정 완료{% else %}게시글 등록{% endif %}
+        </button>
+        <a href="{{ url_for('board.index') }}" class="btn-board-cancel">취소</a>
+      </div>
+
+    </form>
+  </div>
+
+</div>
+{% endblock %}
