@@ -36,6 +36,16 @@
         </div>
     </div>
 
+    <!-- 질문↔AI 답변 구분자 -->
+    <div class="qna-divider">
+        <div class="qna-divider-line"></div>
+        <span class="qna-divider-label">
+            <span class="qna-divider-dot"></span>
+            AI 답변
+        </span>
+        <div class="qna-divider-line"></div>
+    </div>
+
     <!-- ② 원본 질문 AI 답변 -->
     <div class="feed-entry feed-ai" id="entry-ai-main">
         <div class="feed-avatar feed-avatar-ai">✦</div>
@@ -73,6 +83,17 @@
 
     <!-- ③ 답글 + 각 AI 답변 피드 -->
     {% for comment in qna.comments %}
+
+    <!-- 구분자 -->
+    <div class="qna-divider">
+        <div class="qna-divider-line"></div>
+        <span class="qna-divider-label">
+            <span class="qna-divider-dot"></span>
+            답글 {{ loop.index }} — {{ comment.created_at.strftime('%Y.%m.%d %H:%M') }}
+        </span>
+        <div class="qna-divider-line"></div>
+    </div>
+
     <div class="feed-entry feed-question" id="entry-comment-{{ comment.id }}">
         <div class="feed-avatar feed-avatar-user{% if comment.owner.role == 'admin' %} feed-avatar-admin{% endif %}">
             {% if comment.owner.role == 'admin' %}🛡{% else %}👤{% endif %}
