@@ -40,7 +40,7 @@ bcg-priority-3     : 우선순위 3
 
 PROMPTS = {
     # ── STEP 1: 사업 정의 ──────────────────────────────────────────
-    'biz_definition': BMC_SYSTEM + """
+    'biz_definition': """
 [분석 대상]
 프로젝트: {project_name} / 수행 조직: {organization}
 
@@ -97,7 +97,7 @@ PROMPTS = {
 """,
 
     # ── STEP 2: 환경 분석 ──────────────────────────────────────────
-    'env_analysis': BMC_SYSTEM + """
+    'env_analysis': """
 [분석 대상]
 프로젝트: {project_name} / 수행 조직: {organization}
 
@@ -156,7 +156,7 @@ VRIO 데이터: {vrio_data}
 """,
 
     # ── STEP 3: 가치 설계 ──────────────────────────────────────────
-    'value_design': BMC_SYSTEM + """
+    'value_design': """
 [분석 대상]
 프로젝트: {project_name} / 수행 조직: {organization}
 
@@ -179,7 +179,7 @@ VRIO 데이터: {vrio_data}
 """,
 
     # ── STEP 4: 수익 구조 ──────────────────────────────────────────
-    'revenue_model': BMC_SYSTEM + """
+    'revenue_model': """
 [분석 대상]
 프로젝트: {project_name} / 수행 조직: {organization}
 
@@ -202,7 +202,7 @@ VRIO 데이터: {vrio_data}
 """,
 
     # ── STEP 5: 실행 체계 ──────────────────────────────────────────
-    'execution': BMC_SYSTEM + """
+    'execution': """
 [분석 대상]
 프로젝트: {project_name} / 수행 조직: {organization}
 
@@ -225,7 +225,7 @@ VRIO 데이터: {vrio_data}
 """,
 
     # ── STEP 6: 검증·정제 ──────────────────────────────────────────
-    'validation': BMC_SYSTEM + """
+    'validation': """
 [분석 대상]
 프로젝트: {project_name} / 수행 조직: {organization}
 
@@ -307,6 +307,8 @@ def _call_claude(client, **kwargs):
     """Call client.messages.create with retry on HTTP 529 overloaded."""
     if 'thinking' not in kwargs:
         kwargs['thinking'] = {'type': 'adaptive'}
+    if isinstance(kwargs.get('system'), str):
+        kwargs['system'] = [{'type': 'text', 'text': kwargs['system'], 'cache_control': {'type': 'ephemeral'}}]
     last_exc = None
     for attempt, delay in enumerate([0] + _RETRY_DELAYS):
         if delay:
@@ -445,7 +447,7 @@ def ask_field_with_claude(_module_type: str, field_label: str, question: str, pr
 
 
 ENV_ANALYSIS_SUB_PROMPTS = {
-    'pestel': BMC_SYSTEM + """
+    'pestel': """
 [분석 대상]
 프로젝트: {project_name} / 수행 조직: {organization}
 [입력 데이터]
@@ -458,7 +460,7 @@ PESTEL 데이터: {pestel_data}
    영향도: bcg-badge-high(높음)/bcg-badge-mid(중간)/bcg-badge-low(낮음)
 3. 핵심 시사점 (bcg-implication 2~3개)
 """,
-    'five_forces': BMC_SYSTEM + """
+    'five_forces': """
 [분석 대상]
 프로젝트: {project_name} / 수행 조직: {organization}
 [입력 데이터]
@@ -470,7 +472,7 @@ PESTEL 데이터: {pestel_data}
    행: 기존 경쟁자 경쟁 / 신규 진입 위협 / 대체재 위협 / 구매자 협상력 / 공급자 협상력
 3. 대응 전략 권고 (bcg-implication 2~3개)
 """,
-    'swot': BMC_SYSTEM + """
+    'swot': """
 [분석 대상]
 프로젝트: {project_name} / 수행 조직: {organization}
 [입력 데이터]
@@ -481,7 +483,7 @@ SWOT 데이터: {swot_data}
 2. SO·ST·WO·WT 전략 도출 표 (bcg-table) 컬럼: 전략 유형 | 핵심 전략 내용 | 우선순위
    행: SO전략 / ST전략 / WO전략 / WT전략
 """,
-    'vrio': BMC_SYSTEM + """
+    'vrio': """
 [분석 대상]
 프로젝트: {project_name} / 수행 조직: {organization}
 [입력 데이터]
@@ -493,7 +495,7 @@ VRIO 데이터: {vrio_data}
    경쟁우위: bcg-badge-low(지속적 우위)/bcg-badge-mid(일시적 우위)/bcg-badge-high(열위)
 3. 핵심 역량 강화 권고 (bcg-implication 2~3개)
 """,
-    'segment': BMC_SYSTEM + """
+    'segment': """
 [분석 대상]
 프로젝트: {project_name} / 수행 조직: {organization}
 [입력 데이터]
@@ -544,6 +546,7 @@ def analyze_with_claude(module_type: str, input_data: dict, project_name: str, i
             message = _call_claude(client,
                 model='claude-opus-4-8',
                 max_tokens=ANALYZE_MAX_TOKENS,
+                system=BMC_SYSTEM,
                 messages=[{'role': 'user', 'content': prompt}]
             )
             result = _extract_text(message).strip()
@@ -582,6 +585,7 @@ def analyze_with_claude(module_type: str, input_data: dict, project_name: str, i
         message = _call_claude(client,
             model='claude-opus-4-8',
             max_tokens=ANALYZE_MAX_TOKENS,
+            system=BMC_SYSTEM,
             messages=[{'role': 'user', 'content': prompt}]
         )
         result = _extract_text(message).strip()
@@ -599,6 +603,7 @@ def analyze_with_claude(module_type: str, input_data: dict, project_name: str, i
             shorten_msg = _call_claude(client,
                 model='claude-opus-4-8',
                 max_tokens=ANALYZE_MAX_TOKENS,
+                system=BMC_SYSTEM,
                 messages=[{'role': 'user', 'content': shorten_prompt}]
             )
             result = _extract_text(shorten_msg).strip()

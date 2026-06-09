@@ -18,7 +18,7 @@ def _call_claude(system, user_msg, app):
         model='claude-opus-4-8',
         max_tokens=4000,
         thinking={'type': 'adaptive'},
-        system=system,
+        system=[{'type': 'text', 'text': system, 'cache_control': {'type': 'ephemeral'}}],
         messages=[{'role': 'user', 'content': user_msg}]
     )
     result = next(b.text for b in message.content if b.type == 'text').strip()
