@@ -106,8 +106,9 @@ def _async_answer_comment(app, comment_id, qna_id, project_context):
 @qna_bp.route('/')
 @login_required
 def index():
-    qnas = QnA.query.filter_by(owner_id=current_user.id).order_by(QnA.created_at.desc()).all()
-    return render_template('qna/index.html', qnas=qnas)
+    is_admin = current_user.role == 'admin'
+    qnas = QnA.query.order_by(QnA.created_at.desc()).all()
+    return render_template('qna/index.html', qnas=qnas, is_admin=is_admin)
 
 
 @qna_bp.route('/new', methods=['GET', 'POST'])
@@ -155,15 +156,17 @@ def new():
 @qna_bp.route('/<int:qna_id>')
 @login_required
 def detail(qna_id):
-    qna = QnA.query.filter_by(id=qna_id, owner_id=current_user.id).first_or_404()
-    return render_template('qna/detail.html', qna=qna)
+    qna = QnA.query.filter_by(id=qna_id).first_or_404()
+    is_owner = qna.owner_id == current_user.id
+    is_admin = current_user.role == 'admin'
+    return render_template('qna/detail.html', qna=qna, is_owner=is_owner, is_admin=is_admin)
 
 
 # ── AI 상태 폴링 ──────────────────────────────────────────────
 @qna_bp.route('/<int:qna_id>/status')
 @login_required
 def status(qna_id):
-    qna = QnA.query.filter_by(id=qna_id, owner_id=current_user.id).first_or_404()
+    qna = QnA.query.filter_by(id=qna_id).first_or_404()
     return jsonify({
         'pending': qna.ai_pending,
         'answer': qna.ai_answer,
@@ -173,7 +176,7 @@ def status(qna_id):
 @qna_bp.route('/<int:qna_id>/comment/<int:comment_id>/status')
 @login_required
 def comment_status(qna_id, comment_id):
-    QnA.query.filter_by(id=qna_id, owner_id=current_user.id).first_or_404()
+    QnA.query.filter_by(id=qna_id).first_or_404()
     comment = QnAComment.query.filter_by(id=comment_id, qna_id=qna_id).first_or_404()
     return jsonify({
         'pending': comment.ai_pending,
@@ -185,7 +188,11 @@ def comment_status(qna_id, comment_id):
 @qna_bp.route('/<int:qna_id>/request_ai', methods=['POST'])
 @login_required
 def request_ai(qna_id):
-    qna = QnA.query.filter_by(id=qna_id, owner_id=current_user.id).first_or_404()
+    qna = QnA.query.filter_by(id=qna_id).first_or_404()
+    is_owner = qna.owner_id == current_user.id
+    is_admin = current_user.role == 'admin'
+    if not is_owner and not is_admin:
+        return jsonify({'ok': False, 'msg': '권한이 없습니다.'})
     if qna.ai_pending:
         return jsonify({'ok': False, 'msg': '이미 생성 중입니다.'})
     qna.ai_pending = True
@@ -203,8 +210,12 @@ def request_ai(qna_id):
 @qna_bp.route('/<int:qna_id>/comment/<int:comment_id>/request_ai', methods=['POST'])
 @login_required
 def request_comment_ai(qna_id, comment_id):
-    QnA.query.filter_by(id=qna_id, owner_id=current_user.id).first_or_404()
+    QnA.query.filter_by(id=qna_id).first_or_404()
     comment = QnAComment.query.filter_by(id=comment_id, qna_id=qna_id).first_or_404()
+    is_comment_owner = comment.owner_id == current_user.id
+    is_admin = current_user.role == 'admin'
+    if not is_comment_owner and not is_admin:
+        return jsonify({'ok': False, 'msg': '권한이 없습니다.'})
     if comment.ai_pending:
         return jsonify({'ok': False, 'msg': '이미 생성 중입니다.'})
     comment.ai_pending = True
@@ -224,7 +235,13 @@ def request_comment_ai(qna_id, comment_id):
 @qna_bp.route('/<int:qna_id>/comment', methods=['POST'])
 @login_required
 def add_comment(qna_id):
-    qna = QnA.query.filter_by(id=qna_id, owner_id=current_user.id).first_or_404()
+    qna = QnA.query.filter_by(id=qna_id).first_or_404()
+    is_owner = qna.owner_id == current_user.id
+    is_admin = current_user.role == 'admin'
+    if not is_owner and not is_admin:
+        flash('답글 작성 권한이 없습니다.', 'error')
+        return redirect(url_for('qna.detail', qna_id=qna_id))
+
     content = request.form.get('content', '').strip()
     want_ai = request.form.get('want_ai') == '1'
 
@@ -255,8 +272,13 @@ def add_comment(qna_id):
 @qna_bp.route('/<int:qna_id>/comment/<int:comment_id>/delete', methods=['POST'])
 @login_required
 def delete_comment(qna_id, comment_id):
-    QnA.query.filter_by(id=qna_id, owner_id=current_user.id).first_or_404()
+    QnA.query.filter_by(id=qna_id).first_or_404()
     comment = QnAComment.query.filter_by(id=comment_id, qna_id=qna_id).first_or_404()
+    is_comment_owner = comment.owner_id == current_user.id
+    is_admin = current_user.role == 'admin'
+    if not is_comment_owner and not is_admin:
+        flash('삭제 권한이 없습니다.', 'error')
+        return redirect(url_for('qna.detail', qna_id=qna_id))
     db.session.delete(comment)
     db.session.commit()
     return redirect(url_for('qna.detail', qna_id=qna_id))
@@ -265,7 +287,12 @@ def delete_comment(qna_id, comment_id):
 @qna_bp.route('/<int:qna_id>/delete', methods=['POST'])
 @login_required
 def delete(qna_id):
-    qna = QnA.query.filter_by(id=qna_id, owner_id=current_user.id).first_or_404()
+    qna = QnA.query.filter_by(id=qna_id).first_or_404()
+    is_owner = qna.owner_id == current_user.id
+    is_admin = current_user.role == 'admin'
+    if not is_owner and not is_admin:
+        flash('삭제 권한이 없습니다.', 'error')
+        return redirect(url_for('qna.detail', qna_id=qna_id))
     db.session.delete(qna)
     db.session.commit()
     flash('질문이 삭제되었습니다.', 'success')

@@ -7,10 +7,12 @@
         <h1 class="page-title">💬 질의응답</h1>
     </div>
     <div class="page-actions">
+        {% if is_owner or is_admin %}
         <form method="POST" action="{{ url_for('qna.delete', qna_id=qna.id) }}"
               onsubmit="return confirm('이 질문을 삭제하시겠습니까?')">
             <button type="submit" class="btn btn-ghost" style="color:var(--danger)">🗑 삭제</button>
         </form>
+        {% endif %}
     </div>
 </div>
 
@@ -41,7 +43,7 @@
             <div class="feed-bubble-header">
                 <span class="model-badge-v2">✦ Claude AI</span>
                 <div class="feed-ai-actions">
-                    {% if not qna.ai_pending and qna.ai_answer %}
+                    {% if (is_owner or is_admin) and not qna.ai_pending and qna.ai_answer %}
                     <button class="btn btn-ghost btn-sm"
                             onclick="requestAI({{ qna.id }}, 'main')">↺ 재답변</button>
                     {% endif %}
@@ -58,9 +60,11 @@
                 {% else %}
                 <div class="feed-no-answer">
                     <p>아직 AI 답변이 없습니다.</p>
+                    {% if is_owner or is_admin %}
                     <button class="btn btn-ai btn-sm" onclick="requestAI({{ qna.id }}, 'main')">
                         🤖 AI 답변 받기
                     </button>
+                    {% endif %}
                 </div>
                 {% endif %}
             </div>
@@ -70,31 +74,39 @@
     <!-- ③ 답글 + 각 AI 답변 피드 -->
     {% for comment in qna.comments %}
     <div class="feed-entry feed-question" id="entry-comment-{{ comment.id }}">
-        <div class="feed-avatar feed-avatar-user">👤</div>
-        <div class="feed-bubble">
+        <div class="feed-avatar feed-avatar-user{% if comment.owner.role == 'admin' %} feed-avatar-admin{% endif %}">
+            {% if comment.owner.role == 'admin' %}🛡{% else %}👤{% endif %}
+        </div>
+        <div class="feed-bubble{% if comment.owner.role == 'admin' %} feed-bubble-admin{% endif %}">
             <div class="feed-bubble-header">
                 <div class="feed-meta">
                     <span class="feed-author">{{ comment.owner.username }}</span>
+                    {% if comment.owner.role == 'admin' %}
+                    <span class="qna-admin-badge">관리자</span>
+                    {% endif %}
                     <span class="qna-date">{{ comment.created_at.strftime('%Y.%m.%d %H:%M') }}</span>
+                    {% if comment.owner_id == current_user.id or is_admin %}
                     <form method="POST"
                           action="{{ url_for('qna.delete_comment', qna_id=qna.id, comment_id=comment.id) }}"
                           onsubmit="return confirm('이 답글을 삭제하시겠습니까?')"
                           style="margin-left:auto">
                         <button type="submit" class="btn-icon-sm" title="삭제">✕</button>
                     </form>
+                    {% endif %}
                 </div>
             </div>
             <div class="feed-content">{{ comment.content | nl2br }}</div>
         </div>
     </div>
 
+    {% if comment.owner.role != 'admin' %}
     <div class="feed-entry feed-ai" id="entry-ai-comment-{{ comment.id }}">
         <div class="feed-avatar feed-avatar-ai">✦</div>
         <div class="feed-bubble feed-bubble-ai">
             <div class="feed-bubble-header">
                 <span class="model-badge-v2">✦ Claude AI</span>
                 <div class="feed-ai-actions">
-                    {% if not comment.ai_pending and comment.ai_answer %}
+                    {% if (comment.owner_id == current_user.id or is_admin) and not comment.ai_pending and comment.ai_answer %}
                     <button class="btn btn-ghost btn-sm"
                             onclick="requestCommentAI({{ qna.id }}, {{ comment.id }})">↺ 재답변</button>
                     {% endif %}
@@ -111,36 +123,48 @@
                 {% else %}
                 <div class="feed-no-answer">
                     <p>아직 AI 답변이 없습니다.</p>
+                    {% if comment.owner_id == current_user.id or is_admin %}
                     <button class="btn btn-ai btn-sm"
                             onclick="requestCommentAI({{ qna.id }}, {{ comment.id }})">
                         🤖 AI 답변 받기
                     </button>
+                    {% endif %}
                 </div>
                 {% endif %}
             </div>
         </div>
     </div>
+    {% endif %}
     {% endfor %}
 
-    <!-- ④ 답글 입력 -->
+    <!-- ④ 답글 입력 (질문 작성자 + 관리자만) -->
+    {% if is_owner or is_admin %}
     <div class="feed-reply-box" id="reply-box">
-        <div class="feed-avatar feed-avatar-user">👤</div>
+        <div class="feed-avatar feed-avatar-user{% if is_admin and not is_owner %} feed-avatar-admin{% endif %}">
+            {% if is_admin and not is_owner %}🛡{% else %}👤{% endif %}
+        </div>
         <div class="feed-reply-form">
+            {% if is_admin and not is_owner %}
+            <div class="qna-admin-reply-notice">관리자 답변 작성 중</div>
+            {% endif %}
             <form method="POST" action="{{ url_for('qna.add_comment', qna_id=qna.id) }}" id="reply-form">
                 <input type="hidden" name="want_ai" id="reply_want_ai" value="0">
                 <textarea name="content" id="reply-textarea" class="feed-reply-textarea"
-                          rows="3" placeholder="답글을 입력하세요..."></textarea>
+                          rows="3" placeholder="{% if is_admin and not is_owner %}관리자 답변을 입력하세요...{% else %}답글을 입력하세요...{% endif %}"></textarea>
                 <div class="feed-reply-actions">
                     <div style="display:flex; gap:8px;">
                         <button type="button" class="btn btn-secondary btn-sm"
                                 onclick="submitReply(0)">💾 답글 저장</button>
+                        {% if not (is_admin and not is_owner) %}
                         <button type="button" class="btn btn-ai btn-sm"
                                 onclick="submitReply(1)">🤖 저장 + AI 답변</button>
+                        {% endif %}
                     </div>
                 </div>
             </form>
         </div>
     </div>
+    {% endif %}
 
 </div><!-- /qna-feed -->
 
@@ -174,7 +198,6 @@ function showLoading(el) {
 }
 
 function addReAnswerBtn(el, onclick) {
-    // 헤더에 재답변 버튼 추가
     const header = el.closest('.feed-bubble').querySelector('.feed-ai-actions');
     if (header && !header.querySelector('button')) {
         const btn = document.createElement('button');

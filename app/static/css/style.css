@@ -1255,9 +1255,9 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); }
 .ai-loading-orb {
     width: 48px; height: 48px;
     border-radius: 50%;
-    background: conic-gradient(from 0deg, #4f6ef7, #a78bfa, #4f6ef7);
+    background: conic-gradient(from 0deg, #1E3A5F, #0D9488, #1E3A5F);
     animation: spin 1.2s linear infinite;
-    box-shadow: 0 0 24px rgba(79,110,247,0.4);
+    box-shadow: 0 0 20px rgba(30,58,95,0.3);
 }
 .ai-loading-text {
     font-size: 14px;
@@ -2344,6 +2344,54 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); }
     font-weight: 600;
     white-space: nowrap;
 }
+.qna-author-tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    background: var(--bg-hover);
+    color: var(--text-secondary);
+    font-weight: 600;
+    border: 1px solid var(--border);
+}
+.qna-comment-count {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+.qna-admin-badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: #1E3A5F;
+    color: #FFFFFF;
+    font-weight: 700;
+}
+
+/* 관리자 답변 아바타·버블 */
+.feed-avatar-admin {
+    background: #1E3A5F;
+    border: 2px solid #0D9488;
+    color: #FFFFFF;
+}
+.feed-bubble-admin {
+    border-color: #1E3A5F;
+    border-left: 3px solid #0D9488;
+}
+.feed-bubble-admin .feed-bubble-header {
+    background: #EFF6FF;
+    border-color: #D1DAE6;
+}
+
+/* 관리자 답변 입력 알림 */
+.qna-admin-reply-notice {
+    font-size: 12px;
+    font-weight: 700;
+    color: #1E3A5F;
+    background: #EFF6FF;
+    border: 1px solid #D1DAE6;
+    border-radius: 6px 6px 0 0;
+    padding: 6px 12px;
+    margin-bottom: -1px;
+}
 
 /* ===== Q&A 상세 ===== */
 .qna-detail-question {
@@ -2576,9 +2624,9 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); }
     border: 1px solid var(--border);
 }
 .feed-avatar-ai {
-    background: var(--accent-light);
-    border: 1px solid var(--accent);
-    color: var(--accent);
+    background: #1E3A5F;
+    border: 1px solid #1E3A5F;
+    color: #FFFFFF;
     font-size: 14px;
     font-weight: 700;
 }
@@ -2592,8 +2640,9 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); }
     overflow: hidden;
 }
 .feed-bubble-ai {
-    background: rgba(79,110,247,0.04);
-    border-color: rgba(79,110,247,0.25);
+    background: #FFFFFF;
+    border-color: #D1DAE6;
+    border-left: 3px solid #1E3A5F;
 }
 
 .feed-bubble-header {
@@ -2605,8 +2654,14 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); }
     gap: 10px;
 }
 .feed-bubble-ai .feed-bubble-header {
-    border-color: rgba(79,110,247,0.2);
-    background: rgba(79,110,247,0.06);
+    border-color: #D1DAE6;
+    background: #F0F4FF;
+}
+
+/* AI 버블 콘텐츠 — 강제 라이트 배경 (WCAG 2.1 AA) */
+.feed-bubble-ai .feed-ai-content {
+    background: #FFFFFF;
+    color: #111827;
 }
 
 .feed-meta {
