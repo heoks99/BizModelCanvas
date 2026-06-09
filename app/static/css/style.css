@@ -1556,6 +1556,17 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); }
 .ask-all-info-val {
     color: var(--text-primary);
 }
+.ask-all-info-full {
+    flex-direction: column;
+    gap: 4px;
+}
+.ask-all-info-full .ask-all-info-val {
+    display: block;
+    white-space: pre-line;
+    max-height: 7.5em;
+    overflow-y: auto;
+    line-height: 1.5;
+}
 .ask-all-input-label {
     display: block;
     font-size: 12px;
