@@ -294,7 +294,7 @@
                     빈번하게 질문되는 유형을 파악하고, 각 유형별 사용자 니즈와 서비스 개선 방안을 도출합니다.
                 </div>
             </div>
-            <button class="btn btn-ai" id="analyze-btn" onclick="runAnalysis()">✦ AI 분석 실행</button>
+            <button class="btn btn-ai" id="analyze-btn" onclick="runQnaAnalysis()">✦ AI 분석 실행</button>
         </div>
         <div id="analyze-result" style="display:none;"></div>
     </div>
@@ -374,7 +374,7 @@ async function setStatus(userId, status) {
 }
 
 // ── 질문 유형 AI 분석 ─────────────────────────────────────────
-async function runAnalysis() {
+async function runQnaAnalysis() {
     const btn = document.getElementById('analyze-btn');
     const resultEl = document.getElementById('analyze-result');
     btn.disabled = true;
