@@ -3322,6 +3322,69 @@ button.admin-role-badge:hover { opacity: 0.75; }
     border-radius: 20px;
 }
 
+/* ===== Admin Tab Navigation ===== */
+.admin-tab-nav {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+    overflow-x: auto;
+}
+.admin-tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: inherit;
+    white-space: nowrap;
+    margin-bottom: -1px;
+    transition: color 0.15s;
+}
+.admin-tab-btn:hover { color: var(--text-primary); }
+.admin-tab-btn.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    font-weight: 700;
+}
+.admin-tab-badge {
+    background: var(--warning);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 20px;
+    line-height: 1.6;
+}
+.admin-tab-content { display: none; }
+.admin-tab-content.active { display: block; }
+.admin-empty-notice {
+    padding: 16px 20px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+}
+.admin-stats-row-wrap {
+    margin-bottom: 8px;
+}
+.admin-stats-row-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
 /* ===== 리사이즈 가능 카드 ===== */
 .resizable-card-wrap {
     display: flex;

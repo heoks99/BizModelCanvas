@@ -25,18 +25,33 @@ def admin_required(f):
 @login_required
 @admin_required
 def index():
+    from sqlalchemy import func
     users = User.query.order_by(User.created_at.desc()).all()
     stats = {
-        'total':    User.query.count(),
-        'pending':  User.query.filter_by(status='pending').count(),
-        'active':   User.query.filter_by(status='active').count(),
-        'inactive': User.query.filter_by(status='inactive').count(),
-        'projects': Project.query.count(),
-        'qna_total':    QnA.query.count(),
-        'qna_answered': QnA.query.filter(QnA.ai_answer.isnot(None)).count(),
-        'qna_comments': QnAComment.query.count(),
+        'total':         User.query.count(),
+        'pending':       User.query.filter_by(status='pending').count(),
+        'active':        User.query.filter_by(status='active').count(),
+        'inactive':      User.query.filter_by(status='inactive').count(),
+        'projects':      Project.query.count(),
+        'qna_total':     QnA.query.count(),
+        'qna_answered':  QnA.query.filter(QnA.ai_answer.isnot(None)).count(),
+        'qna_pending':   QnA.query.filter_by(ai_pending=True).count(),
+        'qna_no_answer': QnA.query.filter(QnA.ai_answer.is_(None), QnA.ai_pending == False).count(),
+        'qna_comments':  QnAComment.query.count(),
     }
-    return render_template('admin/index.html', users=users, stats=stats)
+    user_stats = (
+        db.session.query(
+            User.id, User.username, User.full_name, User.organization,
+            func.count(QnA.id).label('qna_count'),
+        )
+        .outerjoin(QnA, User.id == QnA.owner_id)
+        .group_by(User.id)
+        .order_by(func.count(QnA.id).desc())
+        .all()
+    )
+    recent_qnas = QnA.query.order_by(QnA.created_at.desc()).limit(30).all()
+    return render_template('admin/index.html', users=users, stats=stats,
+                           user_stats=user_stats, recent_qnas=recent_qnas)
 
 
 # ── QnA 대시보드 ──────────────────────────────────────────────

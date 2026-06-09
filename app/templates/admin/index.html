@@ -4,150 +4,332 @@
 <div class="page-header">
     <div>
         <h1 class="page-title">⚙️ 관리자</h1>
-        <p class="page-desc">회원 승인 및 계정 관리</p>
+        <p class="page-desc">회원 관리, 질의응답 현황 및 AI 분석</p>
     </div>
 </div>
 
-<!-- 통계 카드 -->
-<div class="admin-stats">
-    <div class="admin-stat-card">
-        <div class="admin-stat-num">{{ stats.total }}</div>
-        <div class="admin-stat-label">전체 회원</div>
-    </div>
-    <div class="admin-stat-card admin-stat-pending">
-        <div class="admin-stat-num">{{ stats.pending }}</div>
-        <div class="admin-stat-label">승인 대기</div>
-    </div>
-    <div class="admin-stat-card admin-stat-active">
-        <div class="admin-stat-num">{{ stats.active }}</div>
-        <div class="admin-stat-label">활성 회원</div>
-    </div>
-    <div class="admin-stat-card admin-stat-inactive">
-        <div class="admin-stat-num">{{ stats.inactive }}</div>
-        <div class="admin-stat-label">비활성</div>
-    </div>
-    <div class="admin-stat-card">
-        <div class="admin-stat-num">{{ stats.projects }}</div>
-        <div class="admin-stat-label">전체 프로젝트</div>
-    </div>
-    <div class="admin-stat-card admin-stat-qna">
-        <div class="admin-stat-num">{{ stats.qna_total }}</div>
-        <div class="admin-stat-label">전체 질문</div>
-    </div>
-    <div class="admin-stat-card admin-stat-active">
-        <div class="admin-stat-num">{{ stats.qna_answered }}</div>
-        <div class="admin-stat-label">AI 답변 완료</div>
-    </div>
-    <div class="admin-stat-card">
-        <div class="admin-stat-num">{{ stats.qna_comments }}</div>
-        <div class="admin-stat-label">답글 수</div>
-    </div>
-</div>
-
-<!-- QnA 분석 바로가기 -->
-<div class="admin-qna-shortcut">
-    <div class="admin-qna-shortcut-info">
-        <span class="admin-qna-shortcut-icon">💬</span>
-        <div>
-            <div class="admin-qna-shortcut-title">질의응답 현황 &amp; AI 분석</div>
-            <div class="admin-qna-shortcut-desc">사용자별 질문 통계, 최근 질의응답 목록, 유형별 AI 요약 분석</div>
+<!-- 회원 현황 통계 -->
+<div class="admin-stats-row-wrap">
+    <div class="admin-stats-row-label">회원 현황</div>
+    <div class="admin-stats">
+        <div class="admin-stat-card">
+            <div class="admin-stat-num">{{ stats.total }}</div>
+            <div class="admin-stat-label">전체 회원</div>
+        </div>
+        <div class="admin-stat-card admin-stat-pending">
+            <div class="admin-stat-num">{{ stats.pending }}</div>
+            <div class="admin-stat-label">승인 대기</div>
+        </div>
+        <div class="admin-stat-card admin-stat-active">
+            <div class="admin-stat-num">{{ stats.active }}</div>
+            <div class="admin-stat-label">활성 회원</div>
+        </div>
+        <div class="admin-stat-card admin-stat-inactive">
+            <div class="admin-stat-num">{{ stats.inactive }}</div>
+            <div class="admin-stat-label">비활성</div>
+        </div>
+        <div class="admin-stat-card">
+            <div class="admin-stat-num">{{ stats.projects }}</div>
+            <div class="admin-stat-label">전체 프로젝트</div>
         </div>
     </div>
-    <a href="{{ url_for('admin.qna_dashboard') }}" class="btn btn-primary btn-sm">📊 QnA 대시보드 →</a>
 </div>
 
-<!-- 승인 대기 -->
-{% set pending_users = users | selectattr('status', 'eq', 'pending') | list %}
-{% if pending_users %}
-<div class="admin-section-label" style="color:var(--warning);">⏳ 승인 대기 ({{ pending_users|length }})</div>
-<div class="admin-table-wrap" style="margin-bottom:28px;">
-    <table class="admin-table">
-        <thead>
-            <tr><th>이름</th><th>아이디</th><th>이메일</th><th>조직</th><th>직책</th><th>가입일</th><th>승인</th></tr>
-        </thead>
-        <tbody>
-        {% for u in pending_users %}
-        <tr id="row-{{ u.id }}">
-            <td>{{ u.full_name or '—' }}</td>
-            <td><span class="admin-username">{{ u.username }}</span></td>
-            <td>{{ u.email }}</td>
-            <td>{{ u.organization or '—' }}</td>
-            <td>{{ u.job_title or '—' }}</td>
-            <td>{{ u.created_at | kst('%Y.%m.%d') }}</td>
-            <td>
-                <button class="btn btn-ai btn-sm"
-                        onclick="approveUser({{ u.id }})">✓ 승인</button>
-                <button class="btn btn-ghost btn-sm"
-                        onclick="setStatus({{ u.id }}, 'inactive')">✕ 거절</button>
-            </td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+<!-- 질의응답 통계 -->
+<div class="admin-stats-row-wrap" style="margin-bottom:28px;">
+    <div class="admin-stats-row-label">질의응답 현황</div>
+    <div class="admin-stats">
+        <div class="admin-stat-card admin-stat-qna">
+            <div class="admin-stat-num">{{ stats.qna_total }}</div>
+            <div class="admin-stat-label">전체 질문</div>
+        </div>
+        <div class="admin-stat-card admin-stat-active">
+            <div class="admin-stat-num">{{ stats.qna_answered }}</div>
+            <div class="admin-stat-label">AI 답변 완료</div>
+        </div>
+        <div class="admin-stat-card admin-stat-pending">
+            <div class="admin-stat-num">{{ stats.qna_pending }}</div>
+            <div class="admin-stat-label">답변 생성 중</div>
+        </div>
+        <div class="admin-stat-card admin-stat-inactive">
+            <div class="admin-stat-num">{{ stats.qna_no_answer }}</div>
+            <div class="admin-stat-label">미답변</div>
+        </div>
+        <div class="admin-stat-card">
+            <div class="admin-stat-num">{{ stats.qna_comments }}</div>
+            <div class="admin-stat-label">전체 답글</div>
+        </div>
+        {% if stats.qna_total > 0 %}
+        <div class="admin-stat-card admin-stat-qna">
+            <div class="admin-stat-num">{{ (stats.qna_answered / stats.qna_total * 100) | int }}%</div>
+            <div class="admin-stat-label">AI 답변율</div>
+        </div>
+        {% endif %}
+    </div>
 </div>
-{% endif %}
 
-<!-- 전체 회원 목록 -->
-<div class="admin-section-label">전체 회원</div>
-<div class="admin-table-wrap">
-    <table class="admin-table">
-        <thead>
-            <tr><th>이름</th><th>아이디</th><th>이메일</th><th>조직</th><th>직책</th><th>역할</th><th>상태</th><th>가입일</th><th>관리</th></tr>
-        </thead>
-        <tbody>
-        {% for u in users %}
-        <tr id="row-all-{{ u.id }}">
-            <td>{{ u.full_name or '—' }}</td>
-            <td><a href="{{ url_for('admin.user_detail', user_id=u.id) }}" class="admin-link">{{ u.username }}</a></td>
-            <td>{{ u.email }}</td>
-            <td>{{ u.organization or '—' }}</td>
-            <td>{{ u.job_title or '—' }}</td>
-            <td>
-                {% if u.id != current_user.id %}
-                <button class="admin-role-badge {% if u.role == 'admin' %}role-admin{% else %}role-member{% endif %}"
-                        id="role-badge-{{ u.id }}"
-                        onclick="toggleRole({{ u.id }}, '{{ u.role }}')">
-                    {{ '관리자' if u.role == 'admin' else '일반' }}
-                </button>
-                {% else %}
-                <span class="admin-role-badge role-admin">관리자 (나)</span>
-                {% endif %}
-            </td>
-            <td>
-                <span class="admin-status-badge status-{{ u.status }}" id="status-badge-{{ u.id }}">
-                    {{ {'pending':'대기','active':'활성','inactive':'비활성'}.get(u.status, u.status) }}
-                </span>
-            </td>
-            <td>{{ u.created_at | kst('%Y.%m.%d') }}</td>
-            <td class="admin-actions">
-                <a href="{{ url_for('admin.edit_user', user_id=u.id) }}" class="btn btn-ghost btn-sm">수정</a>
-                {% if u.id != current_user.id %}
-                {% if u.status == 'active' %}
-                <button class="btn btn-ghost btn-sm" onclick="setStatus({{ u.id }}, 'inactive')">비활성</button>
-                {% else %}
-                <button class="btn btn-ghost btn-sm" onclick="setStatus({{ u.id }}, 'active')">활성화</button>
-                {% endif %}
-                <form method="POST" action="{{ url_for('admin.delete_user', user_id=u.id) }}"
-                      onsubmit="return confirm('{{ u.username }} 계정을 삭제하시겠습니까?\n해당 사용자의 모든 프로젝트도 삭제됩니다.')"
-                      style="display:inline">
-                    <button type="submit" class="btn btn-sm" style="color:var(--danger); border-color:rgba(239,68,68,0.3);">삭제</button>
-                </form>
-                {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+<!-- 탭 네비게이션 -->
+<div class="admin-tab-nav">
+    <button class="admin-tab-btn" id="tab-btn-approval" onclick="switchTab('approval')">
+        ⏳ 회원 승인 &amp; 계정 관리
+        {% if stats.pending > 0 %}<span class="admin-tab-badge">{{ stats.pending }}</span>{% endif %}
+    </button>
+    <button class="admin-tab-btn" id="tab-btn-members" onclick="switchTab('members')">
+        👥 전체 회원
+    </button>
+    <button class="admin-tab-btn" id="tab-btn-qna" onclick="switchTab('qna')">
+        💬 질의응답 현황
+    </button>
+    <button class="admin-tab-btn" id="tab-btn-analysis" onclick="switchTab('analysis')">
+        🤖 질문 유형 AI 분석
+    </button>
+</div>
+
+<!-- ① 회원 승인 & 계정 관리 탭 -->
+<div id="tab-approval" class="admin-tab-content">
+    {% set pending_users = users | selectattr('status', 'eq', 'pending') | list %}
+    {% if pending_users %}
+    <div class="admin-section-label" style="color:var(--warning);">⏳ 승인 대기 ({{ pending_users|length }}명)</div>
+    <div class="admin-table-wrap" style="margin-bottom:28px;">
+        <table class="admin-table">
+            <thead>
+                <tr><th>이름</th><th>아이디</th><th>이메일</th><th>조직</th><th>직책</th><th>가입일</th><th>처리</th></tr>
+            </thead>
+            <tbody>
+            {% for u in pending_users %}
+            <tr id="row-{{ u.id }}">
+                <td>{{ u.full_name or '—' }}</td>
+                <td><span class="admin-username">{{ u.username }}</span></td>
+                <td style="font-size:12px;">{{ u.email }}</td>
+                <td style="font-size:12px;">{{ u.organization or '—' }}</td>
+                <td style="font-size:12px;">{{ u.job_title or '—' }}</td>
+                <td>{{ u.created_at | kst('%Y.%m.%d') }}</td>
+                <td class="admin-actions">
+                    <button class="btn btn-ai btn-sm" onclick="approveUser({{ u.id }})">✓ 승인</button>
+                    <button class="btn btn-ghost btn-sm" onclick="setStatus({{ u.id }}, 'inactive')">✕ 거절</button>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="admin-empty-notice">✓ 승인 대기 중인 회원이 없습니다.</div>
+    {% endif %}
+
+    <div class="admin-section-label" style="margin-top:4px;">계정 관리</div>
+    <div class="admin-table-wrap">
+        <table class="admin-table">
+            <thead>
+                <tr><th>이름</th><th>아이디</th><th>이메일</th><th>조직</th><th>역할</th><th>상태</th><th>가입일</th><th>관리</th></tr>
+            </thead>
+            <tbody>
+            {% for u in users | rejectattr('status', 'eq', 'pending') | list %}
+            <tr id="row-all-{{ u.id }}">
+                <td>{{ u.full_name or '—' }}</td>
+                <td><a href="{{ url_for('admin.user_detail', user_id=u.id) }}" class="admin-link">{{ u.username }}</a></td>
+                <td style="font-size:12px;">{{ u.email }}</td>
+                <td style="font-size:12px;">{{ u.organization or '—' }}</td>
+                <td>
+                    {% if u.id != current_user.id %}
+                    <button class="admin-role-badge {% if u.role == 'admin' %}role-admin{% else %}role-member{% endif %}"
+                            id="role-badge-{{ u.id }}" onclick="toggleRole({{ u.id }}, '{{ u.role }}')">
+                        {{ '관리자' if u.role == 'admin' else '일반' }}
+                    </button>
+                    {% else %}
+                    <span class="admin-role-badge role-admin">관리자 (나)</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="admin-status-badge status-{{ u.status }}" id="status-badge-{{ u.id }}">
+                        {{ {'pending':'대기','active':'활성','inactive':'비활성'}.get(u.status, u.status) }}
+                    </span>
+                </td>
+                <td>{{ u.created_at | kst('%Y.%m.%d') }}</td>
+                <td class="admin-actions">
+                    <a href="{{ url_for('admin.edit_user', user_id=u.id) }}" class="btn btn-ghost btn-sm">수정</a>
+                    {% if u.id != current_user.id %}
+                    {% if u.status == 'active' %}
+                    <button class="btn btn-ghost btn-sm" onclick="setStatus({{ u.id }}, 'inactive')">비활성</button>
+                    {% else %}
+                    <button class="btn btn-ghost btn-sm" onclick="setStatus({{ u.id }}, 'active')">활성화</button>
+                    {% endif %}
+                    <form method="POST" action="{{ url_for('admin.delete_user', user_id=u.id) }}"
+                          onsubmit="return confirm('{{ u.username }} 계정을 삭제하시겠습니까?\n해당 사용자의 모든 프로젝트도 삭제됩니다.')"
+                          style="display:inline">
+                        <button type="submit" class="btn btn-sm" style="color:var(--danger);border-color:rgba(239,68,68,0.3);">삭제</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ② 전체 회원 탭 -->
+<div id="tab-members" class="admin-tab-content">
+    <div class="admin-section-label">전체 회원 ({{ users|length }}명)</div>
+    <div class="admin-table-wrap">
+        <table class="admin-table">
+            <thead>
+                <tr><th>이름</th><th>아이디</th><th>이메일</th><th>조직</th><th>직책</th><th>역할</th><th>상태</th><th>가입일</th><th>관리</th></tr>
+            </thead>
+            <tbody>
+            {% for u in users %}
+            <tr>
+                <td>{{ u.full_name or '—' }}</td>
+                <td><a href="{{ url_for('admin.user_detail', user_id=u.id) }}" class="admin-link">{{ u.username }}</a></td>
+                <td style="font-size:12px;">{{ u.email }}</td>
+                <td style="font-size:12px;">{{ u.organization or '—' }}</td>
+                <td style="font-size:12px;">{{ u.job_title or '—' }}</td>
+                <td>
+                    {% if u.id != current_user.id %}
+                    <button class="admin-role-badge {% if u.role == 'admin' %}role-admin{% else %}role-member{% endif %}"
+                            id="role-badge-m-{{ u.id }}" onclick="toggleRole({{ u.id }}, '{{ u.role }}')">
+                        {{ '관리자' if u.role == 'admin' else '일반' }}
+                    </button>
+                    {% else %}
+                    <span class="admin-role-badge role-admin">관리자 (나)</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="admin-status-badge status-{{ u.status }}" id="status-badge-m-{{ u.id }}">
+                        {{ {'pending':'대기','active':'활성','inactive':'비활성'}.get(u.status, u.status) }}
+                    </span>
+                </td>
+                <td>{{ u.created_at | kst('%Y.%m.%d') }}</td>
+                <td class="admin-actions">
+                    <a href="{{ url_for('admin.edit_user', user_id=u.id) }}" class="btn btn-ghost btn-sm">수정</a>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ③ 질의응답 현황 탭 -->
+<div id="tab-qna" class="admin-tab-content">
+    <div class="qna-admin-two-col">
+        <!-- 사용자별 질문 현황 -->
+        <div class="qna-admin-col">
+            <div class="admin-section-label">사용자별 질문 현황</div>
+            <div class="admin-table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr><th>사용자</th><th>조직</th><th style="text-align:center;">질문 수</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                    {% set has_qna = namespace(found=false) %}
+                    {% for u in user_stats %}
+                    {% if u.qna_count > 0 %}
+                    {% set has_qna.found = true %}
+                    <tr>
+                        <td>
+                            <span class="admin-username">{{ u.username }}</span>
+                            {% if u.full_name %}<br><span style="font-size:11px;color:var(--text-muted);">{{ u.full_name }}</span>{% endif %}
+                        </td>
+                        <td style="font-size:12px;">{{ u.organization or '—' }}</td>
+                        <td style="text-align:center;"><span class="qna-count-badge">{{ u.qna_count }}</span></td>
+                        <td><a href="{{ url_for('qna.index') }}" class="btn btn-ghost btn-sm">보기</a></td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                    {% if not has_qna.found %}
+                    <tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px;">질문이 없습니다.</td></tr>
+                    {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- 최근 질의응답 -->
+        <div class="qna-admin-col">
+            <div class="admin-section-label">최근 질의응답 ({{ recent_qnas|length }}건)</div>
+            <div class="admin-table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr><th>질문 제목</th><th>작성자</th><th>상태</th><th>일시</th></tr>
+                    </thead>
+                    <tbody>
+                    {% for q in recent_qnas %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('qna.detail', qna_id=q.id) }}" class="admin-link" style="font-size:12px;">
+                                {{ q.title[:40] }}{% if q.title|length > 40 %}…{% endif %}
+                            </a>
+                            {% if q.project %}
+                            <span class="qna-project-tag" style="margin-left:4px;">{{ q.project.name[:10] }}</span>
+                            {% endif %}
+                        </td>
+                        <td style="font-size:12px;">{{ q.owner.username }}</td>
+                        <td>
+                            {% if q.ai_pending %}
+                            <span class="admin-status-badge status-pending">생성중</span>
+                            {% elif q.ai_answer %}
+                            <span class="admin-status-badge status-active">완료</span>
+                            {% else %}
+                            <span class="admin-status-badge status-inactive">미답변</span>
+                            {% endif %}
+                        </td>
+                        <td style="font-size:11px;white-space:nowrap;">{{ q.created_at | kst('%m.%d %H:%M') }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ④ 질문 유형 AI 분석 탭 -->
+<div id="tab-analysis" class="admin-tab-content">
+    <div class="qna-analyze-panel">
+        <div class="qna-analyze-header">
+            <div>
+                <div class="qna-analyze-title">🤖 질문 유형 AI 분석</div>
+                <div class="qna-analyze-desc">
+                    전체 질의응답을 Claude AI가 유형별로 분류·요약하여 기능 개선 인사이트를 제공합니다.<br>
+                    빈번하게 질문되는 유형을 파악하고, 각 유형별 사용자 니즈와 서비스 개선 방안을 도출합니다.
+                </div>
+            </div>
+            <button class="btn btn-ai" id="analyze-btn" onclick="runAnalysis()">✦ AI 분석 실행</button>
+        </div>
+        <div id="analyze-result" style="display:none;"></div>
+    </div>
 </div>
 
 <script>
+const PENDING_COUNT = {{ stats.pending }};
+
+// ── 탭 전환 ──────────────────────────────────────────────────
+function switchTab(name) {
+    document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.admin-tab-btn').forEach(el => el.classList.remove('active'));
+    const content = document.getElementById('tab-' + name);
+    const btn = document.getElementById('tab-btn-' + name);
+    if (content) content.classList.add('active');
+    if (btn) btn.classList.add('active');
+    history.replaceState(null, null, '#' + name);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const hash = location.hash.replace('#', '');
+    const valid = ['approval', 'members', 'qna', 'analysis'];
+    switchTab(valid.includes(hash) ? hash : (PENDING_COUNT > 0 ? 'approval' : 'members'));
+});
+
+// ── 회원 관리 액션 ────────────────────────────────────────────
 async function approveUser(userId) {
-    const r = await fetch(`/admin/users/${userId}/approve`, { method: 'POST' });
+    const r = await fetch(`/admin/users/${userId}/approve`, { method: 'POST', credentials: 'same-origin' });
     const data = await r.json();
     if (data.ok) {
         document.getElementById(`row-${userId}`)?.remove();
-        const badge = document.getElementById(`status-badge-${userId}`);
-        if (badge) { badge.textContent = '활성'; badge.className = 'admin-status-badge status-active'; }
+        ['status-badge-', 'status-badge-m-'].forEach(prefix => {
+            const b = document.getElementById(prefix + userId);
+            if (b) { b.textContent = '활성'; b.className = 'admin-status-badge status-active'; }
+        });
     }
 }
 
@@ -156,39 +338,129 @@ async function toggleRole(userId, currentRole) {
     const label = newRole === 'admin' ? '관리자' : '일반';
     if (!confirm(`이 사용자를 "${label}"(으)로 변경하시겠습니까?`)) return;
     const r = await fetch(`/admin/users/${userId}/set_role`, {
-        method: 'POST',
+        method: 'POST', credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role: newRole })
     });
     const data = await r.json();
     if (data.ok) {
-        const btn = document.getElementById(`role-badge-${userId}`);
-        btn.textContent = label;
-        btn.className = `admin-role-badge ${newRole === 'admin' ? 'role-admin' : 'role-member'}`;
-        btn.onclick = () => toggleRole(userId, newRole);
-    } else {
-        alert(data.msg);
-    }
+        ['role-badge-', 'role-badge-m-'].forEach(prefix => {
+            const b = document.getElementById(prefix + userId);
+            if (!b) return;
+            b.textContent = label;
+            b.className = `admin-role-badge ${newRole === 'admin' ? 'role-admin' : 'role-member'}`;
+            b.onclick = () => toggleRole(userId, newRole);
+        });
+    } else { alert(data.msg); }
 }
 
 async function setStatus(userId, status) {
     const labels = { active: '활성화', inactive: '비활성', pending: '대기' };
     if (!confirm(`이 사용자를 ${labels[status]}(으)로 변경하시겠습니까?`)) return;
     const r = await fetch(`/admin/users/${userId}/set_status`, {
-        method: 'POST',
+        method: 'POST', credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status })
     });
     const data = await r.json();
     if (data.ok) {
-        const badge = document.getElementById(`status-badge-${userId}`);
-        const statusLabels = { pending: '대기', active: '활성', inactive: '비활성' };
-        if (badge) { badge.textContent = statusLabels[data.status]; badge.className = `admin-status-badge status-${data.status}`; }
-        // 대기 목록 행도 제거
+        const sLabels = { pending: '대기', active: '활성', inactive: '비활성' };
+        ['status-badge-', 'status-badge-m-'].forEach(prefix => {
+            const b = document.getElementById(prefix + userId);
+            if (b) { b.textContent = sLabels[data.status]; b.className = `admin-status-badge status-${data.status}`; }
+        });
         document.getElementById(`row-${userId}`)?.remove();
-    } else {
-        alert(data.msg);
+    } else { alert(data.msg); }
+}
+
+// ── 질문 유형 AI 분석 ─────────────────────────────────────────
+async function runAnalysis() {
+    const btn = document.getElementById('analyze-btn');
+    const resultEl = document.getElementById('analyze-result');
+    btn.disabled = true;
+    btn.textContent = '⏳ 분석 중...';
+    resultEl.style.display = 'block';
+    resultEl.innerHTML = '<div class="ai-loading" style="padding:40px 20px;"><div class="ai-loading-orb"></div><div class="ai-loading-text"><span>Claude AI가 질의응답을 분석 중입니다...</span></div></div>';
+
+    try {
+        const r = await fetch('/admin/qna/analyze', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        if (!r.ok) {
+            const text = await r.text();
+            resultEl.innerHTML = `<div class="bcg-insight-warn" style="margin:16px 0;"><strong>서버 오류 (${r.status}):</strong> ${text.substring(0, 300)}</div>`;
+            return;
+        }
+        const data = await r.json();
+        if (!data.ok) {
+            const rawMsg = data.raw ? `<br><small style="opacity:0.6;">${data.raw}</small>` : '';
+            resultEl.innerHTML = `<div class="bcg-insight-warn" style="margin:16px 0;"><strong>오류:</strong> ${data.msg}${rawMsg}</div>`;
+            return;
+        }
+        if (!data.result) {
+            resultEl.innerHTML = `<div class="bcg-insight-warn" style="margin:16px 0;">분석 결과가 없습니다.</div>`;
+            return;
+        }
+        renderAnalysis(data.result, data.analyzed_count);
+    } catch (e) {
+        resultEl.innerHTML = `<div class="bcg-insight-warn" style="margin:16px 0;"><strong>오류:</strong> ${e.message}</div>`;
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '✦ AI 재분석';
     }
+}
+
+function renderAnalysis(r, count) {
+    const el = document.getElementById('analyze-result');
+    let html = `<div class="qna-analysis-body">`;
+
+    html += `<div class="bcg-summary-box" style="margin:16px 0 20px;">
+        <div class="bcg-summary-box-title">분석 요약 (${count}건 기반)</div>
+        <p>${r.summary || ''}</p>
+    </div>`;
+
+    if (r.categories && r.categories.length) {
+        html += `<div class="qna-analyze-section-title">📂 질문 유형별 분류</div>`;
+        html += `<div class="qna-category-grid">`;
+        for (const cat of r.categories) {
+            const examples = (cat.examples || []).map(e => `<li>${e}</li>`).join('');
+            html += `<div class="qna-category-card">
+                <div class="qna-category-header">
+                    <span class="qna-category-icon">${cat.icon || '📌'}</span>
+                    <span class="qna-category-name">${cat.name}</span>
+                    <span class="qna-category-count">${cat.count}건</span>
+                </div>
+                <p class="qna-category-desc">${cat.description || ''}</p>
+                ${examples ? `<ul class="qna-category-examples">${examples}</ul>` : ''}
+                <div class="qna-category-improve"><strong>개선 제안:</strong> ${cat.improvement || ''}</div>
+            </div>`;
+        }
+        html += `</div>`;
+    }
+
+    html += `<div class="qna-analyze-bottom-grid">`;
+    if (r.top_issues && r.top_issues.length) {
+        html += `<div class="qna-analyze-col-card">
+            <div class="qna-analyze-section-title">⚡ 주요 이슈 &amp; 사용자 니즈</div>
+            <div class="bcg-step-list">`;
+        r.top_issues.forEach((issue, i) => {
+            html += `<div class="bcg-step"><div class="bcg-step-num">${i+1}</div><div>${issue}</div></div>`;
+        });
+        html += `</div></div>`;
+    }
+    if (r.recommendations && r.recommendations.length) {
+        html += `<div class="qna-analyze-col-card">
+            <div class="qna-analyze-section-title">🚀 기능 개선 권고사항</div>
+            <div class="bcg-step-list">`;
+        r.recommendations.forEach((rec, i) => {
+            html += `<div class="bcg-step"><div class="bcg-step-num" style="background:#0D9488;">${i+1}</div><div>${rec}</div></div>`;
+        });
+        html += `</div></div>`;
+    }
+    html += `</div></div>`;
+    el.innerHTML = html;
 }
 </script>
 {% endblock %}
