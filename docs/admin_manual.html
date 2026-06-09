@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>관리자 매뉴얼 — 사업전략관리포탈 v1.3</title>
+<title>관리자 매뉴얼 — 사업전략관리포탈 v1.4</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Malgun Gothic', '맑은 고딕', sans-serif; font-size: 14px; color: #1a1a2e; background: #f5f7ff; line-height: 1.7; }
@@ -75,13 +75,13 @@
 
   <!-- 표지 -->
   <div class="cover">
-    <div class="cover-badge">ADMIN MANUAL v1.3</div>
+    <div class="cover-badge">ADMIN MANUAL v1.4</div>
     <h1>관리자 매뉴얼</h1>
     <p class="sub">사업전략관리포탈 — BizModelCanvas</p>
     <p class="sub">시스템 운영, 회원 관리, 인프라 관리 안내서</p>
     <div class="cover-meta">
-      <span>📅 2026년 5월</span>
-      <span>📌 버전 v1.3.0</span>
+      <span>📅 2026년 6월</span>
+      <span>📌 버전 v1.4.0</span>
       <span>🌐 https://bizmodelcanvas-production.up.railway.app</span>
     </div>
   </div>
@@ -92,6 +92,7 @@
     <ol>
       <li><a href="#s1">시스템 구성 및 인프라</a></li>
       <li><a href="#s2">환경변수 관리</a></li>
+      <li><a href="#s2b">관리자 대시보드 뷰 (v1.4 신규)</a></li>
       <li><a href="#s3">회원 관리</a>
         <ul class="sub">
           <li><a href="#s3-1">신규 회원 승인</a></li>
@@ -99,6 +100,7 @@
           <li><a href="#s3-3">회원 정보 수정 및 삭제</a></li>
         </ul>
       </li>
+      <li><a href="#s3b">질문 유형 AI 분석 (v1.4 신규)</a></li>
       <li><a href="#s4">데이터베이스 관리</a></li>
       <li><a href="#s5">배포 및 업데이트</a></li>
       <li><a href="#s6">장애 대응 및 진단</a></li>
@@ -149,6 +151,7 @@
       <tr><td>v1.0.0</td><td>2026년 4월</td><td>초기 릴리즈 — 6단계 모듈, AI 분석, PDF, Q&A</td></tr>
       <tr><td>v1.1.0</td><td>2026년 5월</td><td>PostgreSQL 전환, 자동 로그인, SendGrid 이메일, PDF 입력데이터 포함</td></tr>
       <tr><td>v1.3.0</td><td>2026년 5월</td><td>회원가입 개선, 환경분석 AI 모달, PDF 안정화, 이메일 SMTP 전환</td></tr>
+      <tr><td>v1.4.0</td><td>2026년 6월</td><td>관리자 대시보드 전체 프로젝트 뷰, 사이드바 토글, 입력 패널 토글, 프로젝트 카드 담당자 표시, 질문 유형 AI 분석 DB 저장·PDF 내보내기, 관리자 UI 개편</td></tr>
     </table>
   </div>
 
@@ -191,12 +194,43 @@
     <div class="warn">환경변수 저장 후 Railway가 자동으로 재배포합니다. 재배포 중 약 1~2분간 서비스가 일시 중단될 수 있습니다.</div>
   </div>
 
+  <!-- 2b. 관리자 대시보드 뷰 -->
+  <div class="section" id="s2b">
+    <div class="section-num">02-B</div>
+    <h2>관리자 대시보드 뷰 <span class="badge-new">v1.4 신규</span></h2>
+
+    <p>관리자 계정으로 로그인하면 대시보드에 <strong>전체 사용자의 프로젝트</strong>가 사용자별로 그룹화되어 표시됩니다. 일반 사용자의 "내 프로젝트 / 공개 프로젝트" 뷰와 다릅니다.</p>
+
+    <h3>화면 구성</h3>
+    <table>
+      <tr><th>구성 요소</th><th>설명</th></tr>
+      <tr><td>전체 프로젝트 수</td><td>상단에 시스템 전체 프로젝트 수 표시</td></tr>
+      <tr><td>사용자 그룹 헤더</td><td>사용자 아바타, 이름, 아이디, 소속, 직책, 해당 사용자 프로젝트 수</td></tr>
+      <tr><td>프로젝트 카드</td><td>해당 사용자 소유의 프로젝트 (사업담당·수행담당 포함)</td></tr>
+    </table>
+
+    <h3>그룹 정렬 기준</h3>
+    <p>사용자 이름 오름차순으로 그룹이 정렬되며, 각 그룹 내 프로젝트는 최종 수정일 내림차순(최근 것 먼저)으로 표시됩니다.</p>
+
+    <div class="info">관리자는 모든 프로젝트를 열람할 수 있지만, 편집·삭제는 해당 프로젝트 소유자만 가능합니다.</div>
+    <div class="tip">사이드바에서도 내 프로젝트 목록이 조직별로 표시됩니다. 관리자 대시보드 뷰는 메인 콘텐츠 영역에서만 제공됩니다.</div>
+  </div>
+
   <!-- 3. 회원 관리 -->
   <div class="section" id="s3">
     <div class="section-num">03</div>
     <h2>회원 관리</h2>
 
     <p>관리자 메뉴(<code>/admin/</code>)에서 모든 회원을 관리합니다. <code>admin</code> 역할을 가진 계정만 접근 가능합니다.</p>
+
+    <h3>관리자 메뉴 탭 구성 <span class="badge-new">v1.4 개편</span></h3>
+    <table>
+      <tr><th>탭</th><th>설명</th></tr>
+      <tr><td>회원 승인·계정 관리</td><td>신규 승인 대기 + 전체 회원 목록 통합 (v1.4 개편)</td></tr>
+      <tr><td>질의응답 현황</td><td>전체 Q&A 통계 및 최근 질문 목록</td></tr>
+      <tr><td>질문 유형 AI 분석</td><td>AI로 질문 유형 분석 후 DB 저장·PDF 내보내기</td></tr>
+    </table>
+    <div class="info">v1.4에서 <strong>전체 회원 탭이 삭제</strong>되고 회원 승인·계정 관리 탭으로 통합되었습니다.</div>
 
     <h3>회원 상태</h3>
     <table>
@@ -237,6 +271,53 @@
     <div class="danger">회원 삭제 시 해당 회원의 모든 프로젝트와 분석 데이터가 함께 영구 삭제됩니다. 삭제 전 반드시 확인하세요.</div>
   </div>
 
+  <!-- 3b. 질문 유형 AI 분석 -->
+  <div class="section" id="s3b">
+    <div class="section-num">03-B</div>
+    <h2>질문 유형 AI 분석 <span class="badge-new">v1.4 신규</span></h2>
+
+    <p>전체 질의응답 데이터를 AI(Claude Opus)로 분석하여 질문 유형을 분류하고, 서비스 개선 인사이트를 도출합니다. 분석 결과는 DB에 저장되며 PDF로 내보낼 수 있습니다.</p>
+
+    <h3>AI 분석 실행</h3>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><strong>관리자 메뉴 접속</strong><span>사이드바 '⚙️ 관리자' 클릭 → <strong>질문 유형 AI 분석</strong> 탭을 클릭합니다.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><strong>AI 분석 실행 클릭</strong><span>탭 상단의 '🤖 AI 분석 실행' 버튼을 클릭합니다. 최근 150건의 Q&A를 자동으로 수집하여 분석합니다.</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><strong>분석 진행 대기</strong><span>Claude Opus AI가 질문들을 분석합니다. 데이터 양에 따라 30초~2분이 소요됩니다.</span></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><strong>결과 확인</strong><span>분석 완료 후 전체 요약, 카테고리별 분류, 주요 이슈, 개선 권고사항이 화면에 표시됩니다.</span></div></div>
+    </div>
+
+    <h3>분석 결과 내용</h3>
+    <table>
+      <tr><th>항목</th><th>설명</th></tr>
+      <tr><td>전체 요약</td><td>분석 대상 Q&A 전체 동향을 2~3문장으로 요약</td></tr>
+      <tr><td>카테고리 분류</td><td>질문 유형별 건수, 패턴 설명, 대표 예시, 개선 제안</td></tr>
+      <tr><td>주요 이슈</td><td>사용자들이 가장 많이 겪는 어려움이나 니즈 (최대 5개)</td></tr>
+      <tr><td>기능 개선 권고</td><td>서비스 개선을 위한 구체적 권고사항 (최대 5개)</td></tr>
+    </table>
+
+    <h3>결과 저장 및 불러오기</h3>
+    <p>AI 분석 결과는 실행 즉시 DB에 자동 저장됩니다. 다음 접속 시에도 마지막 분석 결과를 바로 확인할 수 있습니다.</p>
+    <div class="info">분석을 다시 실행하면 새 결과가 DB에 추가로 저장됩니다. 화면에는 항상 <strong>가장 최근 분석 결과</strong>가 표시됩니다.</div>
+
+    <h3>PDF 내보내기</h3>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><strong>분석 결과 확인</strong><span>AI 분석이 완료되거나 저장된 결과가 화면에 표시된 상태여야 합니다.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><strong>📄 파일 저장 클릭</strong><span>탭 우측 상단의 '📄 파일 저장' 버튼을 클릭합니다.</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><strong>PDF 다운로드</strong><span>브라우저가 PDF 파일을 자동으로 다운로드합니다. 파일명: <code>QnA분석결과_YYYYMMDD_HHmm.pdf</code></span></div></div>
+    </div>
+
+    <h3>PDF 내용 구성</h3>
+    <table>
+      <tr><th>섹션</th><th>내용</th></tr>
+      <tr><td>표지</td><td>분석 제목, 분석 대상 건수, 분석 일시</td></tr>
+      <tr><td>전체 요약</td><td>Q&A 동향 종합 요약</td></tr>
+      <tr><td>카테고리 분류표</td><td>유형·건수·패턴 설명·개선 제안 4열 표</td></tr>
+      <tr><td>주요 이슈 & 개선 권고</td><td>2열 레이아웃으로 이슈와 권고사항 나란히 표시</td></tr>
+    </table>
+
+    <div class="tip">분석은 필요할 때마다 재실행할 수 있습니다. 신규 Q&A가 많이 쌓인 후 정기적으로 실행하면 서비스 개선 방향 파악에 효과적입니다.</div>
+  </div>
+
   <!-- 4. DB 관리 -->
   <div class="section" id="s4">
     <div class="section-num">04</div>
@@ -253,6 +334,7 @@
       <tr><td>analyses</td><td>모듈별 입력/분석 데이터</td><td>id, project_id, module_type, input_data(JSON 문자열), ai_result(HTML 문자열)</td></tr>
       <tr><td>qn_a</td><td>질의응답 게시글</td><td>id, owner_id, project_id, title, content, ai_answer, ai_pending</td></tr>
       <tr><td>qn_a_comment</td><td>질의응답 댓글</td><td>id, qna_id, owner_id, content, ai_answer</td></tr>
+      <tr><td>qna_analysis_results</td><td>질문 유형 AI 분석 결과 저장 (v1.4 신규)</td><td>id, result_json(JSON 문자열), analyzed_count, created_at</td></tr>
     </table>
 
     <h4>analyses.module_type 값</h4>

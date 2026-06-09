@@ -1,5 +1,5 @@
 """HTML 매뉴얼을 PDF로 변환 — Edge 헤드리스 브라우저 사용"""
-import subprocess, os, sys, time, shutil, tempfile
+import subprocess, os, tempfile
 
 EDGE = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
 CHROME = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
@@ -8,8 +8,8 @@ BROWSER = EDGE if os.path.exists(EDGE) else CHROME
 DOCS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 FILES = [
-    ("user_manual.html",  "user_manual_v1.3.pdf"),
-    ("admin_manual.html", "admin_manual_v1.3.pdf"),
+    ("user_manual.html",  "user_manual_v1.4.pdf"),
+    ("admin_manual.html", "admin_manual_v1.4.pdf"),
 ]
 
 def html_to_pdf(html_path, pdf_path):

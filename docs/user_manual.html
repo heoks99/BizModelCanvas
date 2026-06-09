@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>사용자 매뉴얼 — 사업전략관리포탈 v1.3</title>
+<title>사용자 매뉴얼 — 사업전략관리포탈 v1.4</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Malgun Gothic', '맑은 고딕', sans-serif; font-size: 14px; color: #1a1a2e; background: #f5f7ff; line-height: 1.7; }
@@ -85,13 +85,13 @@
 
   <!-- 표지 -->
   <div class="cover">
-    <div class="cover-badge">USER MANUAL v1.3</div>
+    <div class="cover-badge">USER MANUAL v1.4</div>
     <h1>사용자 매뉴얼</h1>
     <p class="sub">사업전략관리포탈 — BizModelCanvas</p>
     <p class="sub">사업모델 설계 및 전략 분석 플랫폼 사용 안내서</p>
     <div class="cover-meta">
-      <span>📅 2026년 5월</span>
-      <span>📌 버전 v1.3.0</span>
+      <span>📅 2026년 6월</span>
+      <span>📌 버전 v1.4.0</span>
       <span>🌐 https://bizmodelcanvas-production.up.railway.app</span>
     </div>
   </div>
@@ -101,7 +101,12 @@
     <h2>목차</h2>
     <ol>
       <li><a href="#s1">시작하기 — 회원가입 및 로그인</a></li>
-      <li><a href="#s2">대시보드 — 프로젝트 관리</a></li>
+      <li><a href="#s2">대시보드 — 프로젝트 관리</a>
+        <ul class="sub">
+          <li><a href="#s2-sidebar">사이드바 토글 (v1.4 신규)</a></li>
+          <li><a href="#s2-card">프로젝트 카드 정보</a></li>
+        </ul>
+      </li>
       <li><a href="#s3">6단계 사업모델 분석 모듈</a>
         <ul class="sub">
           <li><a href="#s3-1">① 사업 정의</a></li>
@@ -195,7 +200,27 @@
       <tr><td>공개</td><td>모든 로그인 사용자가 조회 가능 (편집은 소유자만 가능)</td></tr>
     </table>
 
-    <div class="tip">좌측 사이드바에서 내 모든 프로젝트를 조직별로 확인하고 빠르게 이동할 수 있습니다.</div>
+    <h3 id="s2-card">프로젝트 카드 정보 <span class="badge-new">v1.4 개선</span></h3>
+    <p>대시보드의 프로젝트 카드가 넓어지고, 프로젝트 생성 시 입력한 담당자 정보가 카드에 표시됩니다.</p>
+    <table>
+      <tr><th>카드 정보</th><th>설명</th></tr>
+      <tr><td>프로젝트명</td><td>프로젝트 이름</td></tr>
+      <tr><td>조직명</td><td>수행 조직명</td></tr>
+      <tr><td>사업담당</td><td>사업을 총괄하는 담당자 이름 (입력 시 표시)</td></tr>
+      <tr><td>수행담당</td><td>실무 수행 담당자 이름 (입력 시 표시)</td></tr>
+      <tr><td>최종 수정일</td><td>마지막으로 수정된 날짜</td></tr>
+    </table>
+    <div class="tip">프로젝트 생성 또는 편집 시 사업담당·수행담당 필드를 채워두면 대시보드에서 바로 확인할 수 있어 편리합니다.</div>
+
+    <h3 id="s2-sidebar">사이드바 토글 <span class="badge-new">v1.4 신규</span></h3>
+    <p>좌측 사이드바를 접어 작업 화면을 더 넓게 사용할 수 있습니다.</p>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><strong>토글 버튼 클릭</strong><span>사이드바 상단의 <strong>‹</strong> 버튼을 클릭하면 사이드바가 아이콘 모드(64px)로 축소됩니다.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><strong>메뉴 사용</strong><span>축소된 상태에서도 각 아이콘 위에 마우스를 올리면 메뉴 이름이 표시됩니다.</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><strong>펼치기</strong><span>다시 <strong>›</strong> 버튼을 클릭하면 사이드바가 원래 크기로 복원됩니다.</span></div></div>
+    </div>
+    <div class="info">접기/펼치기 상태는 브라우저에 저장됩니다. 다음에 접속해도 마지막 상태가 유지됩니다.</div>
+    <div class="tip">사이드바 폭은 경계선을 드래그하여 자유롭게 조절할 수도 있습니다.</div>
   </div>
 
   <!-- 3. 6단계 모듈 -->
@@ -278,6 +303,15 @@
         </ul>
       </div>
     </div>
+
+    <h3>입력 패널 토글 <span class="badge-new">v1.4 신규</span></h3>
+    <p>각 모듈 화면은 좌측 입력 패널과 우측 AI 분석 결과 패널로 구성됩니다. AI 분석 결과를 전체 화면으로 보고 싶을 때 입력 패널을 숨길 수 있습니다.</p>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><strong>‹ 버튼 클릭</strong><span>AI 분석 결과 패널 상단의 <strong>‹</strong> 버튼을 클릭합니다.</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><strong>입력 패널 숨김</strong><span>좌측 입력 패널이 숨겨지고 AI 분석 결과 화면이 전체 너비로 확장됩니다.</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><strong>복원</strong><span>다시 <strong>›</strong> 버튼을 클릭하면 입력 패널이 다시 나타납니다.</span></div></div>
+    </div>
+    <div class="info">입력 패널 접기/펼치기 상태도 브라우저에 저장됩니다. 모든 모듈에서 동일하게 적용됩니다.</div>
 
     <h3>데이터 입력 및 저장 (공통)</h3>
     <div class="steps">
