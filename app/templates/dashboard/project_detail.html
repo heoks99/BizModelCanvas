@@ -592,7 +592,10 @@
 
     <div class="result-panel">
         <div class="result-header">
-            <h2>AI 분석 리포트</h2>
+            <div class="result-header-title">
+                <button type="button" class="btn-panel-toggle" id="toggle-input-btn" title="입력 패널 접기/펼치기">‹</button>
+                <h2>AI 분석 리포트</h2>
+            </div>
             <div class="result-header-actions">
                 {% if is_owner %}
                 <button type="button" class="btn btn-ai" onclick="runAnalysis()">🤖 AI 분석 실행</button>
@@ -629,6 +632,27 @@ const storedResult = {{ ai_result | tojson if ai_result else 'null' }};
 document.addEventListener('DOMContentLoaded', () => {
     if (moduleType !== 'env_analysis' && storedResult) {
         document.getElementById('ai-result').innerHTML = renderAIResult(storedResult, moduleType);
+    }
+
+    // 입력 패널 토글 (일반 탭 전용)
+    const toggleInputBtn = document.getElementById('toggle-input-btn');
+    if (toggleInputBtn) {
+        const moduleLayout = document.querySelector('.module-layout');
+        const INPUT_TOGGLE_KEY = 'input_panel_collapsed';
+
+        function setInputCollapsed(collapsed) {
+            moduleLayout.classList.toggle('input-collapsed', collapsed);
+            localStorage.setItem(INPUT_TOGGLE_KEY, collapsed ? '1' : '0');
+        }
+
+        // 초기 로드 시 저장된 상태 즉시 적용 (애니메이션 없이)
+        if (localStorage.getItem(INPUT_TOGGLE_KEY) === '1') {
+            moduleLayout.classList.add('input-collapsed');
+        }
+
+        toggleInputBtn.addEventListener('click', () => {
+            setInputCollapsed(!moduleLayout.classList.contains('input-collapsed'));
+        });
     }
 
     // 저장 후 URL hash로 env 서브모듈 탭 복원
