@@ -145,10 +145,24 @@ async function runAnalysis() {
     resultEl.innerHTML = '<div class="ai-loading" style="padding:40px 20px;"><div class="ai-loading-orb"></div><div class="ai-loading-text"><span>Claude AI가 질의응답을 분석 중입니다...</span></div></div>';
 
     try {
-        const r = await fetch('/admin/qna/analyze', { method: 'POST' });
+        const r = await fetch('/admin/qna/analyze', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        if (!r.ok) {
+            const text = await r.text();
+            resultEl.innerHTML = `<div class="bcg-insight-warn" style="margin:16px 0;"><strong>서버 오류 (${r.status}):</strong> ${text.substring(0, 300)}</div>`;
+            return;
+        }
         const data = await r.json();
         if (!data.ok) {
-            resultEl.innerHTML = `<div class="bcg-insight-warn" style="margin:16px 0;"><strong>오류:</strong> ${data.msg}</div>`;
+            const rawMsg = data.raw ? `<br><small style="opacity:0.6;">${data.raw}</small>` : '';
+            resultEl.innerHTML = `<div class="bcg-insight-warn" style="margin:16px 0;"><strong>오류:</strong> ${data.msg}${rawMsg}</div>`;
+            return;
+        }
+        if (!data.result) {
+            resultEl.innerHTML = `<div class="bcg-insight-warn" style="margin:16px 0;">분석 결과가 없습니다.</div>`;
             return;
         }
         renderAnalysis(data.result, data.analyzed_count);

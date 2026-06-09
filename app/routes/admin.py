@@ -129,19 +129,22 @@ def analyze_qna():
         client = anthropic.Anthropic(api_key=current_app.config.get('ANTHROPIC_API_KEY', ''))
         message = client.messages.create(
             model='claude-opus-4-8',
-            max_tokens=3000,
+            max_tokens=8000,
             thinking={'type': 'adaptive'},
             system=[{'type': 'text', 'text': system, 'cache_control': {'type': 'ephemeral'}}],
             messages=[{'role': 'user', 'content': user_msg}],
         )
-        raw = next(b.text for b in message.content if b.type == 'text').strip()
-        # 코드블록 제거 후 JSON 객체만 추출 (위치 무관)
+        text_blocks = [b.text for b in message.content if b.type == 'text']
+        if not text_blocks:
+            return jsonify({'ok': False, 'msg': 'AI가 텍스트 응답을 반환하지 않았습니다.'})
+        raw = text_blocks[-1].strip()
         json_match = re.search(r'\{.*\}', raw, re.DOTALL)
         if not json_match:
             return jsonify({'ok': False, 'msg': 'AI가 JSON 형식으로 응답하지 않았습니다.', 'raw': raw[:300]})
         result = json.loads(json_match.group())
         return jsonify({'ok': True, 'result': result, 'analyzed_count': len(qnas)})
     except Exception as e:
+        current_app.logger.error(f'analyze_qna error: {e}', exc_info=True)
         return jsonify({'ok': False, 'msg': str(e), 'raw': raw[:300]})
 
 
