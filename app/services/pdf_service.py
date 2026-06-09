@@ -635,3 +635,141 @@ def generate_full_report_pdf(project, modules, analyses):
         logger.error('pisa error in generate_full_report_pdf: err=%s', status.err)
     buf.seek(0)
     return buf
+
+
+def generate_qna_analysis_pdf(record):
+    """질문 유형 AI 분석 결과 PDF 생성."""
+    from datetime import timezone, timedelta
+
+    result = json.loads(record.result_json)
+    kst = record.created_at.replace(tzinfo=timezone.utc) + timedelta(hours=9)
+    kst_str = kst.strftime('%Y년 %m월 %d일 %H:%M')
+    now = datetime.now().strftime('%Y년 %m월 %d일')
+    f = KOREAN_FONT
+
+    def strip_emoji(text):
+        return re.sub(r'[\U00010000-\U0010ffff]', '', text or '')
+
+    # ── 표지 ──────────────────────────────────────────────────
+    cover_html = f'''
+    <div class="cover">
+        <div class="cover-badge">사업모델캔버스 — 관리자 분석 리포트</div>
+        <h1 class="cover-title">질문 유형 AI 분석 결과</h1>
+        <p class="cover-subtitle">전체 질의응답 유형 분류 및 서비스 개선 인사이트</p>
+        <div class="cover-meta">
+            <strong>분석 기준 질문 수</strong>: {record.analyzed_count}건<br/>
+            <strong>분석 실행일시</strong>: {kst_str} (KST)<br/>
+            <strong>출력일</strong>: {now}
+        </div>
+    </div>
+    '''
+
+    # ── 전체 요약 ────────────────────────────────────────────
+    summary = strip_emoji(result.get('summary', ''))
+    summary_html = f'''
+    <div class="section-title">전체 요약</div>
+    <div style="background:#f0f3ff; border-left:4px solid #4f6ef7; padding:10px 14px;
+                margin-bottom:20px; font-family:{f}; font-size:10pt; line-height:1.7;">
+        {summary}
+    </div>
+    '''
+
+    # ── 질문 유형별 분류 테이블 ──────────────────────────────
+    categories = result.get('categories', [])
+    cat_rows = ''
+    for i, cat in enumerate(categories):
+        name = strip_emoji(cat.get('name', ''))
+        desc = strip_emoji(cat.get('description', ''))
+        count = cat.get('count', 0)
+        examples = [strip_emoji(e) for e in cat.get('examples', [])[:3]]
+        improve = strip_emoji(cat.get('improvement', ''))
+        ex_items = ''.join(f'<li style="font-family:{f}; font-size:8.5pt; color:#555;">{e}</li>'
+                           for e in examples)
+        ex_html = f'<ul style="margin:4px 0 0 14px; padding:0;">{ex_items}</ul>' if ex_items else ''
+        bg = '#f8f9ff' if i % 2 == 0 else 'white'
+        cat_rows += f'''<tr style="background:{bg};">
+            <td style="border:1px solid #dde3ff; padding:7px 10px; vertical-align:top;
+                       font-family:{f}; font-size:9pt; font-weight:bold;">{name}</td>
+            <td style="border:1px solid #dde3ff; padding:7px 10px; vertical-align:top;
+                       text-align:center; font-family:{f}; font-size:9pt;
+                       font-weight:bold; color:#4f6ef7;">{count}건</td>
+            <td style="border:1px solid #dde3ff; padding:7px 10px; vertical-align:top;
+                       font-family:{f}; font-size:9pt;">{desc}{ex_html}</td>
+            <td style="border:1px solid #dde3ff; padding:7px 10px; vertical-align:top;
+                       font-family:{f}; font-size:9pt; color:#0D9488;">{improve}</td>
+        </tr>'''
+
+    cat_html = ''
+    if cat_rows:
+        cat_html = f'''
+        <div class="section-title">질문 유형별 분류</div>
+        <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
+            <thead>
+                <tr>
+                    <th style="width:20%; background:#4f6ef7; color:white; padding:6px 10px;
+                               font-family:{f}; font-size:9pt;">유형</th>
+                    <th style="width:8%; background:#4f6ef7; color:white; padding:6px 10px;
+                               font-family:{f}; font-size:9pt; text-align:center;">건수</th>
+                    <th style="width:36%; background:#4f6ef7; color:white; padding:6px 10px;
+                               font-family:{f}; font-size:9pt;">설명 및 예시 질문</th>
+                    <th style="width:36%; background:#0D9488; color:white; padding:6px 10px;
+                               font-family:{f}; font-size:9pt;">개선 제안</th>
+                </tr>
+            </thead>
+            <tbody>{cat_rows}</tbody>
+        </table>
+        '''
+
+    # ── 주요 이슈 & 권고사항 (2열 테이블) ────────────────────
+    def _numbered_items(items, color):
+        rows = ''
+        for i, item in enumerate(items, 1):
+            rows += f'''<tr>
+                <td style="width:22pt; background:{color}; color:white; text-align:center;
+                           padding:5px 4px; font-family:{f}; font-size:9pt; font-weight:bold;
+                           vertical-align:top;">{i}</td>
+                <td style="padding:5px 8px; font-family:{f}; font-size:9.5pt;
+                           border-bottom:1px solid #eee; vertical-align:top;">{strip_emoji(item)}</td>
+            </tr>'''
+        return f'<table style="width:100%; border-collapse:collapse;">{rows}</table>' if rows else ''
+
+    top_issues = result.get('top_issues', [])
+    recommendations = result.get('recommendations', [])
+
+    bottom_html = f'''
+    <div style="page-break-before: always;"></div>
+    <table style="width:100%; border-collapse:collapse; margin-top:10px;">
+        <tr>
+            <td style="width:50%; vertical-align:top; padding-right:10pt; border:none;">
+                <div class="section-title">주요 이슈 &amp; 사용자 니즈</div>
+                {_numbered_items(top_issues, '#4f6ef7')}
+            </td>
+            <td style="width:50%; vertical-align:top; padding-left:10pt; border:none;">
+                <div class="section-title">기능 개선 권고사항</div>
+                {_numbered_items(recommendations, '#0D9488')}
+            </td>
+        </tr>
+    </table>
+    '''
+
+    html = f'''<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<style>{PDF_CSS}</style>
+</head>
+<body>
+{cover_html}
+{summary_html}
+{cat_html}
+{bottom_html}
+</body>
+</html>'''
+
+    html = _finalize_html_for_pisa(html)
+    buf = io.BytesIO()
+    status = pisa.CreatePDF(io.BytesIO(html.encode('utf-8')), dest=buf)
+    if status.err:
+        logger.error('pisa error in generate_qna_analysis_pdf: err=%s', status.err)
+    buf.seek(0)
+    return buf
