@@ -488,7 +488,17 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); }
 .project-card:hover { border-color: var(--accent); transform: translateY(-2px); }
 .project-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
 .project-card-header h3 { font-size: 15px; font-weight: 600; }
-.project-desc { color: var(--text-secondary); font-size: 12px; margin-bottom: 14px; line-height: 1.5; }
+.project-desc {
+    color: var(--text-secondary);
+    font-size: 12px;
+    margin-bottom: 14px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
 
 .project-modules { display: flex; gap: 5px; margin-bottom: 14px; }
 .module-dot {
@@ -2961,6 +2971,7 @@ button.admin-role-badge:hover { opacity: 0.75; }
     line-height: 1.6;
 }
 .pi-val-name { font-size: 16px; font-weight: 700; }
+.pi-val-desc { white-space: pre-wrap; }
 
 /* 프로젝트 정보 탭 nav 스타일 */
 .step-nav-info { font-style: normal; }
