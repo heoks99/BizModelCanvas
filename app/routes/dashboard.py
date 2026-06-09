@@ -19,30 +19,43 @@ MODULES = [
 @dashboard_bp.route('/')
 @login_required
 def index():
-    my_projects = Project.query.filter_by(owner_id=current_user.id).order_by(Project.updated_at.desc()).all()
-
     is_admin = current_user.role == 'admin'
+
     if is_admin:
-        # 관리자: 다른 사용자의 공개·비공개 프로젝트 모두 표시
-        other_projects = Project.query.filter(
-            Project.owner_id != current_user.id
-        ).order_by(Project.updated_at.desc()).all()
+        from app.models.user import User
+        all_projects = (
+            Project.query
+            .join(User, Project.owner_id == User.id)
+            .order_by(User.username, Project.updated_at.desc())
+            .all()
+        )
+        # 소유자별 그룹화 (순서 유지)
+        owner_map = {}
+        for p in all_projects:
+            uid = p.owner_id
+            if uid not in owner_map:
+                owner_map[uid] = {'user': p.owner, 'projects': []}
+            owner_map[uid]['projects'].append(p)
+        owner_groups = list(owner_map.values())
+        return render_template('dashboard/index.html',
+                               is_admin=True,
+                               owner_groups=owner_groups,
+                               total_projects=len(all_projects))
     else:
+        my_projects = Project.query.filter_by(owner_id=current_user.id).order_by(Project.updated_at.desc()).all()
         other_projects = Project.query.filter(
             Project.is_public == True,
             Project.owner_id != current_user.id
         ).order_by(Project.updated_at.desc()).all()
-
-    orgs = {}
-    for p in my_projects:
-        key = p.organization or '미지정'
-        orgs.setdefault(key, []).append(p)
-
-    return render_template('dashboard/index.html',
-                           projects=my_projects,
-                           public_projects=other_projects,
-                           is_admin=is_admin,
-                           orgs=orgs)
+        orgs = {}
+        for p in my_projects:
+            key = p.organization or '미지정'
+            orgs.setdefault(key, []).append(p)
+        return render_template('dashboard/index.html',
+                               projects=my_projects,
+                               public_projects=other_projects,
+                               is_admin=False,
+                               orgs=orgs)
 
 
 @dashboard_bp.route('/projects/new', methods=['GET', 'POST'])

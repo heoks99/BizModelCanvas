@@ -3455,3 +3455,18 @@ button.admin-role-badge:hover { opacity: 0.75; }
 .step-nav-info { font-style: normal; }
 .step-nav-info .step-num { font-style: normal; }
 
+
+/* 관리자 대시보드 - 전체 프로젝트 (소유자별 그룹) */
+.admin-dashboard-group { margin-bottom: 32px; }
+.admin-dashboard-group-header { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; }
+.admin-dashboard-owner-avatar { font-size: 20px; flex-shrink: 0; }
+.admin-dashboard-owner-info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.admin-dashboard-owner-name { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+.admin-dashboard-owner-meta { font-size: 12px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.admin-dashboard-proj-count { font-size: 12px; font-weight: 600; color: var(--accent); background: var(--accent-bg, rgba(99,102,241,0.1)); padding: 3px 10px; border-radius: 20px; flex-shrink: 0; }
+
+/* 대시보드 섹션 레이블 카운트 */
+.dashboard-section-count { display: inline-flex; align-items: center; justify-content: center; background: var(--text-muted); color: #fff; font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 20px; margin-left: 6px; line-height: 1.6; vertical-align: middle; }
+
+/* 공개 프로젝트 카드 소유자 뱃지 */
+.project-owner-badge { font-size: 11px; color: var(--text-muted); background: var(--bg-secondary); padding: 2px 7px; border-radius: 20px; border: 1px solid var(--border); }
