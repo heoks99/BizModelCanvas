@@ -437,7 +437,69 @@ def build_input_data_html(module_type, input_data: dict) -> str:
     )
 
 
+def _build_env_analysis_html(ai_result, input_data):
+    """환경분석 서브모듈별 입력데이터→AI리포트 순차 생성."""
+    html = '<div class="module-section">'
+    html += '<div class="module-header"><h2>환경 분석</h2></div>'
+
+    ai_dict = {}
+    if ai_result:
+        try:
+            parsed = json.loads(ai_result)
+            if isinstance(parsed, dict):
+                ai_dict = parsed
+        except Exception:
+            pass
+
+    input_dict = input_data or {}
+
+    sub_modules = [
+        ('pestel',      'PESTEL 분석',      'pestel_data',      'PESTEL 입력 데이터'),
+        ('five_forces', '5 Forces 분석',    'five_forces_data', '5 Forces 입력 데이터'),
+        ('swot',        'SWOT 분석',        'swot_data',        'SWOT 입력 데이터'),
+        ('vrio',        'VRIO 분석',        'vrio_data',        'VRIO 입력 데이터'),
+        ('segment',     '고객 세그먼트 맵',  'segment_data',     '고객 세그먼트 맵 입력 데이터'),
+    ]
+
+    any_content = False
+    for key, label, input_key, input_label in sub_modules:
+        sub_input = (input_dict.get(input_key) or '').strip()
+        sub_ai    = ai_dict.get(key, '')
+        if not sub_input and not sub_ai:
+            continue
+
+        any_content = True
+        html += f'<div class="input-section-title">{label}</div>'
+
+        if sub_input:
+            val_html = (sub_input
+                        .replace('&', '&amp;')
+                        .replace('<', '&lt;')
+                        .replace('>', '&gt;')
+                        .replace('\n', '<br/>'))
+            html += (
+                '<div class="input-section">'
+                '<table class="input-table">'
+                f'<tr><th>{input_label}</th><td>{val_html}</td></tr>'
+                '</table></div>'
+            )
+
+        if sub_ai:
+            html += '<div class="ai-section-title">AI 분석 결과</div>'
+            clean = sanitize_bcg_html_for_pdf(_unescape_attr_quotes(sub_ai))
+            html += f'<div class="ai-result-content">{clean}</div>'
+
+    if not any_content:
+        html += '<div class="no-result">입력 데이터 및 AI 분석 결과가 없습니다.</div>'
+
+    html += '</div>'
+    return html
+
+
 def build_module_html(module_type, ai_result, input_data=None):
+    if module_type == 'env_analysis':
+        return _build_env_analysis_html(ai_result, input_data)
+
     meta = MODULE_META.get(module_type, {'name': module_type, 'icon': ''})
 
     html = f'<div class="module-section">'
