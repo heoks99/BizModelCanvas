@@ -15,12 +15,13 @@ def _call_claude(system, user_msg, app):
     import anthropic
     client = anthropic.Anthropic(api_key=app.config.get('ANTHROPIC_API_KEY', ''))
     message = client.messages.create(
-        model='claude-opus-4-6',
+        model='claude-opus-4-8',
         max_tokens=4000,
+        thinking={'type': 'adaptive'},
         system=system,
         messages=[{'role': 'user', 'content': user_msg}]
     )
-    result = message.content[0].text.strip()
+    result = next(b.text for b in message.content if b.type == 'text').strip()
     result = re.sub(r'^```[a-z]*\n?', '', result)
     result = re.sub(r'\n?```$', '', result)
     return result

@@ -305,6 +305,8 @@ _RETRY_DELAYS = [5, 15, 30]  # seconds between retries on 529 overloaded
 
 def _call_claude(client, **kwargs):
     """Call client.messages.create with retry on HTTP 529 overloaded."""
+    if 'thinking' not in kwargs:
+        kwargs['thinking'] = {'type': 'adaptive'}
     last_exc = None
     for attempt, delay in enumerate([0] + _RETRY_DELAYS):
         if delay:
@@ -317,6 +319,11 @@ def _call_claude(client, **kwargs):
                 continue
             raise
     raise last_exc
+
+
+def _extract_text(msg):
+    """thinking 블록을 건너뛰고 text 블록만 추출."""
+    return next(b.text for b in msg.content if b.type == 'text')
 
 
 def ask_all_fields_with_claude(module_type: str, question: str, project_name: str,
@@ -360,7 +367,7 @@ def ask_all_fields_with_claude(module_type: str, question: str, project_name: st
         api_key = current_app.config.get('ANTHROPIC_API_KEY', '')
         client = anthropic.Anthropic(api_key=api_key)
         message = _call_claude(client,
-            model='claude-opus-4-6',
+            model='claude-opus-4-8',
             max_tokens=max_tokens,
             system=system,
             messages=[{
@@ -373,7 +380,7 @@ def ask_all_fields_with_claude(module_type: str, question: str, project_name: st
                 )
             }]
         )
-        raw = message.content[0].text.strip()
+        raw = _extract_text(message).strip()
         raw = re.sub(r'^```[a-z]*\n?', '', raw)
         raw = re.sub(r'\n?```$', '', raw)
         # JSON이 잘린 경우 복구 시도
@@ -427,12 +434,12 @@ def ask_field_with_claude(_module_type: str, field_label: str, question: str, pr
         api_key = current_app.config.get('ANTHROPIC_API_KEY', '')
         client = anthropic.Anthropic(api_key=api_key)
         message = _call_claude(client,
-            model='claude-opus-4-6',
+            model='claude-opus-4-8',
             max_tokens=ASK_MAX_TOKENS,
             system=system,
             messages=[{'role': 'user', 'content': question}]
         )
-        return message.content[0].text
+        return _extract_text(message)
     except Exception as e:
         return f'오류가 발생했습니다: {str(e)}'
 
@@ -535,11 +542,11 @@ def analyze_with_claude(module_type: str, input_data: dict, project_name: str, i
             api_key = current_app.config.get('ANTHROPIC_API_KEY', '')
             client = anthropic.Anthropic(api_key=api_key)
             message = _call_claude(client,
-                model='claude-opus-4-6',
+                model='claude-opus-4-8',
                 max_tokens=ANALYZE_MAX_TOKENS,
                 messages=[{'role': 'user', 'content': prompt}]
             )
-            result = message.content[0].text.strip()
+            result = _extract_text(message).strip()
             if result.startswith('```'):
                 result = re.sub(r'^```[a-z]*\n?', '', result)
                 result = re.sub(r'\n?```$', '', result)
@@ -573,11 +580,11 @@ def analyze_with_claude(module_type: str, input_data: dict, project_name: str, i
         api_key = current_app.config.get('ANTHROPIC_API_KEY', '')
         client = anthropic.Anthropic(api_key=api_key)
         message = _call_claude(client,
-            model='claude-opus-4-6',
+            model='claude-opus-4-8',
             max_tokens=ANALYZE_MAX_TOKENS,
             messages=[{'role': 'user', 'content': prompt}]
         )
-        result = message.content[0].text.strip()
+        result = _extract_text(message).strip()
         if result.startswith('```'):
             result = re.sub(r'^```[a-z]*\n?', '', result)
             result = re.sub(r'\n?```$', '', result)
@@ -590,11 +597,11 @@ def analyze_with_claude(module_type: str, input_data: dict, project_name: str, i
                 f"{result}"
             )
             shorten_msg = _call_claude(client,
-                model='claude-opus-4-6',
+                model='claude-opus-4-8',
                 max_tokens=ANALYZE_MAX_TOKENS,
                 messages=[{'role': 'user', 'content': shorten_prompt}]
             )
-            result = shorten_msg.content[0].text.strip()
+            result = _extract_text(shorten_msg).strip()
             if result.startswith('```'):
                 result = re.sub(r'^```[a-z]*\n?', '', result)
                 result = re.sub(r'\n?```$', '', result)

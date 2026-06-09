@@ -296,14 +296,14 @@ def api_health():
         import anthropic
         client = anthropic.Anthropic(api_key=api_key)
         msg = client.messages.create(
-            model='claude-opus-4-6',
+            model='claude-opus-4-8',
             max_tokens=16,
             messages=[{'role': 'user', 'content': 'ping'}]
         )
         return jsonify({
             'status': 'ok',
             'api_key': key_preview,
-            'model_response': msg.content[0].text[:50],
+            'model_response': next(b.text for b in msg.content if b.type == 'text')[:50],
         })
     except Exception as e:
         return jsonify({
