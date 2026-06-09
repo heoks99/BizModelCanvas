@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+{% block title %}QnA 대시보드 — 관리자{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <a href="{{ url_for('admin.index') }}" class="back-link">← 관리자</a>
+        <h1 class="page-title">💬 질의응답 대시보드</h1>
+        <p class="page-desc">질의응답 현황 통계 및 AI 유형별 분석</p>
+    </div>
+</div>
+
+<!-- 통계 카드 -->
+<div class="admin-stats" style="margin-bottom:20px;">
+    <div class="admin-stat-card">
+        <div class="admin-stat-num">{{ stats.total }}</div>
+        <div class="admin-stat-label">전체 질문</div>
+    </div>
+    <div class="admin-stat-card admin-stat-active">
+        <div class="admin-stat-num">{{ stats.answered }}</div>
+        <div class="admin-stat-label">AI 답변 완료</div>
+    </div>
+    <div class="admin-stat-card admin-stat-pending">
+        <div class="admin-stat-num">{{ stats.pending }}</div>
+        <div class="admin-stat-label">답변 생성 중</div>
+    </div>
+    <div class="admin-stat-card admin-stat-inactive">
+        <div class="admin-stat-num">{{ stats.no_answer }}</div>
+        <div class="admin-stat-label">미답변</div>
+    </div>
+    <div class="admin-stat-card">
+        <div class="admin-stat-num">{{ stats.comments }}</div>
+        <div class="admin-stat-label">전체 답글</div>
+    </div>
+    {% if stats.total > 0 %}
+    <div class="admin-stat-card admin-stat-qna">
+        <div class="admin-stat-num">{{ (stats.answered / stats.total * 100) | int }}%</div>
+        <div class="admin-stat-label">AI 답변율</div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- AI 분석 섹션 -->
+<div class="qna-analyze-panel" id="analyze-panel">
+    <div class="qna-analyze-header">
+        <div>
+            <div class="qna-analyze-title">🤖 AI 유형별 분석</div>
+            <div class="qna-analyze-desc">전체 질의응답을 Claude AI가 유형별로 분류·요약하여 기능 개선 인사이트를 제공합니다.</div>
+        </div>
+        <button class="btn btn-ai" id="analyze-btn" onclick="runAnalysis()">✦ AI 분석 실행</button>
+    </div>
+    <div id="analyze-result" style="display:none;"></div>
+</div>
+
+<!-- 2단 레이아웃: 사용자별 현황 + 최근 질문 -->
+<div class="qna-admin-two-col">
+
+    <!-- 사용자별 질문 현황 -->
+    <div class="qna-admin-col">
+        <div class="admin-section-label">사용자별 질문 현황</div>
+        <div class="admin-table-wrap">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>사용자</th>
+                        <th>조직</th>
+                        <th style="text-align:center;">질문 수</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for u in user_stats %}
+                {% if u.qna_count > 0 %}
+                <tr>
+                    <td>
+                        <span class="admin-username">{{ u.username }}</span>
+                        {% if u.full_name %}<br><span style="font-size:11px;color:var(--text-muted);">{{ u.full_name }}</span>{% endif %}
+                    </td>
+                    <td style="font-size:12px;">{{ u.organization or '—' }}</td>
+                    <td style="text-align:center;">
+                        <span class="qna-count-badge">{{ u.qna_count }}</span>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('qna.index') }}" class="btn btn-ghost btn-sm">보기</a>
+                    </td>
+                </tr>
+                {% endif %}
+                {% else %}
+                <tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px;">질문이 없습니다.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 최근 질의응답 목록 -->
+    <div class="qna-admin-col">
+        <div class="admin-section-label">최근 질의응답 ({{ recent_qnas|length }}건)</div>
+        <div class="admin-table-wrap">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>질문 제목</th>
+                        <th>작성자</th>
+                        <th>상태</th>
+                        <th>일시</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for q in recent_qnas %}
+                <tr>
+                    <td>
+                        <a href="{{ url_for('qna.detail', qna_id=q.id) }}" class="admin-link"
+                           style="font-size:12px;">{{ q.title[:40] }}{% if q.title|length > 40 %}…{% endif %}</a>
+                        {% if q.project %}
+                        <span class="qna-project-tag" style="margin-left:4px;">{{ q.project.name[:10] }}</span>
+                        {% endif %}
+                    </td>
+                    <td style="font-size:12px;">{{ q.owner.username }}</td>
+                    <td>
+                        {% if q.ai_pending %}
+                        <span class="admin-status-badge status-pending">생성중</span>
+                        {% elif q.ai_answer %}
+                        <span class="admin-status-badge status-active">완료</span>
+                        {% else %}
+                        <span class="admin-status-badge status-inactive">미답변</span>
+                        {% endif %}
+                    </td>
+                    <td style="font-size:11px;white-space:nowrap;">{{ q.created_at.strftime('%m.%d %H:%M') }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div><!-- /qna-admin-two-col -->
+
+<script>
+async function runAnalysis() {
+    const btn = document.getElementById('analyze-btn');
+    const resultEl = document.getElementById('analyze-result');
+    btn.disabled = true;
+    btn.textContent = '⏳ 분석 중...';
+    resultEl.style.display = 'block';
+    resultEl.innerHTML = '<div class="ai-loading" style="padding:40px 20px;"><div class="ai-loading-orb"></div><div class="ai-loading-text"><span>Claude AI가 질의응답을 분석 중입니다...</span></div></div>';
+
+    try {
+        const r = await fetch('/admin/qna/analyze', { method: 'POST' });
+        const data = await r.json();
+        if (!data.ok) {
+            resultEl.innerHTML = `<div class="bcg-insight-warn" style="margin:16px 0;"><strong>오류:</strong> ${data.msg}</div>`;
+            return;
+        }
+        renderAnalysis(data.result, data.analyzed_count);
+    } catch (e) {
+        resultEl.innerHTML = `<div class="bcg-insight-warn" style="margin:16px 0;"><strong>오류:</strong> ${e.message}</div>`;
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '✦ AI 재분석';
+    }
+}
+
+function renderAnalysis(r, count) {
+    const el = document.getElementById('analyze-result');
+    let html = `<div class="qna-analysis-body">`;
+
+    // 요약
+    html += `<div class="bcg-summary-box" style="margin:16px 0 20px;">
+        <div class="bcg-summary-box-title">분석 요약 (${count}건 기반)</div>
+        <p>${r.summary || ''}</p>
+    </div>`;
+
+    // 카테고리
+    if (r.categories && r.categories.length) {
+        html += `<div class="qna-analyze-section-title">📂 질문 유형별 분류</div>`;
+        html += `<div class="qna-category-grid">`;
+        for (const cat of r.categories) {
+            const examples = (cat.examples || []).map(e => `<li>${e}</li>`).join('');
+            html += `<div class="qna-category-card">
+                <div class="qna-category-header">
+                    <span class="qna-category-icon">${cat.icon || '📌'}</span>
+                    <span class="qna-category-name">${cat.name}</span>
+                    <span class="qna-category-count">${cat.count}건</span>
+                </div>
+                <p class="qna-category-desc">${cat.description || ''}</p>
+                ${examples ? `<ul class="qna-category-examples">${examples}</ul>` : ''}
+                <div class="qna-category-improve"><strong>개선 제안:</strong> ${cat.improvement || ''}</div>
+            </div>`;
+        }
+        html += `</div>`;
+    }
+
+    // 2열: 주요 이슈 + 권고사항
+    html += `<div class="qna-analyze-bottom-grid">`;
+
+    // 주요 이슈
+    if (r.top_issues && r.top_issues.length) {
+        html += `<div class="qna-analyze-col-card">
+            <div class="qna-analyze-section-title">⚡ 주요 이슈 &amp; 사용자 니즈</div>
+            <div class="bcg-step-list">`;
+        r.top_issues.forEach((issue, i) => {
+            html += `<div class="bcg-step"><div class="bcg-step-num">${i+1}</div><div>${issue}</div></div>`;
+        });
+        html += `</div></div>`;
+    }
+
+    // 권고사항
+    if (r.recommendations && r.recommendations.length) {
+        html += `<div class="qna-analyze-col-card">
+            <div class="qna-analyze-section-title">🚀 기능 개선 권고사항</div>
+            <div class="bcg-step-list">`;
+        r.recommendations.forEach((rec, i) => {
+            html += `<div class="bcg-step"><div class="bcg-step-num" style="background:#0D9488;">${i+1}</div><div>${rec}</div></div>`;
+        });
+        html += `</div></div>`;
+    }
+
+    html += `</div>`; // bottom-grid
+    html += `</div>`; // analysis-body
+
+    el.innerHTML = html;
+}
+</script>
+{% endblock %}

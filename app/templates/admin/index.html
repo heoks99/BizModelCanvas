@@ -30,6 +30,30 @@
         <div class="admin-stat-num">{{ stats.projects }}</div>
         <div class="admin-stat-label">전체 프로젝트</div>
     </div>
+    <div class="admin-stat-card admin-stat-qna">
+        <div class="admin-stat-num">{{ stats.qna_total }}</div>
+        <div class="admin-stat-label">전체 질문</div>
+    </div>
+    <div class="admin-stat-card admin-stat-active">
+        <div class="admin-stat-num">{{ stats.qna_answered }}</div>
+        <div class="admin-stat-label">AI 답변 완료</div>
+    </div>
+    <div class="admin-stat-card">
+        <div class="admin-stat-num">{{ stats.qna_comments }}</div>
+        <div class="admin-stat-label">답글 수</div>
+    </div>
+</div>
+
+<!-- QnA 분석 바로가기 -->
+<div class="admin-qna-shortcut">
+    <div class="admin-qna-shortcut-info">
+        <span class="admin-qna-shortcut-icon">💬</span>
+        <div>
+            <div class="admin-qna-shortcut-title">질의응답 현황 &amp; AI 분석</div>
+            <div class="admin-qna-shortcut-desc">사용자별 질문 통계, 최근 질의응답 목록, 유형별 AI 요약 분석</div>
+        </div>
+    </div>
+    <a href="{{ url_for('admin.qna_dashboard') }}" class="btn btn-primary btn-sm">📊 QnA 대시보드 →</a>
 </div>
 
 <!-- 승인 대기 -->

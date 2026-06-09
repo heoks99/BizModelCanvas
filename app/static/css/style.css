@@ -3188,6 +3188,140 @@ button.admin-role-badge:hover { opacity: 0.75; }
 .admin-project-name { font-size: 13px; font-weight: 600; color: var(--text-primary); flex: 1; }
 .admin-project-meta { font-size: 11px; color: var(--text-muted); }
 
+/* ===== Admin QnA 대시보드 ===== */
+.admin-stat-qna { border-color: rgba(13,148,136,0.3); }
+.admin-stat-qna .admin-stat-num { color: #0D9488; }
+
+/* QnA 바로가기 배너 */
+.admin-qna-shortcut {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    background: #EFF6FF;
+    border: 1px solid #BFDBFE;
+    border-left: 4px solid #1E3A5F;
+    border-radius: var(--radius);
+    padding: 14px 20px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+}
+.admin-qna-shortcut-info { display: flex; align-items: center; gap: 14px; }
+.admin-qna-shortcut-icon { font-size: 26px; }
+.admin-qna-shortcut-title { font-size: 14px; font-weight: 700; color: #1E3A5F; }
+.admin-qna-shortcut-desc { font-size: 12px; color: #4B5563; margin-top: 2px; }
+
+/* QnA 분석 패널 */
+.qna-analyze-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 28px;
+}
+.qna-analyze-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+.qna-analyze-title { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.qna-analyze-desc { font-size: 12px; color: var(--text-muted); }
+.qna-analyze-section-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 20px 0 10px;
+}
+.qna-analysis-body { margin-top: 4px; }
+
+/* 카테고리 그리드 */
+.qna-category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+.qna-category-card {
+    background: #F9FAFB;
+    border: 1px solid #E5E7EB;
+    border-top: 3px solid #1E3A5F;
+    border-radius: 8px;
+    padding: 14px 16px;
+}
+.qna-category-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+.qna-category-icon { font-size: 18px; }
+.qna-category-name { flex: 1; font-size: 13px; font-weight: 700; color: #1E3A5F; }
+.qna-category-count {
+    font-size: 11px;
+    font-weight: 700;
+    background: #1E3A5F;
+    color: #FFFFFF;
+    padding: 2px 8px;
+    border-radius: 20px;
+}
+.qna-category-desc { font-size: 12px; color: #374151; line-height: 1.6; margin-bottom: 8px; }
+.qna-category-examples {
+    margin: 0 0 8px 16px;
+    padding: 0;
+    font-size: 12px;
+    color: #6B7280;
+}
+.qna-category-examples li { margin-bottom: 2px; }
+.qna-category-improve {
+    font-size: 12px;
+    color: #111827;
+    background: #EFF6FF;
+    border-left: 3px solid #0D9488;
+    padding: 6px 10px;
+    border-radius: 0 4px 4px 0;
+    line-height: 1.5;
+}
+
+/* 하단 2열 */
+.qna-analyze-bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 4px;
+}
+@media (max-width: 700px) { .qna-analyze-bottom-grid { grid-template-columns: 1fr; } }
+.qna-analyze-col-card {
+    background: #F9FAFB;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    padding: 14px 16px;
+}
+
+/* QnA 관리자 2단 */
+.qna-admin-two-col {
+    display: grid;
+    grid-template-columns: 1fr 1.6fr;
+    gap: 20px;
+    align-items: start;
+}
+@media (max-width: 900px) { .qna-admin-two-col { grid-template-columns: 1fr; } }
+.qna-admin-col {}
+
+/* 질문 건수 배지 */
+.qna-count-badge {
+    display: inline-block;
+    background: #1E3A5F;
+    color: #FFFFFF;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 20px;
+}
+
 /* ===== 리사이즈 가능 카드 ===== */
 .resizable-card-wrap {
     display: flex;
