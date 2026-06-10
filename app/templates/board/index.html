@@ -4,6 +4,11 @@
 {% block content %}
 <div class="board-page">
 
+  <!-- 뒤로가기 -->
+  <div class="board-back">
+    <a href="javascript:history.back()" class="board-back-link">‹ 이전 화면</a>
+  </div>
+
   <!-- 헤더 -->
   <div class="board-header">
     <div class="board-header-left">
@@ -38,12 +43,13 @@
     <table class="board-table">
       <thead>
         <tr>
-          <th style="width:52px;text-align:center">번호</th>
+          <th class="col-num">번호</th>
           <th>제목</th>
-          <th style="width:90px">작성자</th>
-          <th style="width:100px">날짜</th>
-          <th style="width:52px;text-align:center">조회</th>
-          <th style="width:52px;text-align:center">댓글</th>
+          <th class="col-attach">첨부</th>
+          <th class="col-author">작성자</th>
+          <th class="col-date">날짜</th>
+          <th class="col-count">조회</th>
+          <th class="col-count">댓글</th>
         </tr>
       </thead>
       <tbody>
@@ -54,19 +60,25 @@
           <td class="board-num"><span class="pin-badge">📌</span></td>
           <td class="board-title-cell">
             {% if post.id not in read_ids %}<span class="board-unread-dot"></span>{% endif %}
-            <a href="{{ url_for('board.detail', post_id=post.id) }}" class="board-item-link {% if post.id not in read_ids %}unread{% endif %}">
+            <a href="{{ url_for('board.detail', post_id=post.id) }}"
+               class="board-item-link {% if post.id not in read_ids %}unread{% endif %}">
               {{ post.title }}
             </a>
-            {% if post.file_name %}<span class="file-icon" title="{{ post.file_name }}">📎</span>{% endif %}
             {% if post.id not in read_ids %}<span class="board-new-badge">NEW</span>{% endif %}
+          </td>
+          <td class="board-attach-cell">
+            {% if post.file_name %}
+            <a href="{{ url_for('board.download_file', post_id=post.id) }}"
+               class="attach-link" title="{{ post.file_name }}">📎</a>
+            {% else %}<span class="attach-none">—</span>{% endif %}
           </td>
           <td class="board-meta-cell">{{ post.owner.full_name or post.owner.username }}</td>
           <td class="board-meta-cell">{{ post.created_at | kst('%Y.%m.%d') }}</td>
-          <td class="board-meta-cell" style="text-align:center">{{ post.view_count or 0 }}</td>
-          <td class="board-meta-cell" style="text-align:center">
+          <td class="board-meta-cell text-center">{{ post.view_count or 0 }}</td>
+          <td class="board-meta-cell text-center">
             {% if post.comments | length > 0 %}
             <span class="board-comment-count">{{ post.comments | length }}</span>
-            {% else %}-{% endif %}
+            {% else %}—{% endif %}
           </td>
         </tr>
         {% endfor %}
@@ -74,23 +86,28 @@
         {# ── 일반 게시글 (순번: 내림차순) ── #}
         {% for post in normal_posts %}
         <tr class="board-row">
-          {# loop.revindex: 첫 행(최신글) = normal_count, 마지막 행 = 1 #}
           <td class="board-num">{{ loop.revindex }}</td>
           <td class="board-title-cell">
             {% if post.id not in read_ids %}<span class="board-unread-dot"></span>{% endif %}
-            <a href="{{ url_for('board.detail', post_id=post.id) }}" class="board-item-link {% if post.id not in read_ids %}unread{% endif %}">
+            <a href="{{ url_for('board.detail', post_id=post.id) }}"
+               class="board-item-link {% if post.id not in read_ids %}unread{% endif %}">
               {{ post.title }}
             </a>
-            {% if post.file_name %}<span class="file-icon" title="{{ post.file_name }}">📎</span>{% endif %}
             {% if post.id not in read_ids %}<span class="board-new-badge">NEW</span>{% endif %}
+          </td>
+          <td class="board-attach-cell">
+            {% if post.file_name %}
+            <a href="{{ url_for('board.download_file', post_id=post.id) }}"
+               class="attach-link" title="{{ post.file_name }}">📎</a>
+            {% else %}<span class="attach-none">—</span>{% endif %}
           </td>
           <td class="board-meta-cell">{{ post.owner.full_name or post.owner.username }}</td>
           <td class="board-meta-cell">{{ post.created_at | kst('%Y.%m.%d') }}</td>
-          <td class="board-meta-cell" style="text-align:center">{{ post.view_count or 0 }}</td>
-          <td class="board-meta-cell" style="text-align:center">
+          <td class="board-meta-cell text-center">{{ post.view_count or 0 }}</td>
+          <td class="board-meta-cell text-center">
             {% if post.comments | length > 0 %}
             <span class="board-comment-count">{{ post.comments | length }}</span>
-            {% else %}-{% endif %}
+            {% else %}—{% endif %}
           </td>
         </tr>
         {% endfor %}

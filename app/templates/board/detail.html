@@ -6,8 +6,10 @@
 
   <!-- 뒤로 가기 -->
   <div class="board-back">
+    <a href="javascript:history.back()" class="board-back-link">‹ 이전 화면</a>
+    <span class="board-back-sep">·</span>
     <a href="{{ url_for('board.index', cat=post.category) }}" class="board-back-link">
-      ‹ {{ categories[post.category] }}
+      {{ categories[post.category] }} 목록
     </a>
   </div>
 

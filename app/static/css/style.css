@@ -3587,8 +3587,8 @@ button.admin-role-badge:hover { opacity: 0.75; }
    게시판 (Board)
 ─────────────────────────────────────────────────────────── */
 .board-page {
-    max-width: 960px;
-    margin: 0 auto;
+    max-width: 1100px;
+    margin: 0;
     padding: 28px 24px 60px;
 }
 
@@ -3730,7 +3730,12 @@ button.admin-role-badge:hover { opacity: 0.75; }
 .btn-board-write:hover { opacity: 0.88; color: #fff; }
 
 /* 뒤로가기 */
-.board-back { margin-bottom: 16px; }
+.board-back {
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
 .board-back-link {
     color: var(--text-muted);
     text-decoration: none;
@@ -3741,6 +3746,27 @@ button.admin-role-badge:hover { opacity: 0.75; }
     transition: color 0.15s;
 }
 .board-back-link:hover { color: var(--accent); }
+.board-back-sep { color: var(--border); font-size: 13px; }
+
+/* 테이블 컬럼 폭 */
+.col-num    { width: 52px; text-align: center; }
+.col-attach { width: 48px; text-align: center; }
+.col-author { width: 86px; }
+.col-date   { width: 90px; }
+.col-count  { width: 48px; text-align: center; }
+.text-center { text-align: center; }
+
+/* 첨부파일 컬럼 */
+.board-attach-cell { text-align: center; }
+.attach-link {
+    font-size: 16px;
+    text-decoration: none;
+    opacity: 0.75;
+    transition: opacity 0.15s, transform 0.15s;
+    display: inline-block;
+}
+.attach-link:hover { opacity: 1; transform: scale(1.15); }
+.attach-none { color: var(--border); font-size: 13px; }
 
 /* 상세 카드 */
 .board-detail-card {
