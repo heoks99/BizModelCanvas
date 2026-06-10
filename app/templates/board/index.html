@@ -2,6 +2,10 @@
 {% block title %}게시판 — 사업모델캔버스{% endblock %}
 
 {% block content %}
+{% macro sort_th(col, label, cls='') %}
+{% set nd = 'asc' if (sort == col and sort_dir == 'desc') else 'desc' %}
+<th class="{{ cls }}"><a href="{{ url_for('board.index', cat=cat, sort=col, dir=nd) }}" class="sort-link{% if sort == col %} sort-active{% endif %}">{{ label }}{% if sort == col %} <span class="sort-icon">{{ '↑' if sort_dir == 'asc' else '↓' }}</span>{% endif %}</a></th>
+{% endmacro %}
 <div class="board-page">
 
   <!-- 뒤로가기 -->
@@ -43,11 +47,11 @@
     <table class="board-table">
       <thead>
         <tr>
-          <th class="col-num">번호</th>
-          <th>제목</th>
-          <th class="col-attach">첨부</th>
-          <th class="col-author">작성자</th>
-          <th class="col-date">날짜</th>
+          {{ sort_th('num',    '번호',   'col-num') }}
+          {{ sort_th('title',  '제목') }}
+          {{ sort_th('attach', '첨부',   'col-attach') }}
+          {{ sort_th('author', '작성자', 'col-author') }}
+          {{ sort_th('date',   '날짜',   'col-date') }}
           <th class="col-count">조회</th>
           <th class="col-count">댓글</th>
         </tr>
@@ -83,10 +87,10 @@
         </tr>
         {% endfor %}
 
-        {# ── 일반 게시글 (순번: 내림차순) ── #}
+        {# ── 일반 게시글 ── #}
         {% for post in normal_posts %}
         <tr class="board-row">
-          <td class="board-num">{{ loop.revindex }}</td>
+          <td class="board-num">{{ post_nums[post.id] }}</td>
           <td class="board-title-cell">
             {% if post.id not in read_ids %}<span class="board-unread-dot"></span>{% endif %}
             <a href="{{ url_for('board.detail', post_id=post.id) }}"

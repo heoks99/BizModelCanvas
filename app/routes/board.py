@@ -15,17 +15,39 @@ def _is_admin():
     return current_user.is_authenticated and current_user.role == 'admin'
 
 
+VALID_SORTS = ('num', 'title', 'attach', 'author', 'date')
+
+
 @board_bp.route('/')
 @login_required
 def index():
     cat = request.args.get('cat', 'notice')
+    sort = request.args.get('sort', 'date')
+    sort_dir = request.args.get('dir', 'desc')
+
     if cat not in CATEGORIES:
         cat = 'notice'
+    if sort not in VALID_SORTS:
+        sort = 'date'
+    if sort_dir not in ('asc', 'desc'):
+        sort_dir = 'desc'
 
-    posts = (BoardPost.query
-             .filter_by(category=cat)
-             .order_by(BoardPost.is_pinned.desc(), BoardPost.created_at.desc())
-             .all())
+    posts = BoardPost.query.filter_by(category=cat).all()
+
+    def get_key(p):
+        if sort == 'title':
+            return p.title.lower()
+        elif sort == 'author':
+            return (p.owner.full_name or p.owner.username or '').lower()
+        elif sort == 'attach':
+            return (1 if p.file_name else 0, (p.file_name or '').lower())
+        else:  # 'date' or 'num'
+            return p.created_at
+
+    rev = (sort_dir == 'desc')
+    pinned = sorted([p for p in posts if p.is_pinned], key=get_key, reverse=rev)
+    normal = sorted([p for p in posts if not p.is_pinned], key=get_key, reverse=rev)
+    posts = pinned + normal
 
     # 읽은 게시글 ID 세트
     read_ids = set()
@@ -41,8 +63,10 @@ def index():
 
     counts = {c: BoardPost.query.filter_by(category=c).count() for c in CATEGORIES}
 
-    # 비고정 게시글 수 (순번 계산용)
-    normal_count = sum(1 for p in posts if not p.is_pinned)
+    # 순번: 생성일 오름차순 기준 고정 (최신 = 최대번호)
+    normal_by_date = sorted([p for p in posts if not p.is_pinned], key=lambda p: p.created_at)
+    total_normal = len(normal_by_date)
+    post_nums = {p.id: total_normal - i for i, p in enumerate(normal_by_date)}
 
     return render_template('board/index.html',
                            posts=posts,
@@ -50,7 +74,9 @@ def index():
                            categories=CATEGORIES,
                            counts=counts,
                            read_ids=read_ids,
-                           normal_count=normal_count)
+                           sort=sort,
+                           sort_dir=sort_dir,
+                           post_nums=post_nums)
 
 
 @board_bp.route('/<int:post_id>')

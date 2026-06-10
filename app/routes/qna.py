@@ -179,12 +179,42 @@ def _async_answer_comment(app, comment_id, qna_id, project_context):
 
 
 # ── 라우트 ────────────────────────────────────────────────────
+_VALID_SORTS = ('num', 'title', 'attach', 'author', 'date')
+
+
 @qna_bp.route('/')
 @login_required
 def index():
     is_admin = current_user.role == 'admin'
-    qnas = QnA.query.order_by(QnA.created_at.desc()).all()
-    return render_template('qna/index.html', qnas=qnas, is_admin=is_admin)
+    sort = request.args.get('sort', 'date')
+    sort_dir = request.args.get('dir', 'desc')
+
+    if sort not in _VALID_SORTS:
+        sort = 'date'
+    if sort_dir not in ('asc', 'desc'):
+        sort_dir = 'desc'
+
+    qnas = QnA.query.all()
+
+    def get_key(q):
+        if sort == 'title':
+            return q.title.lower()
+        elif sort == 'author':
+            return (q.owner.full_name or q.owner.username or '').lower()
+        elif sort == 'attach':
+            return (1 if q.file_name else 0, (q.file_name or '').lower())
+        else:  # 'date' or 'num'
+            return q.created_at
+
+    qnas = sorted(qnas, key=get_key, reverse=(sort_dir == 'desc'))
+
+    # 순번: 생성일 오름차순 기준 고정 (최신 = 최대번호)
+    by_date = sorted(qnas, key=lambda q: q.created_at)
+    total = len(by_date)
+    post_nums = {q.id: total - i for i, q in enumerate(by_date)}
+
+    return render_template('qna/index.html', qnas=qnas, is_admin=is_admin,
+                           sort=sort, sort_dir=sort_dir, post_nums=post_nums)
 
 
 @qna_bp.route('/new', methods=['GET', 'POST'])
