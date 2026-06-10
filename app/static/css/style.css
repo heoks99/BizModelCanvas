@@ -2905,8 +2905,16 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); }
     font-size: 16px;
     font-weight: 700;
     color: var(--text-primary);
-    margin-top: 6px;
+    margin-top: 0;
+    margin-bottom: 6px;
     line-height: 1.4;
+}
+
+/* 질문 버블 헤더: 제목(상) + 메타(하) 세로 배치 */
+.feed-question-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
 }
 .feed-ai-actions {
     display: flex;
@@ -3587,7 +3595,7 @@ button.admin-role-badge:hover { opacity: 0.75; }
    게시판 (Board)
 ─────────────────────────────────────────────────────────── */
 .board-page {
-    max-width: 1100px;
+    width: 100%;
     margin: 0;
     padding: 28px 24px 60px;
 }
@@ -3665,7 +3673,8 @@ button.admin-role-badge:hover { opacity: 0.75; }
     border: 1px solid var(--border);
     border-top: none;
     border-radius: 0 0 12px 12px;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
 }
 .board-table {
     width: 100%;
@@ -4377,4 +4386,26 @@ button.admin-role-badge:hover { opacity: 0.75; }
 .qna-status-wait {
     font-size: 11px;
     color: var(--text-muted);
+}
+
+/* ═══════════════════════════════════════
+   반응형 레이아웃 (게시판 / 질의응답 목록)
+   ═══════════════════════════════════════ */
+
+/* 중형 화면: 작성자·날짜 컬럼 숨김 */
+@media (max-width: 860px) {
+    .board-page { padding: 16px 12px 40px; }
+    .col-author, .board-row td.board-meta-cell:nth-child(4) { display: none; }
+}
+
+/* 소형 화면: 조회·날짜 컬럼 추가 숨김, 패딩 최소화 */
+@media (max-width: 620px) {
+    .main-content { padding: 0 !important; }
+    .board-page { padding: 12px 8px 32px; }
+    .col-date,  .board-row td.board-meta-cell:nth-child(5) { display: none; }
+    .col-count, .board-row td.board-meta-cell:nth-child(6) { display: none; }
+    .col-status { display: none; }
+    .board-table thead th.col-author,
+    .board-table thead th.col-date { display: none; }
+    .board-tabs { flex-wrap: wrap; }
 }

@@ -22,7 +22,8 @@
     <div class="feed-entry feed-question" id="entry-question">
         <div class="feed-avatar feed-avatar-user">👤</div>
         <div class="feed-bubble">
-            <div class="feed-bubble-header">
+            <div class="feed-bubble-header feed-question-header">
+                <h2 class="feed-title">{{ qna.title }}</h2>
                 <div class="feed-meta">
                     {% if qna.project %}
                     <span class="qna-project-tag">{{ qna.project.name }}</span>
@@ -30,7 +31,6 @@
                     <span class="feed-author">{{ qna.owner.username }}</span>
                     <span class="qna-date">{{ qna.created_at | kst }}</span>
                 </div>
-                <h2 class="feed-title">{{ qna.title }}</h2>
             </div>
             <div class="feed-content">{{ qna.content | nl2br }}</div>
         </div>
