@@ -11,7 +11,7 @@
     </a>
   </div>
 
-  <!-- 게시글 -->
+  <!-- 게시글 카드 -->
   <div class="board-detail-card">
 
     <!-- 제목 영역 -->
@@ -20,15 +20,14 @@
         <span class="board-cat-badge {{ post.category }}">
           {% if post.category == 'notice' %}📢 공지사항{% else %}📁 매뉴얼{% endif %}
         </span>
-        {% if post.is_pinned %}
-        <span class="board-pin-label">📌 상단고정</span>
-        {% endif %}
+        {% if post.is_pinned %}<span class="board-pin-label">📌 상단고정</span>{% endif %}
       </div>
       <h1 class="board-detail-title">{{ post.title }}</h1>
       <div class="board-detail-info">
         <span>👤 {{ post.owner.full_name or post.owner.username }}</span>
         <span>📅 {{ post.created_at | kst }}</span>
         <span>👁 {{ post.view_count or 0 }}회</span>
+        <span>💬 댓글 {{ post.comments | length }}개</span>
         {% if post.updated_at and post.updated_at != post.created_at %}
         <span class="board-edited">(수정됨: {{ post.updated_at | kst }})</span>
         {% endif %}
@@ -64,6 +63,67 @@
       </form>
     </div>
     {% endif %}
+
+  </div>
+
+  <!-- ─────────────── 댓글 영역 ─────────────── -->
+  <div class="board-comments-section" id="comments">
+
+    <div class="board-comments-header">
+      <span class="board-comments-title">댓글</span>
+      <span class="board-comments-count">{{ post.comments | length }}</span>
+    </div>
+
+    <!-- 댓글 목록 -->
+    {% if post.comments %}
+    <ul class="board-comment-list">
+      {% for c in post.comments %}
+      <li class="board-comment-item {% if c.owner_id == post.owner_id %}comment-by-author{% endif %}">
+        <div class="comment-avatar">
+          {{ (c.owner.full_name or c.owner.username)[0] | upper }}
+        </div>
+        <div class="comment-body">
+          <div class="comment-meta">
+            <span class="comment-author">{{ c.owner.full_name or c.owner.username }}</span>
+            {% if c.owner_id == post.owner_id %}
+            <span class="comment-author-badge">작성자</span>
+            {% endif %}
+            {% if c.owner.role == 'admin' and c.owner_id != post.owner_id %}
+            <span class="comment-admin-badge">관리자</span>
+            {% endif %}
+            <span class="comment-date">{{ c.created_at | kst }}</span>
+          </div>
+          <div class="comment-content">{{ c.content | nl2br }}</div>
+        </div>
+        {% if c.owner_id == current_user.id or current_user.role == 'admin' %}
+        <form action="{{ url_for('board.delete_comment', comment_id=c.id) }}" method="POST"
+              onsubmit="return confirm('댓글을 삭제하시겠습니까?');" class="comment-delete-form">
+          <button type="submit" class="btn-comment-delete" title="삭제">✕</button>
+        </form>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="board-no-comments">아직 댓글이 없습니다. 첫 번째 댓글을 남겨보세요.</p>
+    {% endif %}
+
+    <!-- 댓글 작성 폼 -->
+    <form action="{{ url_for('board.add_comment', post_id=post.id) }}" method="POST"
+          class="board-comment-form">
+      <div class="comment-input-wrap">
+        <div class="comment-input-avatar">
+          {{ (current_user.full_name or current_user.username)[0] | upper }}
+        </div>
+        <textarea name="content" class="comment-input" rows="3"
+                  placeholder="댓글을 입력하세요..."
+                  required maxlength="2000"></textarea>
+      </div>
+      <div class="comment-form-actions">
+        <span class="comment-hint">최대 2,000자</span>
+        <button type="submit" class="btn-comment-submit">댓글 등록</button>
+      </div>
+    </form>
 
   </div>
 

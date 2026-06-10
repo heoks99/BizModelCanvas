@@ -1,9 +1,10 @@
 import io
 from flask import Blueprint, render_template, redirect, url_for, flash, request, send_file
 from flask_login import login_required, current_user
+from sqlalchemy.exc import IntegrityError
 
 from app import db
-from app.models.board import BoardPost
+from app.models.board import BoardPost, BoardComment, BoardReadStatus
 
 board_bp = Blueprint('board', __name__, url_prefix='/board')
 
@@ -26,9 +27,30 @@ def index():
              .order_by(BoardPost.is_pinned.desc(), BoardPost.created_at.desc())
              .all())
 
+    # 읽은 게시글 ID 세트
+    read_ids = set()
+    if posts:
+        post_ids = [p.id for p in posts]
+        read_ids = {
+            r.post_id for r in
+            BoardReadStatus.query
+            .filter_by(user_id=current_user.id)
+            .filter(BoardReadStatus.post_id.in_(post_ids))
+            .all()
+        }
+
     counts = {c: BoardPost.query.filter_by(category=c).count() for c in CATEGORIES}
-    return render_template('board/index.html', posts=posts, cat=cat,
-                           categories=CATEGORIES, counts=counts)
+
+    # 비고정 게시글 수 (순번 계산용)
+    normal_count = sum(1 for p in posts if not p.is_pinned)
+
+    return render_template('board/index.html',
+                           posts=posts,
+                           cat=cat,
+                           categories=CATEGORIES,
+                           counts=counts,
+                           read_ids=read_ids,
+                           normal_count=normal_count)
 
 
 @board_bp.route('/<int:post_id>')
@@ -36,7 +58,18 @@ def index():
 def detail(post_id):
     post = BoardPost.query.get_or_404(post_id)
     post.view_count = (post.view_count or 0) + 1
-    db.session.commit()
+
+    # 읽음 처리 (중복 무시)
+    try:
+        rs = BoardReadStatus()
+        rs.user_id = current_user.id
+        rs.post_id = post_id
+        db.session.add(rs)
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        db.session.commit()  # view_count 반영
+
     return render_template('board/detail.html', post=post, categories=CATEGORIES)
 
 
@@ -110,7 +143,6 @@ def edit_post(post_id):
             post.file_data = f.read()
             post.file_mime = f.mimetype or 'application/octet-stream'
 
-        # 파일 삭제 요청
         if request.form.get('delete_file') and post.file_name:
             post.file_name = None
             post.file_data = None
@@ -151,3 +183,38 @@ def download_file(post_id):
         as_attachment=True,
         download_name=post.file_name or 'download'
     )
+
+
+# ── 댓글 ──────────────────────────────────────────────────────
+
+@board_bp.route('/<int:post_id>/comment', methods=['POST'])
+@login_required
+def add_comment(post_id):
+    BoardPost.query.get_or_404(post_id)  # 게시글 존재 확인
+    content = request.form.get('content', '').strip()
+    if not content:
+        flash('댓글 내용을 입력해주세요.', 'error')
+        return redirect(url_for('board.detail', post_id=post_id) + '#comments')
+
+    comment = BoardComment()
+    comment.post_id = post_id
+    comment.owner_id = current_user.id
+    comment.content = content
+    db.session.add(comment)
+    db.session.commit()
+    return redirect(url_for('board.detail', post_id=post_id) + '#comments')
+
+
+@board_bp.route('/comment/<int:comment_id>/delete', methods=['POST'])
+@login_required
+def delete_comment(comment_id):
+    comment = BoardComment.query.get_or_404(comment_id)
+    post_id = comment.post_id
+
+    if comment.owner_id != current_user.id and not _is_admin():
+        flash('댓글을 삭제할 권한이 없습니다.', 'error')
+        return redirect(url_for('board.detail', post_id=post_id) + '#comments')
+
+    db.session.delete(comment)
+    db.session.commit()
+    return redirect(url_for('board.detail', post_id=post_id) + '#comments')
