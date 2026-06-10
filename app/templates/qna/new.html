@@ -10,7 +10,7 @@
 </div>
 
 <div class="form-card">
-    <form method="POST" id="qna-new-form">
+    <form method="POST" id="qna-new-form" enctype="multipart/form-data">
         <input type="hidden" name="want_ai" id="want_ai_input" value="0">
         <div class="form-group">
             <label>관련 프로젝트 <span class="form-optional">(선택)</span></label>
@@ -30,6 +30,10 @@
             <label>질문 내용 <span class="form-required">*</span></label>
             <textarea name="content" class="form-textarea" rows="8"
                 placeholder="질문 내용을 상세하게 작성해주세요.&#10;배경 상황, 현재 고민, 원하는 방향 등을 포함하면 더 정확한 답변을 받을 수 있습니다." required></textarea>
+        </div>
+        <div class="form-group">
+            <label>첨부파일 <span class="form-optional">(선택)</span></label>
+            <input type="file" name="file" class="form-input" style="padding:6px">
         </div>
         <div class="qna-new-actions">
             <a href="{{ url_for('qna.index') }}" class="btn btn-ghost">취소</a>

@@ -1,56 +1,115 @@
 {% extends 'base.html' %}
 {% block title %}질의응답 — 사업모델캔버스{% endblock %}
 {% block content %}
-<div class="page-header">
-    <div>
-        <h1 class="page-title">💬 질의응답</h1>
-        <p class="page-desc">전략 관련 질문을 등록하면 Claude AI가 전문적으로 답변해드립니다.</p>
+<div class="board-page" style="max-width:1100px">
+
+  <!-- 헤더 -->
+  <div class="board-header">
+    <div class="board-header-left">
+      <h1 class="board-title">💬 질의응답</h1>
+      <p class="board-subtitle">전략 관련 질문을 등록하면 Claude AI가 전문적으로 답변해드립니다.</p>
     </div>
-    <div class="page-actions">
-        {% if not is_admin %}
-        <a href="{{ url_for('qna.new') }}" class="btn btn-primary">＋ 질문 등록</a>
-        {% endif %}
-    </div>
+    {% if not is_admin %}
+    <a href="{{ url_for('qna.new') }}" class="btn-board-write">＋ 질문 등록</a>
+    {% endif %}
+  </div>
+
+  {% if qnas %}
+  <div class="board-list-wrap">
+    <table class="board-table">
+      <thead>
+        <tr>
+          <th class="col-num">번호</th>
+          <th>제목</th>
+          <th class="col-attach">첨부</th>
+          <th class="col-author">작성자</th>
+          <th class="col-date">날짜</th>
+          <th class="col-status">상태</th>
+          <th class="col-count">답글</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for qna in qnas %}
+        <tr class="board-row">
+          <td class="board-num">{{ loop.revindex }}</td>
+          <td class="board-title-cell">
+            <div class="qna-title-row">
+              <a href="{{ url_for('qna.detail', qna_id=qna.id) }}" class="board-item-link">{{ qna.title }}</a>
+              {% if qna.project %}
+              <span class="qna-project-tag-sm">{{ qna.project.name }}</span>
+              {% endif %}
+            </div>
+            {% if qna.comments %}
+            <div class="qna-preview-row" id="preview-{{ qna.id }}">
+              <span class="qna-preview-text">{{ qna.comments[0].content | replace('\n', ' ') | truncate(80, True, '…') }}</span>
+              <button class="qna-expand-btn" onclick="toggleQnaComments({{ qna.id }}, event)">▼ 답글 {{ qna.comments|length }}개</button>
+            </div>
+            <div class="qna-comments-inline" id="comments-{{ qna.id }}">
+              {% for c in qna.comments %}
+              <div class="qna-inline-comment">
+                <span class="qna-inline-author">{{ c.owner.full_name or c.owner.username }}</span>
+                <span class="qna-inline-content">{{ c.content }}</span>
+              </div>
+              {% endfor %}
+              <div class="qna-collapse-row">
+                <button class="qna-expand-btn" onclick="toggleQnaComments({{ qna.id }}, event)">▲ 접기</button>
+              </div>
+            </div>
+            {% endif %}
+          </td>
+          <td class="board-attach-cell">
+            {% if qna.file_name %}
+            <a href="{{ url_for('qna.download_file', qna_id=qna.id) }}"
+               class="attach-link" title="{{ qna.file_name }}">📎</a>
+            {% else %}<span class="attach-none">—</span>{% endif %}
+          </td>
+          <td class="board-meta-cell">{{ qna.owner.full_name or qna.owner.username }}</td>
+          <td class="board-meta-cell">{{ qna.created_at | kst('%Y.%m.%d') }}</td>
+          <td class="board-meta-cell text-center">
+            {% if qna.ai_pending %}
+            <span class="qna-status-pending">⏳</span>
+            {% elif qna.ai_answer %}
+            <span class="qna-status-done">✓ AI</span>
+            {% else %}
+            <span class="qna-status-wait">대기</span>
+            {% endif %}
+          </td>
+          <td class="board-meta-cell text-center">
+            {% if qna.comments|length > 0 %}
+            <span class="board-comment-count">{{ qna.comments|length }}</span>
+            {% else %}—{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% else %}
+  <div class="board-empty">
+    <div class="board-empty-icon">💬</div>
+    <p>등록된 질문이 없습니다.</p>
+    {% if not is_admin %}
+    <a href="{{ url_for('qna.new') }}" class="btn-board-write" style="margin-top:12px">＋ 첫 번째 질문 등록하기</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
 </div>
 
-{% if qnas %}
-<div class="qna-list">
-    {% for qna in qnas %}
-    <a href="{{ url_for('qna.detail', qna_id=qna.id) }}" class="qna-list-item">
-        <div class="qna-list-main">
-            <div class="qna-list-title">{{ qna.title }}</div>
-            <div class="qna-list-meta">
-                {% if qna.project %}
-                <span class="qna-project-tag">{{ qna.project.name }}</span>
-                {% endif %}
-                <span class="qna-author-tag">{{ qna.owner.username }}</span>
-                <span class="qna-date">{{ qna.created_at | kst }}</span>
-                {% if qna.comments %}
-                <span class="qna-comment-count">💬 {{ qna.comments|length }}</span>
-                {% endif %}
-            </div>
-            <p class="qna-list-snippet">{{ qna.content[:120] }}{% if qna.content|length > 120 %}…{% endif %}</p>
-        </div>
-        <div class="qna-list-status">
-            {% if qna.ai_pending %}
-            <span class="qna-pending-badge">⏳ 답변 생성 중</span>
-            {% elif qna.ai_answer %}
-            <span class="qna-answered-badge">✓ AI 답변 완료</span>
-            {% else %}
-            <span class="qna-pending-badge">답변 대기</span>
-            {% endif %}
-        </div>
-    </a>
-    {% endfor %}
-</div>
-{% else %}
-<div class="empty-state">
-    <div class="empty-icon">💬</div>
-    <h2>등록된 질문이 없습니다</h2>
-    <p>전략 관련 궁금한 내용을 질문해보세요. AI가 전문적으로 답변해드립니다.</p>
-    {% if not is_admin %}
-    <a href="{{ url_for('qna.new') }}" class="btn btn-primary">첫 번째 질문 등록하기</a>
-    {% endif %}
-</div>
-{% endif %}
+<script>
+function toggleQnaComments(qnaId, event) {
+  event.preventDefault();
+  event.stopPropagation();
+  var preview  = document.getElementById('preview-' + qnaId);
+  var expanded = document.getElementById('comments-' + qnaId);
+  if (expanded.classList.contains('open')) {
+    expanded.classList.remove('open');
+    preview.style.display = '';
+  } else {
+    expanded.classList.add('open');
+    preview.style.display = 'none';
+  }
+}
+</script>
 {% endblock %}

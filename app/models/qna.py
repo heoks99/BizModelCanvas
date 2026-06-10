@@ -12,6 +12,9 @@ class QnA(db.Model):
     ai_answer = db.Column(db.Text)
     ai_pending = db.Column(db.Boolean, default=False)   # AI 답변 생성 중
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'), nullable=True)
+    file_name = db.Column(db.String(300))
+    file_data = db.Column(db.LargeBinary)
+    file_mime = db.Column(db.String(100))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

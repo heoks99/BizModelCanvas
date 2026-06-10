@@ -1,12 +1,28 @@
+import io
 import re
 import threading
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app, send_file
 from flask_login import login_required, current_user
 from app import db
 from app.models.qna import QnA, QnAComment
 from app.models.project import Project
 
 qna_bp = Blueprint('qna', __name__, url_prefix='/qna')
+
+
+@qna_bp.route('/<int:qna_id>/download')
+@login_required
+def download_file(qna_id):
+    qna = QnA.query.get_or_404(qna_id)
+    if not qna.file_data:
+        flash('첨부 파일이 없습니다.', 'error')
+        return redirect(url_for('qna.detail', qna_id=qna_id))
+    return send_file(
+        io.BytesIO(qna.file_data),
+        mimetype=qna.file_mime or 'application/octet-stream',
+        as_attachment=True,
+        download_name=qna.file_name or 'download'
+    )
 
 
 # ── AI 답변 생성 ──────────────────────────────────────────────
@@ -197,6 +213,13 @@ def new():
             project_id=project.id if project else None,
             ai_pending=want_ai,
         )
+
+        f = request.files.get('file')
+        if f and f.filename:
+            qna.file_name = f.filename
+            qna.file_data = f.read()
+            qna.file_mime = f.mimetype or 'application/octet-stream'
+
         db.session.add(qna)
         db.session.commit()
 

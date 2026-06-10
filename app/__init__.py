@@ -57,5 +57,20 @@ def create_app():
 
     with app.app_context():
         db.create_all()
+        # QnA 파일 첨부 컬럼 마이그레이션 (기존 테이블에 컬럼 추가)
+        try:
+            from sqlalchemy import inspect as sa_inspect, text
+            inspector = sa_inspect(db.engine)
+            qna_cols = {c['name'] for c in inspector.get_columns('qna')}
+            with db.engine.connect() as conn:
+                if 'file_name' not in qna_cols:
+                    conn.execute(text('ALTER TABLE qna ADD COLUMN file_name VARCHAR(300)'))
+                if 'file_data' not in qna_cols:
+                    conn.execute(text('ALTER TABLE qna ADD COLUMN file_data BYTEA'))
+                if 'file_mime' not in qna_cols:
+                    conn.execute(text('ALTER TABLE qna ADD COLUMN file_mime VARCHAR(100)'))
+                conn.commit()
+        except Exception:
+            pass
 
     return app
